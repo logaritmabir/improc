@@ -1,6 +1,6 @@
 #include "image.hpp"
-#include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 template<typename T>
 Image<T>::Image() : rows_(0), cols_(0), channels_(0), stride_(0), data_() {}

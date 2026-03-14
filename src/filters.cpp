@@ -2,7 +2,7 @@
 #include <iostream>
 
 template<typename T>
-void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::vector<T>>& kernel) {
+void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::vector<T>>& kernel, T divideBy) {
     size_t filterSize = kernel.size();
     size_t offset = filterSize / 2;
     
@@ -23,10 +23,10 @@ void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::ve
                         }
                     }
                 }
-                output.at(r,c,ch) = sum/9.0f; // Normalize by the sum of the kernel values (for a 3x3 kernel)
+                output.at(r,c,ch) = sum / divideBy; // Normalize by the sum of the kernel values (for a 3x3 kernel)
             }
         }
     }
 }
 
-template void convolve(const Image<uint8_t>& input, Image<uint8_t>& output, const std::vector<std::vector<uint8_t>>& kernel);
+template void convolve(const Image<uint8_t>& input, Image<uint8_t>& output, const std::vector<std::vector<uint8_t>>& kernel, uint8_t divideBy);
