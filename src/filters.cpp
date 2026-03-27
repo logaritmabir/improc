@@ -1,32 +1,137 @@
 #include "filters.hpp"
 #include <iostream>
+#include <algorithm>
 
 template<typename T>
-void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::vector<T>>& kernel, T divideBy) {
-    size_t filterSize = kernel.size();
-    size_t offset = filterSize / 2;
+void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::vector<float>>& kernel) {
+    if(kernel.empty())
+        throw std::invalid_argument("Kernel cannot be empty");
     
-    size_t cols = input.cols();
-    size_t rows = input.rows();
+    size_t kernelSize = kernel.size();
 
-    for(size_t r = 0; r < rows; r++){
-        for(size_t c = 0; c < cols; c++){
-            for(size_t ch = 0; ch < input.channels(); ch++){
-                size_t sum = 0;
-                for(size_t i = 0; i < filterSize; i++){
-                    for(size_t j = 0; j < filterSize; j++){
-                        size_t row = r + i - offset;
-                        size_t col = c + j - offset;
+    for(const auto& row : kernel) {
+        if(row.size() != kernelSize)
+            throw std::invalid_argument("Kernel must be square");
+    }
 
-                        if(row >= 0 && row < rows && col >= 0 && col < cols){
-                            sum += input.at(row, col, ch) * kernel[i][j];
-                        }
+    if(kernelSize % 2 == 0) 
+        throw std::invalid_argument("Kernel size must be odd");
+
+    // This line will be replaced with operator!= (maybe) once it's implemented, but for now we can just check dimensions here.
+    if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
+        throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
+
+    int filterRadius = static_cast<int>(kernelSize / 2);
+    int cols = static_cast<int>(input.cols());
+    int rows = static_cast<int>(input.rows());
+    int channels = static_cast<int>(input.channels());
+
+    for(int r = 0; r < rows; r++){
+        for(int c = 0; c < cols; c++){
+            for(int ch = 0; ch < channels; ch++){
+                float sum = 0.0f;
+                for(int i = -filterRadius; i <= filterRadius; i++){
+                    for(int j = -filterRadius; j <= filterRadius; j++){
+                        int row = r + i;
+                        int col = c + j;
+
+                        if(row >= 0 && row < rows && col >= 0 && col < cols)
+                            sum += input(row, col, ch) * kernel[i + filterRadius][j + filterRadius];
                     }
                 }
-                output.at(r,c,ch) = sum / divideBy; // Normalize by the sum of the kernel values (for a 3x3 kernel)
+                output(r,c,ch) = static_cast<T>(clamp<float>(sum, 0.0f, 255.0f));
             }
         }
     }
 }
 
-template void convolve(const Image<uint8_t>& input, Image<uint8_t>& output, const std::vector<std::vector<uint8_t>>& kernel, uint8_t divideBy);
+template<typename T>
+void medianFilter(const Image<T>& input, Image<T>& output, size_t kernelSize) {
+    if(kernelSize <= 1)
+        throw std::invalid_argument("Kernel size must be greater than 1 and odd");
+    
+    if(kernelSize % 2 == 0) 
+        throw std::invalid_argument("Kernel size must be odd");
+
+    if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
+        throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
+
+    int filterRadius = static_cast<int>(kernelSize / 2);
+    int cols = static_cast<int>(input.cols());
+    int rows = static_cast<int>(input.rows());
+    int channels = static_cast<int>(input.channels());
+
+    std::vector<T> neighbors;
+    neighbors.reserve(kernelSize * kernelSize); // Reserve space for neighbors to avoid reallocations
+
+    for(int r = 0; r < rows; r++){
+        for(int c = 0; c < cols; c++){
+            for(int ch = 0; ch < channels; ch++){
+                neighbors.clear(); // Clear the neighbors vector for the new pixel
+                for(int i = -filterRadius; i <= filterRadius; i++){
+                    for(int j = -filterRadius; j <= filterRadius; j++){
+                        int row = r + i;
+                        int col = c + j;
+
+                        if(row >= 0 && row < rows && col >= 0 && col < cols){
+                            neighbors.push_back(input(row, col, ch));
+                        }
+                    }
+                }
+                std::sort(neighbors.begin(), neighbors.end());
+                output(r,c,ch) = neighbors[neighbors.size() / 2]; // Set to median value
+            }
+        }
+    }
+}
+
+template<typename T>
+void gaussianBlur(const Image<T>& input, Image<T>& output, float sigma) {
+    if(sigma <= 0.0f)
+        throw std::invalid_argument("Sigma must be greater than 0");
+
+    int kernelSize = static_cast<int>(std::ceil(sigma * 6)) | 1; // Ensure kernel size is odd
+    std::vector<std::vector<float>> kernel(kernelSize, std::vector<float>(kernelSize));
+    int filterRadius = kernelSize / 2;
+    float sum = 0.0f;
+
+    for(int i = -filterRadius; i <= filterRadius; i++){
+        for(int j = -filterRadius; j <= filterRadius; j++){
+            float exponent = -(i * i + j * j) / (2 * sigma * sigma);
+            kernel[i + filterRadius][j + filterRadius] = std::exp(exponent);
+            sum += kernel[i + filterRadius][j + filterRadius];
+        }
+    }
+
+    // Normalize the kernel
+    for(int i = 0; i < kernelSize; i++){
+        for(int j = 0; j < kernelSize; j++){
+            kernel[i][j] /= sum;
+        }
+    }
+    convolve(input, output, kernel);
+}
+
+template<typename T>
+void sobelFilter(const Image<T>& input, Image<T>& output) {
+    if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
+        throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
+    
+    std::vector<std::vector<float>> Gx = {
+        {-1.0f, 0.0f, 1.0f},
+        {-2.0f, 0.0f, 2.0f},
+        {-1.0f, 0.0f, 1.0f}
+    };
+
+    std::vector<std::vector<float>> Gy = {
+        {1.0f, 2.0f, 1.0f},
+        {0.0f, 0.0f, 0.0f},
+        {-1.0f, -2.0f, -1.0f}
+    };
+
+    convolve(input, output, Gx);
+    convolve(input, output, Gy);
+}
+
+template void medianFilter(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernelSize);
+template void convolve(const Image<uint8_t>& input, Image<uint8_t>& output, const std::vector<std::vector<float>>& kernel);
