@@ -1,3 +1,73 @@
+/**
+ * @mainpage Improc Image Processing Library
+ *
+ * @brief A C++ image processing library with CPU and GPU (CUDA) support.
+ *
+ * @section overview Overview
+ *
+ * Improc provides a comprehensive set of image processing operations including:
+ * - Image container class with multi-channel support
+ * - Point operations (inversion, thresholding)
+ * - Filtering operations (convolution, median filter, Gaussian blur, Sobel edge detection)
+ * - PNM file format I/O (PGM for grayscale, PPM for RGB)
+ * - GPU-accelerated convolution via CUDA
+ *
+ * @section usage Usage
+ *
+ * @subsection basic Basic Example
+ * @code
+ * #include "pnm_funcs.hpp"
+ * #include "filters.hpp"
+ *
+ * Image<uint8_t> img;
+ * readPNM("input.pgm", img);
+ *
+ * Image<uint8_t> blurred;
+ * gaussianBlur(img, blurred, 2.0f);
+ *
+ * savePNM("output.pgm", blurred);
+ * @endcode
+ *
+ * @subsection cuda CUDA Example
+ * @code
+ * #include "cuda/gpu_image.cuh"
+ * #include "cuda/kernels.cuh"
+ *
+ * cuda::GpuImage<uint8_t> d_input(img);
+ * cuda::GpuImage<uint8_t> d_output(img);
+ *
+ * d_input.upload(img);
+ *
+ * float kernel[] = { 0.0625f, 0.1250f, 0.0625f,
+ *                    0.1250f, 0.2500f, 0.1250f,
+ *                    0.0625f, 0.1250f, 0.0625f };
+ *
+ * cuda::convolve(d_input, d_output, kernel, 3);
+ * d_output.download(result);
+ * @endcode
+ *
+ * @section modules Modules
+ *
+ * - @ref Image "Image Class" - Template-based image container
+ * - @ref point_ops "Point Operations" - Per-pixel transformations
+ * - @ref filters "Filtering" - Convolution and smoothing filters
+ * - @ref pnm_funcs "PNM I/O" - File format support
+ * - @ref cuda "CUDA Support" - GPU-accelerated processing
+ *
+ * @section build Building
+ *
+ * The project uses a Makefile for building:
+ * @code
+ * make        # Build the project
+ * make clean  # Clean build artifacts
+ * make run    # Build and run the example
+ * @endcode
+ *
+ * @section license License
+ *
+ * This project is provided as-is for educational purposes.
+ */
+
 #include <iostream>
 #include <exception>
 #include <stdexcept>
@@ -8,6 +78,7 @@
 #include "filters.hpp"
 #include "cuda/gpu_image.cuh"
 #include "cuda/kernels.cuh"
+#include "point_ops.hpp"
 
 int main() {
     Image<uint8_t> sample_img;
@@ -45,10 +116,10 @@ int main() {
 
     // CUDA convolution test
     Image<uint8_t> h_convolution_img = sample_img;
-    cuda::GpuImage<uint8_t> d_input(h_convolution_img); //image is allocated
+    cuda::GpuImage<uint8_t> d_input(h_convolution_img);
     cuda::GpuImage<uint8_t> d_output(h_convolution_img);
 
-    d_input.upload(h_convolution_img); //data is uploaded to gpu
+    d_input.upload(h_convolution_img);
 
     const float h_kernel[] = {
     0.0625f, 0.1250f, 0.0625f,

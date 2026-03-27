@@ -322,9 +322,9 @@ TEST_F(ImageTest, RangeBasedForLoop) {
 
 TEST_F(ImageTest, MultiChannelAccess) {
     Image<uint8_t> img2(2, 2, 3);
-    img2(0, 0, 0) = 100;  // R
-    img2(0, 0, 1) = 150;  // G
-    img2(0, 0, 2) = 200;  // B
+    img2(0, 0, 0) = 100;
+    img2(0, 0, 1) = 150;
+    img2(0, 0, 2) = 200;
     
     EXPECT_EQ(img2.at(0, 0, 0), 100);
     EXPECT_EQ(img2.at(0, 0, 1), 150);
