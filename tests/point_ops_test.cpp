@@ -43,7 +43,7 @@ TEST_F(PointOpsTest, InvertDimensionMismatch) {
 
 TEST_F(PointOpsTest, ThresholdAllAbove) {
     Image<uint8_t> output(3, 3, 1);
-    threshold(img1, output, 50);
+    threshold(img1, output, (uint8_t)50);
     
     for (size_t r = 0; r < img1.rows(); r++) {
         for (size_t c = 0; c < img1.cols(); c++) {
@@ -54,7 +54,7 @@ TEST_F(PointOpsTest, ThresholdAllAbove) {
 
 TEST_F(PointOpsTest, ThresholdAllBelow) {
     Image<uint8_t> output(3, 3, 1);
-    threshold(img1, output, 200);
+    threshold(img1, output, (uint8_t)200);
     
     for (size_t r = 0; r < img1.rows(); r++) {
         for (size_t c = 0; c < img1.cols(); c++) {
@@ -69,7 +69,7 @@ TEST_F(PointOpsTest, ThresholdPartial) {
     img(1, 1, 0) = 200;
     
     Image<uint8_t> output(3, 3, 1);
-    threshold(img, output, 150);
+    threshold(img, output, (uint8_t)150);
     
     EXPECT_EQ(output(0, 0, 0), 0);
     EXPECT_EQ(output(1, 1, 0), 255);
@@ -77,5 +77,5 @@ TEST_F(PointOpsTest, ThresholdPartial) {
 
 TEST_F(PointOpsTest, ThresholdDimensionMismatch) {
     Image<uint8_t> wrongSize(2, 2, 1);
-    EXPECT_THROW(threshold(img1, wrongSize, 128), std::invalid_argument);
+    EXPECT_THROW(threshold(img1, wrongSize, (uint8_t)128), std::invalid_argument);
 }

@@ -1,6 +1,9 @@
 #include "filters.hpp"
+#include "utils.hpp"
+
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 
 template<typename T>
 void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::vector<float>>& kernel) {
@@ -135,3 +138,6 @@ void sobelFilter(const Image<T>& input, Image<T>& output) {
 
 template void medianFilter(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernelSize);
 template void convolve(const Image<uint8_t>& input, Image<uint8_t>& output, const std::vector<std::vector<float>>& kernel);
+template void gaussianBlur(const Image<uint8_t>& input, Image<uint8_t>& output, float sigma);
+template void sobelFilter(const Image<uint8_t>& input, Image<uint8_t>& output);
+

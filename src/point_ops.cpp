@@ -1,4 +1,5 @@
 #include "point_ops.hpp"
+#include <stdexcept>
 
 template<typename T>
 void invert(const Image<T>& input, Image<T>& output) {

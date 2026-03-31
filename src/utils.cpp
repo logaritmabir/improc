@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include <algorithm>
 
 template<typename T>
 T clamp(T value, T min, T max) {
