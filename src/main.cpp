@@ -76,8 +76,10 @@
 
 #include "pnm_funcs.hpp"
 #include "filters.hpp"
+#ifdef BUILD_WITH_CUDA
 #include "cuda/gpu_image.cuh"
 #include "cuda/kernels.cuh"
+#endif
 #include "point_ops.hpp"
 
 int main() {
@@ -114,6 +116,7 @@ int main() {
     Image<uint8_t> threshold_img = sample_img;
     threshold(sample_img, threshold_img, (uint8_t)128);
 
+    #ifdef BUILD_WITH_CUDA
     // CUDA convolution test
     Image<uint8_t> h_convolution_img = sample_img;
     cuda::GpuImage<uint8_t> d_input(h_convolution_img);
@@ -129,6 +132,7 @@ int main() {
     cuda::convolve(d_input, d_output, h_kernel, 3);
 
     d_output.download(h_convolution_img);
+    #endif
 
     try {
         savePNM("../images/convolution_img.pgm", convolution_img);
@@ -136,7 +140,9 @@ int main() {
         savePNM("../images/sobelFilter_img.pgm", sobelFilter_img);
         savePNM("../images/inverted_img.pgm", inverted_img);
         savePNM("../images/threshold_img.pgm", threshold_img);
+        #ifdef BUILD_WITH_CUDA
         savePNM("../images/h_convolution_img.pgm", h_convolution_img);
+        #endif
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
