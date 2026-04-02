@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <vector>
 #include <stdexcept>
+#include "image.hpp"
 
 /**
  * @brief Clamps a value to a specified range.
@@ -47,3 +48,17 @@ void validateKernelSize(size_t kernel_size);
  */
 template<typename T>
 void validateKernel(const std::vector<std::vector<T>>& kernel);
+
+/**
+ * @brief Checks if two images have identical dimensions.
+ *
+ * Compares two images to determine if they have the same dimensions
+ * (rows, columns, channels). The pixel data is not compared.
+ *
+ * @tparam T The data type of the image pixels
+ * @param img1 First image to compare
+ * @param img2 Second image to compare
+ * @return true if both images have the same dimensions, false otherwise
+ */
+template<typename T>
+bool imagesEqual(const Image<T>& img1, const Image<T>& img2);

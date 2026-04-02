@@ -18,15 +18,14 @@
  * black regions in the image.
  * 
  * @tparam T The data type of the image (typically uint8_t or float)
- * @param input The source grayscale image
- * @param output The destination grayscale image where the eroded result is stored
+ * @param input The source grayscale image (must have exactly 1 channel)
+ * @param output The destination grayscale image where the eroded result is stored (must have exactly 1 channel)
  * @param kernel_size The size of the square kernel (must be odd, e.g., 3, 5, 7)
  * 
- * @note Input and output images must have the same dimensions.
- * @note This function only works with single-channel (grayscale) images.
+ * @note Input and output images must have the same dimensions and exactly 1 channel.
  * @note The kernel radius determines the neighborhood: radius = (kernel_size - 1) / 2
  * 
- * @throws std::invalid_argument If kernel_size is even or input/output dimensions don't match
+ * @throws std::invalid_argument If kernel_size is even, input/output dimensions don't match, or images are not single-channel
  */
 template<typename T>
 void erode(const Image<T>& input, Image<T>& output, size_t kernel_size);
@@ -39,15 +38,14 @@ void erode(const Image<T>& input, Image<T>& output, size_t kernel_size);
  * black regions in the image.
  * 
  * @tparam T The data type of the image (typically uint8_t or float)
- * @param input The source grayscale image
- * @param output The destination grayscale image where the dilated result is stored
+ * @param input The source grayscale image (must have exactly 1 channel)
+ * @param output The destination grayscale image where the dilated result is stored (must have exactly 1 channel)
  * @param kernel_size The size of the square kernel (must be odd, e.g., 3, 5, 7)
  * 
- * @note Input and output images must have the same dimensions.
- * @note This function only works with single-channel (grayscale) images.
+ * @note Input and output images must have the same dimensions and exactly 1 channel.
  * @note The kernel radius determines the neighborhood: radius = (kernel_size - 1) / 2
  * 
- * @throws std::invalid_argument If kernel_size is even or input/output dimensions don't match
+ * @throws std::invalid_argument If kernel_size is even, input/output dimensions don't match, or images are not single-channel
  */
 template<typename T>
 void dilate(const Image<T>& input, Image<T>& output, size_t kernel_size);

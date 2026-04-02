@@ -61,8 +61,8 @@
  * The project uses a Makefile for building:
  * @code
  * make        # Build the project
+ * make -DBUILD_WITH_CUDA=1 # Build the project with CUDA support
  * make clean  # Clean build artifacts
- * make run    # Build and run the example
  * @endcode
  *
  * @section license License
@@ -88,7 +88,7 @@
 int main() {
     Image<uint8_t> sample_img;
     try {
-        readPNM("images/sampleGRAY.pgm", sample_img);
+        readPNM("../images/sampleGRAY.pgm", sample_img);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
@@ -125,11 +125,15 @@ int main() {
     laplacianFilter(sample_img, laplacian_img);
 
     // Morphological operations test
-    Image<uint8_t> eroded_img = sample_img;
+    Image<uint8_t> eroded_img = threshold_img;
     erode(sample_img, eroded_img, 3);
 
-    Image<uint8_t> dilated_img = sample_img;
+    Image<uint8_t> dilated_img = threshold_img;
     dilate(sample_img, dilated_img, 3);
+
+    // Histogram equalization test
+    Image<uint8_t> histogramEqualized_img = sample_img;
+    histogramEqualization(sample_img, histogramEqualized_img);
 
     #ifdef BUILD_WITH_CUDA
     // CUDA convolution test
@@ -150,16 +154,17 @@ int main() {
     #endif
 
     try {
-        savePNM("images/gaussianBlur_img.pgm", gaussianBlur_img);
-        savePNM("images/gaussianBlur_without_sigma_img.pgm", gaussianBlur_without_sigma_img);
-        savePNM("images/medianFilter_img.pgm", medianFilter_img);
-        savePNM("images/sobelFilter_img.pgm", sobelFilter_img);
-        savePNM("images/inverted_img.pgm", inverted_img);
-        savePNM("images/threshold_img.pgm", threshold_img);
-        savePNM("images/sharpening_img.pgm", sharpening_img);
-        savePNM("images/laplacian_img.pgm", laplacian_img);
-        savePNM("images/eroded_img.pgm", eroded_img);
-        savePNM("images/dilated_img.pgm", dilated_img);
+        savePNM("../images/gaussianBlur_img.pgm", gaussianBlur_img);
+        savePNM("../images/gaussianBlur_without_sigma_img.pgm", gaussianBlur_without_sigma_img);
+        savePNM("../images/medianFilter_img.pgm", medianFilter_img);
+        savePNM("../images/sobelFilter_img.pgm", sobelFilter_img);
+        savePNM("../images/inverted_img.pgm", inverted_img);
+        savePNM("../images/threshold_img.pgm", threshold_img);
+        savePNM("../images/sharpening_img.pgm", sharpening_img);
+        savePNM("../images/laplacian_img.pgm", laplacian_img);
+        savePNM("../images/eroded_img.pgm", eroded_img);
+        savePNM("../images/dilated_img.pgm", dilated_img);
+        savePNM("../images/histogramEqualized_img.pgm", histogramEqualized_img);
         #ifdef BUILD_WITH_CUDA
         savePNM("images/h_convolution_img.pgm", h_convolution_img);
         #endif

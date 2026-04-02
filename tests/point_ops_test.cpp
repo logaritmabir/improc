@@ -79,3 +79,13 @@ TEST_F(PointOpsTest, ThresholdDimensionMismatch) {
     Image<uint8_t> wrongSize(2, 2, 1);
     EXPECT_THROW(threshold(img1, wrongSize, (uint8_t)128), std::invalid_argument);
 }
+
+TEST_F(PointOpsTest, ThresholdMultiChannelInput) {
+    Image<uint8_t> output(3, 3, 3);
+    EXPECT_THROW(threshold(img2, output, (uint8_t)128), std::invalid_argument);
+}
+
+TEST_F(PointOpsTest, ThresholdMultiChannelOutput) {
+    Image<uint8_t> output(3, 3, 3);
+    EXPECT_THROW(threshold(img1, output, (uint8_t)128), std::invalid_argument);
+}

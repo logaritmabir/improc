@@ -32,9 +32,15 @@ void validateKernel(const std::vector<std::vector<T>>& kernel) {
     }
 }
 
+template<typename T>
+bool imagesEqual(const Image<T>& img1, const Image<T>& img2) {
+    // Check if dimensions are identical
+    return (img1.rows() == img2.rows() && img1.cols() == img2.cols() && img1.channels() == img2.channels());
+}
+
 template float clamp(float value, float min, float max);
+template int clamp(int value, int min, int max);
 template uint8_t clamp(uint8_t value, uint8_t min, uint8_t max);
 template void validateKernel(const std::vector<std::vector<float>>& kernel);
 template void validateKernel(const std::vector<std::vector<uint8_t>>& kernel);
-
-template int clamp<int>(int, int, int);
+template bool imagesEqual(const Image<uint8_t>& img1, const Image<uint8_t>& img2);
