@@ -9,7 +9,8 @@ A modern C++ image processing library with support for reading, writing, and fil
 - **Image Class**: A generic, template-based container for image data supporting multiple channels and flexible data types
 - **PNM I/O**: Functions to read and write images exclusively in Portable PixMap (PPM) and Portable GrayMap (PGM) formats
 - **Point Operations**: Per-pixel transformations like inversion and thresholding
-- **Image Filtering**: Convolution-based filters including blur, median filter, and edge detection
+- **Image Filtering**: Convolution-based filters including blur, median filter, edge detection, sharpening, and Laplacian
+- **Morphological Operations**: Erosion and dilation for shape analysis
 - **Color Operations**: Extract RGB channels and convert to grayscale
 - **GPU Acceleration**: CUDA-based convolution for high-performance processing
 - **Type Flexibility**: Template-based design allows working with different data types (uint8_t, float, etc.)
@@ -22,6 +23,7 @@ improc/
 │   ├── image.hpp        # Image container class
 │   ├── filters.hpp      # Image filtering functions
 │   ├── point_ops.hpp    # Point-wise operations
+│   ├── morph.hpp        # Morphological operations
 │   ├── utils.hpp        # Utility functions
 │   ├── pnm_funcs.hpp   # PNM file I/O functions
 │   └── cuda/            # CUDA support
@@ -31,6 +33,7 @@ improc/
 │   ├── image.cpp
 │   ├── filters.cpp
 │   ├── point_ops.cpp
+│   ├── morph.cpp        # Morphological operations
 │   ├── utils.cpp
 │   ├── pnm_funcs.cpp
 │   ├── main.cpp         # Example usage
@@ -71,6 +74,13 @@ Image processing operations:
 - `medianFilter()` - Apply median filter for noise reduction
 - `gaussianBlur()` - Apply Gaussian blur for smoothing
 - `sobelFilter()` - Apply Sobel edge detection
+- `sharpeningFilter()` - Enhance image details and edges
+- `laplacianFilter()` - Apply Laplacian edge detection
+
+### Morphological Operations (`morph.hpp`)
+Shape-based image processing:
+- `erode()` - Perform morphological erosion
+- `dilate()` - Perform morphological dilation
 
 ### CUDA Support (`cuda/`)
 GPU-accelerated processing:

@@ -87,6 +87,24 @@ template<typename T>
 void gaussianBlur(const Image<T>& input, Image<T>& output, float sigma);
 
 /**
+ * @brief Applies Gaussian blur with a default sigma value.
+ *
+ * This is a convenience function that applies Gaussian blur using a fixed
+ * 3x3 kernel with sigma ≈ 0.85. This provides a standard amount of smoothing
+ * without requiring the user to specify a sigma parameter.
+ *
+ * @tparam T The pixel data type (typically uint8_t)
+ * @param input Source image to blur
+ * @param output Destination image for result (must have same dimensions as input)
+ * @throws std::invalid_argument if dimensions mismatch
+ *
+ * @note Uses a fixed kernel: [0.0625, 0.125, 0.0625; 0.125, 0.25, 0.125; 0.0625, 0.125, 0.0625]
+ * @note For more control over blur amount, use the version with sigma parameter
+ */
+template<typename T>
+void gaussianBlur(const Image<T>& input, Image<T>& output);
+
+/**
  * @brief Applies Sobel edge detection filter.
  *
  * The Sobel filter detects edges by computing the gradient magnitude
@@ -108,3 +126,43 @@ void gaussianBlur(const Image<T>& input, Image<T>& output, float sigma);
  */
 template<typename T>
 void sobelFilter(const Image<T>& input, Image<T>& output);
+
+/**
+ * @brief Applies a sharpening filter to enhance image details.
+ *
+ * Sharpening enhances edges and fine details by amplifying high-frequency
+ * components. This implementation uses an unsharp masking approach with
+ * a 3x3 kernel that emphasizes the center pixel while subtracting neighbors.
+ *
+ * @tparam T The pixel data type (typically uint8_t)
+ * @param input Source image to sharpen
+ * @param output Destination image for sharpened result (must have same dimensions as input)
+ * @throws std::invalid_argument if dimensions mismatch
+ *
+ * @note Uses kernel: [0, -1, 0; -1, 5, -1; 0, -1, 0]
+ * @note May amplify noise along with edges
+ */
+template<typename T>
+void sharpeningFilter(const Image<T>& input, Image<T>& output);
+
+/**
+ * @brief Applies Laplacian edge detection filter.
+ *
+ * The Laplacian filter detects edges by computing the second derivative
+ * of the image intensity. It highlights regions of rapid intensity change,
+ * which typically correspond to edges. The result is a grayscale image
+ * where edges appear as bright lines on a dark background.
+ *
+ * @tparam T The pixel data type (typically uint8_t)
+ * @param input Source grayscale image for edge detection
+ * @param output Destination image for edge result (must have same dimensions as input)
+ * @throws std::invalid_argument if dimensions mismatch
+ *
+ * @note Uses kernel: [0, 1, 0; 1, -4, 1; 0, 1, 0]
+ * @note For best results, apply to grayscale images
+ * @note Output values are clamped to [0, 255] range
+ *
+ * @see rgbToGrayscale() in pnm_funcs.hpp to convert color images to grayscale
+ */
+template<typename T>
+void laplacianFilter(const Image<T>& input, Image<T>& output);

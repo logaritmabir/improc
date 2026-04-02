@@ -8,7 +8,8 @@
  * Improc provides a comprehensive set of image processing operations including:
  * - Image container class with multi-channel support
  * - Point operations (inversion, thresholding)
- * - Filtering operations (convolution, median filter, Gaussian blur, Sobel edge detection)
+ * - Filtering operations (convolution, median filter, Gaussian blur, Sobel edge detection, sharpening, Laplacian)
+ * - Morphological operations (erosion, dilation)
  * - PNM file format I/O (PGM for grayscale, PPM for RGB)
  * - GPU-accelerated convolution via CUDA
  *
@@ -51,6 +52,7 @@
  * - @ref Image "Image Class" - Template-based image container
  * - @ref point_ops "Point Operations" - Per-pixel transformations
  * - @ref filters "Filtering" - Convolution and smoothing filters
+ * - @ref morph "Morphological Operations" - Erosion and dilation
  * - @ref pnm_funcs "PNM I/O" - File format support
  * - @ref cuda "CUDA Support" - GPU-accelerated processing
  *
@@ -81,32 +83,30 @@
 #include "cuda/kernels.cuh"
 #endif
 #include "point_ops.hpp"
+#include "morph.hpp"
 
 int main() {
     Image<uint8_t> sample_img;
     try {
-        readPNM("../images/sampleGRAY.pgm", sample_img);
+        readPNM("images/sampleGRAY.pgm", sample_img);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
     
-    // Convolution test
-    Image<uint8_t> convolution_img = sample_img;
-    std::vector<std::vector<float>> kernel = {{0.0625f, 0.1250f, 0.0625f}, {0.1250f, 0.2500f, 0.1250f}, {0.0625f, 0.1250f, 0.0625f}};
-    convolve(sample_img, convolution_img, kernel);
- 
+    // Gaussian blur test
+    Image<uint8_t> gaussianBlur_img = sample_img;
+    Image<uint8_t> gaussianBlur_without_sigma_img = sample_img;
+    gaussianBlur(sample_img, gaussianBlur_without_sigma_img);
+    gaussianBlur(sample_img, gaussianBlur_img, 0.3);
+
     // Median filter test
     Image<uint8_t> medianFilter_img = sample_img;
     medianFilter(sample_img, medianFilter_img, 3);
 
     // Sobel filter test
     Image<uint8_t> sobelFilter_img = sample_img;
-    std::vector<std::vector<float>> sobelKernelX = {{-1.0f, 0.0f, 1.0f}, {-2.0f, 0.0f, 2.0f}, {-1.0f, 0.0f, 1.0f}};
-    std::vector<std::vector<float>> sobelKernelY = {{-1.0f, -2.0f, -1.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 2.0f, 1.0f}};
-
-    convolve(sample_img, sobelFilter_img, sobelKernelX);
-    convolve(sample_img, sobelFilter_img, sobelKernelY);
+    sobelFilter(sample_img, sobelFilter_img);
 
     // Invert test
     Image<uint8_t> inverted_img = sample_img;
@@ -115,6 +115,21 @@ int main() {
     // Threshold test
     Image<uint8_t> threshold_img = sample_img;
     threshold(sample_img, threshold_img, (uint8_t)128);
+
+    // Sharpening test
+    Image<uint8_t> sharpening_img = sample_img;
+    sharpeningFilter(sample_img, sharpening_img);
+
+    // Laplacian filter test
+    Image<uint8_t> laplacian_img = sample_img;
+    laplacianFilter(sample_img, laplacian_img);
+
+    // Morphological operations test
+    Image<uint8_t> eroded_img = sample_img;
+    erode(sample_img, eroded_img, 3);
+
+    Image<uint8_t> dilated_img = sample_img;
+    dilate(sample_img, dilated_img, 3);
 
     #ifdef BUILD_WITH_CUDA
     // CUDA convolution test
@@ -135,13 +150,18 @@ int main() {
     #endif
 
     try {
-        savePNM("../images/convolution_img.pgm", convolution_img);
-        savePNM("../images/medianFilter_img.pgm", medianFilter_img);
-        savePNM("../images/sobelFilter_img.pgm", sobelFilter_img);
-        savePNM("../images/inverted_img.pgm", inverted_img);
-        savePNM("../images/threshold_img.pgm", threshold_img);
+        savePNM("images/gaussianBlur_img.pgm", gaussianBlur_img);
+        savePNM("images/gaussianBlur_without_sigma_img.pgm", gaussianBlur_without_sigma_img);
+        savePNM("images/medianFilter_img.pgm", medianFilter_img);
+        savePNM("images/sobelFilter_img.pgm", sobelFilter_img);
+        savePNM("images/inverted_img.pgm", inverted_img);
+        savePNM("images/threshold_img.pgm", threshold_img);
+        savePNM("images/sharpening_img.pgm", sharpening_img);
+        savePNM("images/laplacian_img.pgm", laplacian_img);
+        savePNM("images/eroded_img.pgm", eroded_img);
+        savePNM("images/dilated_img.pgm", dilated_img);
         #ifdef BUILD_WITH_CUDA
-        savePNM("../images/h_convolution_img.pgm", h_convolution_img);
+        savePNM("images/h_convolution_img.pgm", h_convolution_img);
         #endif
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

@@ -1,4 +1,4 @@
-#include "moprh.hpp"
+#include "morph.hpp"
 #include "utils.hpp"
 #include <limits>
 
@@ -65,4 +65,7 @@ void dilate(const Image<T>& input, Image<T>& output, size_t kernel_size){
         }
     }
 }
+
+template void erode(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernel_size);
+template void dilate(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernel_size);
     

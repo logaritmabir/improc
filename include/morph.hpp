@@ -3,7 +3,7 @@
 #include "image.hpp"
 
 /**
- * @file moprh.hpp
+ * @file morph.hpp
  * @brief Morphological operations for image processing.
  * 
  * This file contains template functions for applying morphological operations

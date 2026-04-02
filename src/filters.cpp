@@ -116,6 +116,20 @@ void gaussianBlur(const Image<T>& input, Image<T>& output, float sigma) {
 }
 
 template<typename T>
+void gaussianBlur(const Image<T>& input, Image<T>& output){
+    if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
+        throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
+
+    std::vector<std::vector<float>> kernel = {
+        {0.0625f, 0.1250f, 0.0625f},
+        {0.1250f, 0.2500f, 0.1250f},
+        {0.0625f, 0.1250f, 0.0625f}
+    };
+
+    convolve(input,output,kernel);
+}
+
+template<typename T>
 void sobelFilter(const Image<T>& input, Image<T>& output) {
     if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
         throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
@@ -136,8 +150,38 @@ void sobelFilter(const Image<T>& input, Image<T>& output) {
     convolve(input, output, Gy);
 }
 
+template<typename T>
+void sharpeningFilter(const Image<T>& input, Image<T>& output){
+    if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
+        throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
+
+    std::vector<std::vector<float>> kernel = {
+        {0.0f, -1.0f, 0.0f},
+        {-1.0f, 5.0f, -1.0f},
+        {0.0f, -1.0f, 0.0f}
+    };
+
+    convolve(input,output,kernel);
+}
+
+template<typename T>
+void laplacianFilter(const Image<T>& input, Image<T>& output){
+    if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
+        throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
+
+    std::vector<std::vector<float>> kernel = {
+        {0.0f, 1.0f, 0.0f},
+        {1.0f, -4.0f, 1.0f},
+        {0.0f, 1.0f, 0.0f}
+    };
+
+    convolve(input,output,kernel);
+}
+
 template void medianFilter(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernelSize);
 template void convolve(const Image<uint8_t>& input, Image<uint8_t>& output, const std::vector<std::vector<float>>& kernel);
 template void gaussianBlur(const Image<uint8_t>& input, Image<uint8_t>& output, float sigma);
+template void gaussianBlur(const Image<uint8_t>& input, Image<uint8_t>& output);
 template void sobelFilter(const Image<uint8_t>& input, Image<uint8_t>& output);
-
+template void sharpeningFilter(const Image<uint8_t>& input, Image<uint8_t>& output);
+template void laplacianFilter(const Image<uint8_t>& input, Image<uint8_t>& output);
