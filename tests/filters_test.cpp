@@ -3,6 +3,7 @@
 #include "image.hpp"
 #include <cstdint>
 #include <vector>
+#include <array>
 
 class FiltersTest : public ::testing::Test {
 protected:
@@ -19,6 +20,20 @@ TEST_F(FiltersTest, ConvolveBoxBlur) {
         {1.0f/9, 1.0f/9, 1.0f/9},
         {1.0f/9, 1.0f/9, 1.0f/9}
     };
+    
+    Image<uint8_t> output(3, 3, 1);
+    convolve(img, output, kernel);
+    
+    EXPECT_EQ(output.rows(), img.rows());
+    EXPECT_EQ(output.cols(), img.cols());
+}
+
+TEST_F(FiltersTest, ConvolveBoxBlurWithArray) {
+    constexpr std::array<std::array<float, 3>, 3> kernel = {{
+        {{1.0f/9, 1.0f/9, 1.0f/9}},
+        {{1.0f/9, 1.0f/9, 1.0f/9}},
+        {{1.0f/9, 1.0f/9, 1.0f/9}}
+    }};
     
     Image<uint8_t> output(3, 3, 1);
     convolve(img, output, kernel);

@@ -12,6 +12,7 @@ A modern C++ image processing library with support for reading, writing, and fil
 - **Image Filtering**: Convolution-based filters including blur, median filter, edge detection, sharpening, and Laplacian
 - **Morphological Operations**: Erosion and dilation for shape analysis
 - **Color Operations**: Extract RGB channels and convert to grayscale
+- **Histogram Operations**: Histogram equalization for contrast enhancement
 - **GPU Acceleration**: CUDA-based convolution for high-performance processing
 - **Type Flexibility**: Template-based design allows working with different data types (uint8_t, float, etc.)
 
@@ -24,6 +25,7 @@ improc/
 │   ├── filters.hpp      # Image filtering functions
 │   ├── point_ops.hpp    # Point-wise operations
 │   ├── morph.hpp        # Morphological operations
+│   ├── transform.hpp    # Geometric transformations (placeholder)
 │   ├── utils.hpp        # Utility functions
 │   ├── pnm_funcs.hpp   # PNM file I/O functions
 │   └── cuda/            # CUDA support
@@ -34,6 +36,7 @@ improc/
 │   ├── filters.cpp
 │   ├── point_ops.cpp
 │   ├── morph.cpp        # Morphological operations
+│   ├── transform.cpp    # Geometric transformations (placeholder)
 │   ├── utils.cpp
 │   ├── pnm_funcs.cpp
 │   ├── main.cpp         # Example usage
@@ -67,6 +70,7 @@ I/O operations for image files:
 Per-pixel transformations:
 - `invert()` - Invert pixel values (photographic negative)
 - `threshold()` - Apply binary thresholding
+- `histogramEqualization()` - Redistribute pixel intensities to enhance contrast
 
 ### Filters (`filters.hpp`)
 Image processing operations:
@@ -81,6 +85,10 @@ Image processing operations:
 Shape-based image processing:
 - `erode()` - Perform morphological erosion
 - `dilate()` - Perform morphological dilation
+
+### Transformations (`transform.hpp`)
+Geometric image transformations (under development):
+- Rotation, scaling, and translation support planned
 
 ### CUDA Support (`cuda/`)
 GPU-accelerated processing:
@@ -117,6 +125,9 @@ invert(img, inverted);
 
 Image<uint8_t> binary;
 threshold(img, binary, 128);
+
+Image<uint8_t> equalized;
+histogramEqualization(img, equalized);
 
 savePNM("output.pgm", blurred);
 ```

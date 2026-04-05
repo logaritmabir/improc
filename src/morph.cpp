@@ -60,7 +60,6 @@ void dilate(const Image<T>& input, Image<T>& output, size_t kernel_size){
     for(int r = 0; r < rows; ++r) {
         for(int c = 0; c < cols; ++c) {
             T maxVal = std::numeric_limits<T>::min();
-
             for(int i = -filterRadius; i <= filterRadius; ++i) {
                 for(int j = -filterRadius; j <= filterRadius; ++j) {
                     int neighborRow = r + i;
@@ -78,6 +77,74 @@ void dilate(const Image<T>& input, Image<T>& output, size_t kernel_size){
     }
 }
 
+template<typename T>
+void open(const Image<T>& input, Image<T>& output, size_t kernel_size){
+    Image<T> temp(output);
+    erode(input, temp, kernel_size);
+    dilate(temp, output, kernel_size);
+}
+
+template<typename T>
+void close(const Image<T>& input, Image<T>& output, size_t kernel_size){
+    Image<T> temp(output);
+    dilate(input, temp, kernel_size);
+    erode(temp, output, kernel_size);
+}
+
+template<typename T>
+void morphologicalGradient(const Image<T>& input, Image<T>& output, size_t kernel_size){
+    Image<T> dilated(input);
+    Image<T> eroded(input);
+
+    dilate(input, dilated, kernel_size);
+    erode(input, eroded, kernel_size);
+
+    int cols = static_cast<int>(input.cols());
+    int rows = static_cast<int>(input.rows());
+
+    for(int r = 0; r < rows; ++r) {
+        for(int c = 0; c < cols; ++c) {
+            output(r, c) = dilated(r, c) - eroded(r, c);
+        }
+    }
+}
+
+template<typename T>
+void topHat(const Image<T>& input, Image<T>& output, size_t kernel_size){
+    Image<T> opened(input);
+    open(input, opened, kernel_size);
+
+    int cols = static_cast<int>(input.cols());
+    int rows = static_cast<int>(input.rows());
+
+    for(int r = 0; r < rows; ++r) {
+        for(int c = 0; c < cols; ++c) {
+            output(r, c) = input(r, c) - opened(r, c);
+        }
+    }
+}
+
+template<typename T>
+void bottomHat(const Image<T>& input, Image<T>& output, size_t kernel_size){
+    Image<T> closed(input);
+    close(input, closed, kernel_size);
+
+    int cols = static_cast<int>(input.cols());
+    int rows = static_cast<int>(input.rows());
+
+    for(int r = 0; r < rows; ++r) {
+        for(int c = 0; c < cols; ++c) {
+            output(r, c) = closed(r, c) - input(r, c);
+        }
+    }
+}
+
 template void erode(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernel_size);
 template void dilate(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernel_size);
+template void open(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernel_size);
+template void close(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernel_size);
+template void morphologicalGradient(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernel_size);
+template void topHat(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernel_size);
+template void bottomHat(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernel_size);
+
     

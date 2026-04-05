@@ -39,7 +39,7 @@ void invert(const Image<T>& input, Image<T>& output);
  * @throws std::invalid_argument if images are not single-channel or dimensions don't match
  */
 template<typename T>
-void threshold(const Image<T>& input, Image<T>& output, T thresholdValue);
+void threshold(const Image<T>& input, Image<T>& output, const T thresholdValue);
 
 /**
  * @brief Applies histogram equalization to a grayscale image.

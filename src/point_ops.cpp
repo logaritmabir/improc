@@ -21,7 +21,7 @@ void invert(const Image<T>& input, Image<T>& output) {
 }
 
 template<typename T>
-void threshold(const Image<T>& input, Image<T>& output, T thresholdValue) {
+void threshold(const Image<T>& input, Image<T>& output, const T thresholdValue) {
     if(input.channels() != 1)
         throw std::invalid_argument("Threshold only works on single-channel (grayscale) images");
     
@@ -72,6 +72,6 @@ void histogramEqualization(const Image<T>& input, Image<T>& output){
 }
 
 template void invert(const Image<uint8_t>& input, Image<uint8_t>& output);
-template void threshold(const Image<uint8_t>& input, Image<uint8_t>& output, uint8_t thresholdValue);
+template void threshold(const Image<uint8_t>& input, Image<uint8_t>& output, const uint8_t thresholdValue);
 template void histogramEqualization(const Image<uint8_t>& input, Image<uint8_t>& output);
 

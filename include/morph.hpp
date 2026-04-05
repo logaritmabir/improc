@@ -49,3 +49,18 @@ void erode(const Image<T>& input, Image<T>& output, size_t kernel_size);
  */
 template<typename T>
 void dilate(const Image<T>& input, Image<T>& output, size_t kernel_size);
+
+template<typename T>
+void open(const Image<T>& input, Image<T>& output, size_t kernel_size);
+
+template<typename T>
+void close(const Image<T>& input, Image<T>& output, size_t kernel_size);
+
+template<typename T>
+void morphologicalGradient(const Image<T>& input, Image<T>& output, size_t kernel_size);
+
+template<typename T>
+void topHat(const Image<T>& input, Image<T>& output, size_t kernel_size);
+
+template<typename T>
+void bottomHat(const Image<T>& input, Image<T>& output, size_t kernel_size);

@@ -12,6 +12,7 @@
  */
 
 #include "image.hpp"
+#include <array>
 
 /**
  * @brief Applies a generic convolution kernel to an image.
@@ -42,6 +43,21 @@
  */
 template<typename T>
 void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::vector<float>>& kernel);
+
+/**
+ * @brief Applies a generic convolution kernel to an image (std::array version).
+ *
+ * This overload accepts fixed-size square 2D array kernels for better performance.
+ *
+ * @tparam T The pixel data type (typically uint8_t)
+ * @tparam N The size of the square kernel (must be odd)
+ * @param input Source image to convolve
+ * @param output Destination image for result (must have same dimensions as input)
+ * @param kernel 2D square convolution kernel using std::array
+ * @throws std::invalid_argument if N is even or dimensions mismatch
+ */
+template<typename T, size_t N>
+void convolve(const Image<T>& input, Image<T>& output, const std::array<std::array<float, N>, N>& kernel);
 
 /**
  * @brief Applies a median filter to reduce noise.

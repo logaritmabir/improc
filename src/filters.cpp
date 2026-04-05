@@ -4,6 +4,10 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
+#include <array>
+
+// sep conva bakılacak
+// validate kernel fonksiyonuna baklıacak, nerelerde kullanılabilir vb.
 
 template<typename T>
 void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::vector<float>>& kernel) {
@@ -25,6 +29,38 @@ void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::ve
         throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
 
     int filterRadius = static_cast<int>(kernelSize / 2);
+    int cols = static_cast<int>(input.cols());
+    int rows = static_cast<int>(input.rows());
+    int channels = static_cast<int>(input.channels());
+
+    for(int r = 0; r < rows; r++){
+        for(int c = 0; c < cols; c++){
+            for(int ch = 0; ch < channels; ch++){
+                float sum = 0.0f;
+                for(int i = -filterRadius; i <= filterRadius; i++){
+                    for(int j = -filterRadius; j <= filterRadius; j++){
+                        int row = r + i;
+                        int col = c + j;
+
+                        if(row >= 0 && row < rows && col >= 0 && col < cols)
+                            sum += input(row, col, ch) * kernel[i + filterRadius][j + filterRadius];
+                    }
+                }
+                output(r,c,ch) = static_cast<T>(clamp<float>(sum, 0.0f, 255.0f));
+            }
+        }
+    }
+}
+
+// Template specialization for std::array kernels
+template<typename T, size_t N>
+void convolve(const Image<T>& input, Image<T>& output, const std::array<std::array<float, N>, N>& kernel) {
+    static_assert(N % 2 == 1, "Kernel size must be odd");
+    
+    if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
+        throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
+
+    int filterRadius = static_cast<int>(N / 2);
     int cols = static_cast<int>(input.cols());
     int rows = static_cast<int>(input.rows());
     int channels = static_cast<int>(input.channels());
@@ -120,13 +156,13 @@ void gaussianBlur(const Image<T>& input, Image<T>& output){
     if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
         throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
 
-    std::vector<std::vector<float>> kernel = {
-        {0.0625f, 0.1250f, 0.0625f},
-        {0.1250f, 0.2500f, 0.1250f},
-        {0.0625f, 0.1250f, 0.0625f}
-    };
+    constexpr std::array<std::array<float, 3>, 3> kernel = {{
+        {{0.0625f, 0.1250f, 0.0625f}},
+        {{0.1250f, 0.2500f, 0.1250f}},
+        {{0.0625f, 0.1250f, 0.0625f}}
+    }};
 
-    convolve(input,output,kernel);
+    convolve(input, output, kernel);
 }
 
 template<typename T>
@@ -134,17 +170,17 @@ void sobelFilter(const Image<T>& input, Image<T>& output) {
     if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
         throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
     
-    std::vector<std::vector<float>> Gx = {
-        {-1.0f, 0.0f, 1.0f},
-        {-2.0f, 0.0f, 2.0f},
-        {-1.0f, 0.0f, 1.0f}
-    };
+    constexpr std::array<std::array<float, 3>, 3> Gx = {{
+        {{-1.0f, 0.0f, 1.0f}},
+        {{-2.0f, 0.0f, 2.0f}},
+        {{-1.0f, 0.0f, 1.0f}}
+    }};
 
-    std::vector<std::vector<float>> Gy = {
-        {1.0f, 2.0f, 1.0f},
-        {0.0f, 0.0f, 0.0f},
-        {-1.0f, -2.0f, -1.0f}
-    };
+    constexpr std::array<std::array<float, 3>, 3> Gy = {{
+        {{1.0f, 2.0f, 1.0f}},
+        {{0.0f, 0.0f, 0.0f}},
+        {{-1.0f, -2.0f, -1.0f}}
+    }};
 
     convolve(input, output, Gx);
     convolve(input, output, Gy);
@@ -155,13 +191,13 @@ void sharpeningFilter(const Image<T>& input, Image<T>& output){
     if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
         throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
 
-    std::vector<std::vector<float>> kernel = {
-        {0.0f, -1.0f, 0.0f},
-        {-1.0f, 5.0f, -1.0f},
-        {0.0f, -1.0f, 0.0f}
-    };
+    constexpr std::array<std::array<float, 3>, 3> kernel = {{
+        {{0.0f, -1.0f, 0.0f}},
+        {{-1.0f, 5.0f, -1.0f}},
+        {{0.0f, -1.0f, 0.0f}}
+    }};
 
-    convolve(input,output,kernel);
+    convolve(input, output, kernel);
 }
 
 template<typename T>
@@ -169,17 +205,18 @@ void laplacianFilter(const Image<T>& input, Image<T>& output){
     if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
         throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
 
-    std::vector<std::vector<float>> kernel = {
-        {0.0f, 1.0f, 0.0f},
-        {1.0f, -4.0f, 1.0f},
-        {0.0f, 1.0f, 0.0f}
-    };
+    constexpr std::array<std::array<float, 3>, 3> kernel = {{
+        {{0.0f, 1.0f, 0.0f}},
+        {{1.0f, -4.0f, 1.0f}},
+        {{0.0f, 1.0f, 0.0f}}
+    }};
 
-    convolve(input,output,kernel);
+    convolve(input, output, kernel);
 }
 
 template void medianFilter(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernelSize);
 template void convolve(const Image<uint8_t>& input, Image<uint8_t>& output, const std::vector<std::vector<float>>& kernel);
+template void convolve(const Image<uint8_t>& input, Image<uint8_t>& output, const std::array<std::array<float, 3>, 3>& kernel);
 template void gaussianBlur(const Image<uint8_t>& input, Image<uint8_t>& output, float sigma);
 template void gaussianBlur(const Image<uint8_t>& input, Image<uint8_t>& output);
 template void sobelFilter(const Image<uint8_t>& input, Image<uint8_t>& output);

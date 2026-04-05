@@ -131,6 +131,21 @@ int main() {
     Image<uint8_t> dilated_img = threshold_img;
     dilate(sample_img, dilated_img, 3);
 
+    Image<uint8_t> opened_img = threshold_img;
+    open(sample_img, opened_img, 3);
+
+    Image<uint8_t> closed_img = threshold_img;
+    close(sample_img, closed_img, 3);
+
+    Image<uint8_t> morphGradient_img = threshold_img;
+    morphologicalGradient(sample_img, morphGradient_img, 3);
+
+    Image<uint8_t> topHat_img = sample_img;
+    topHat(sample_img, topHat_img, 3);
+
+    Image<uint8_t> bottomHat_img = sample_img;
+    bottomHat(sample_img, bottomHat_img, 3);
+
     // Histogram equalization test
     Image<uint8_t> histogramEqualized_img = sample_img;
     histogramEqualization(sample_img, histogramEqualized_img);
@@ -164,6 +179,11 @@ int main() {
         savePNM("../images/laplacian_img.pgm", laplacian_img);
         savePNM("../images/eroded_img.pgm", eroded_img);
         savePNM("../images/dilated_img.pgm", dilated_img);
+        savePNM("../images/opened_img.pgm", opened_img);
+        savePNM("../images/closed_img.pgm", closed_img);
+        savePNM("../images/morphGradient_img.pgm", morphGradient_img);
+        savePNM("../images/topHat_img.pgm", topHat_img);
+        savePNM("../images/bottomHat_img.pgm", bottomHat_img);
         savePNM("../images/histogramEqualized_img.pgm", histogramEqualized_img);
         #ifdef BUILD_WITH_CUDA
         savePNM("images/h_convolution_img.pgm", h_convolution_img);
