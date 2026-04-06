@@ -1,7 +1,6 @@
 # Build artifacts
 .obj/
 *.o
-*.a
 *.so
 
 # Executables
