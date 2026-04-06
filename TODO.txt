@@ -1,0 +1,374 @@
+================================================================================
+                            IMPROC PROJECT TODO LIST
+================================================================================
+
+================================================================================
+GENERAL PROJECT TODO
+================================================================================
+
+Functionality & Features:
+  [ ] Add support for additional image formats (JPEG, PNG) beyond just PNM
+      - Currently limited to PNM (PGM/PPM) format only
+      - Integrate libpng and libjpeg-turbo for wide format support
+      - Create abstraction layer for image I/O to support multiple backends
+      - Would significantly increase adoption and usability
+
+  [ ] Implement sparse convolution for performance optimization
+      - Optimize convolution for kernels with many zero coefficients
+      - Reduces redundant computation, especially useful for edge detection
+      - Skip zero coefficients during kernel sliding window computation
+      - Can provide 30-50% performance improvement for specific filters
+
+  [ ] Add batch processing support for multiple images
+      - Process collections of images efficiently with a single API call
+      - Amortize overhead across multiple operations
+      - Critical for production image processing pipelines
+      - Enable parallel processing of independent images
+
+  [ ] Implement histogram-based operations (histogram matching, specification)
+      - Add histogram computation and analysis functions
+      - Histogram equalization for contrast enhancement
+      - Histogram matching for style transfer between images
+      - Useful for medical imaging and satellite imagery applications
+
+  [ ] Add color space conversions (RGB to HSV, LAB, etc.)
+      - Extend beyond existing RGB to grayscale conversion
+      - HSV useful for color-based image segmentation
+      - LAB color space better represents human perception
+      - CIE color spaces for perceptually accurate processing
+
+  [ ] Implement affine transformations (rotation, scaling, translation)
+      - Add geometric image manipulation capabilities
+      - Rotation with configurable interpolation (nearest neighbor, bilinear)
+      - Essential for image registration and alignment tasks
+      - Support for composite transformations with matrix composition
+
+  [ ] Add watershed algorithm for image segmentation
+      - Morphological-based segmentation for object separation
+      - Particularly effective for touching/adjacent objects
+      - Build on existing morphological operations (erosion/dilation)
+      - Useful for medical imaging and particle analysis
+
+  [ ] Implement connected component labeling
+      - Identify and label connected regions in binary/labeled images
+      - Foundation for region-based image analysis
+      - Support both 4-connectivity and 8-connectivity
+      - Output labeled image and component statistics (size, centroid, etc.)
+
+Code Quality & Testing:
+  [ ] Expand unit test coverage (currently limited)
+      - Create comprehensive test suites for each module
+      - Use GoogleTest framework currently in place
+      - Aim for >80% code coverage across all operations
+      - Add edge case tests (empty images, single pixel, boundary conditions)
+      - Test type template instantiation with uint8_t, float, int16_t, etc.
+
+  [ ] Add performance benchmarking suite
+      - Create benchmark executable comparing CPU vs baseline
+      - Measure FLOPs, memory bandwidth, and execution time
+      - Profile different image sizes (small, medium, large)
+      - Enable regression detection when optimizations are made
+      - Use Google Benchmark library for consistent measurements
+
+  [ ] Add input validation and error handling for edge cases
+      - Validate kernel sizes are odd and positive
+      - Check image dimensions match for operations requiring two images
+      - Handle zero-sized images gracefully
+      - Provide meaningful error messages instead of crashes
+      - Add bounds checking for pixel access operations
+
+  [ ] Create comprehensive Doxygen documentation with examples
+      - Generate HTML API documentation from source comments
+      - Add usage examples for each class and function
+      - Include algorithm descriptions and references
+      - Create tutorials for common image processing workflows
+      - Enable documentation generation in CI/CD pipeline
+
+  [ ] Add sanitizers (ASAN, UBSAN) to build system
+      - Enable AddressSanitizer to detect memory leaks and corruption
+      - Enable UndefinedBehaviorSanitizer for undefined behavior detection
+      - Create separate build target with sanitizer flags
+      - Catch subtle bugs early in development cycle
+      - Critical for library code correctness
+
+Build & Development:
+  [ ] Migrate from Makefile to CMake for better cross-platform support
+      - Makefile is verbose and difficult to maintain for CUDA/CPU dual targets
+      - CMake provides better IDE integration (Visual Studio, Xcode, etc.)
+      - Automatic detection of CUDA toolkit and compiler capabilities
+      - Enable feature-based configuration (BUILD_TESTING, BUILD_DOCUMENTATION)
+      - Simplify dependency management and version requirements
+
+  [ ] Add CI/CD pipeline (GitHub Actions, etc.)
+      - Automatically build and test on every commit
+      - Create matrix builds for different configurations (CUDA on/off)
+      - Run with multiple compilers (GCC, Clang) and CUDA versions
+      - Enforce code quality checks and test coverage requirements
+      - Generate documentation on successful builds
+
+  [ ] Create separate build profiles (Debug, Release, Profile)
+      - Debug: Full symbol information, no optimizations for debugging
+      - Release: O3 optimizations, stripped symbols, NDEBUG flag
+      - Profile: Optimizations with profiling instrumentation and symbols
+      - Allow easy switching between profiles via CMake variable
+      - Reduce build times during development with Debug profile
+
+  [ ] Add package management support (vcpkg, Conan)
+      - Enable easy installation as a system library
+      - Manage dependencies (if any: testing framework, image libraries)
+      - Allow integration into other projects via package managers
+      - Create recipes for multiple platforms and configurations
+      - Simplify user installation process
+
+  [ ] Create Docker container for reproducible builds
+      - Include CUDA toolkit, compilers, and all dependencies
+      - Ensure consistent build environment across development team
+      - Simplify CI/CD pipeline integration
+      - Enable easy local reproduction of build and test environments
+      - Support for multiple base images (Ubuntu, Alpine, etc.)
+
+Documentation:
+  [ ] Write algorithm complexity analysis for each operation
+      - Document time complexity O(n), space complexity for each function
+      - Explain algorithmic approach and any optimizations used
+      - Compare complexity of CPU vs GPU implementations
+      - Help users choose appropriate operations for their use cases
+      - Include actual measured performance on reference hardware
+
+  [ ] Add performance profiling results and optimization guide
+      - Profile all operations with real images and various sizes
+      - Document hot paths and optimization opportunities
+      - Compare different kernel launch configurations for CUDA
+      - Include memory bandwidth utilization metrics
+      - Create guide for users to optimize their usage patterns
+
+  [ ] Create API reference guide
+      - Structured documentation separate from code comments
+      - Include function signatures, parameter descriptions, return values
+      - Add example code snippets for each major class/function
+      - Document template instantiation requirements
+      - Include limitations and caveats for each operation
+
+  [ ] Add example programs demonstrating different use cases
+      - Edge detection pipeline (Sobel -> thresholding -> morphological ops)
+      - Image enhancement workflow (blur -> histogram equalization -> sharpening)
+      - CUDA vs CPU performance comparison for same operation
+      - Batch processing example with multiple image files
+      - GPU memory management best practices example
+
+
+================================================================================
+GPU/CUDA TODO
+================================================================================
+
+Core GPU Implementations:
+  [ ] Convert all CPU filters to GPU kernels (median filter, Sobel, Laplacian, sharpening)
+      - Currently only basic convolution is GPU-accelerated
+      - Each filter has unique properties requiring different optimization strategies
+      - Median filter: Requires sorting or selection algorithms on GPU
+      - Sobel/Laplacian: Can use separable convolution for efficiency
+      - Sharpening: Combines blur and original for unsharp mask approach
+      - Provides consistent acceleration across entire filter library
+
+  [ ] Implement GPU-accelerated morphological operations (erosion, dilation)
+      - CPU versions are naive sliding window implementations
+      - GPU can parallelize across all output pixels simultaneously
+      - Use shared memory to cache input tile for thread cooperation
+      - Dilation and erosion can be decomposed into separable operations
+      - Foundation for higher-level morphological operations
+      - Expected 10-50x speedup depending on structuring element size
+
+  [ ] Implement GPU point operations (inversion, thresholding)
+      - Simple per-pixel operations with maximum parallelism potential
+      - Trivial GPU implementation but improves consistency
+      - Good entry point for GPU optimization learning
+      - Pairs well with other GPU operations to avoid PCIe transfers
+      - Expected 20-100x speedup with GPU memory coalescing
+
+  [ ] Add GPU support for median filter with optimized algorithms
+      - Naive approach: Sort each neighborhood (very slow)
+      - Better approach: Use bitonic sort specialized for filter windows
+      - Even better: Use histogram-based approach for uint8_t images
+      - Median filter is computationally expensive but important for noise reduction
+      - Consider specialized optimization for small kernels vs large kernels
+
+Performance Optimization:
+  [ ] Add shared memory optimization to convolution kernels
+      - Current implementation likely uses global memory only
+      - Load input tile into shared memory for reuse across threads
+      - Tile-based approach with overlapping boundaries
+      - Reduces global memory bandwidth by 10-100x depending on kernel size
+      - More complex to implement but huge performance impact
+      - Requires careful handling of boundary pixels
+
+  [ ] Implement separable convolution for Gaussian blur (2x performance improvement)
+      - Gaussian blur kernel is separable: 2D = 1D horizontal * 1D vertical
+      - Replace single 2D convolution with two 1D convolutions
+      - Reduces computation from O(k²) to O(2k) where k=kernel_size
+      - Dramatically reduces memory bandwidth requirements
+      - Apply same principle to other separable kernels if added
+
+  [ ] Use texture memory for improved memory bandwidth on image reads
+      - Texture memory optimized for spatial locality (like images have)
+      - Provides hardware-level caching and address translation
+      - Better performance than raw global memory for non-coalesced access
+      - Particularly beneficial for multi-channel images and complex access patterns
+      - Requires CUDA API changes but significant speedup potential
+
+  [ ] Add constant memory for kernel coefficients
+      - Convolution kernels are read-only and broadcast to many threads
+      - Constant memory has dedicated cache optimized for this pattern
+      - Frees up global memory bandwidth for image data
+      - Limited to 64KB but sufficient for realistic kernel sizes
+      - Trivial to implement but worthwhile optimization
+
+  [ ] Optimize thread block sizing for different kernel sizes
+      - Different kernel sizes benefit from different thread block configurations
+      - Larger kernels need more shared memory per block
+      - Smaller kernels can use more threads per block
+      - Create tuning parameter or auto-detection mechanism
+      - Profile to find sweet spot for specific GPU architectures
+
+  [ ] Implement stream processing for multi-GPU data parallelism
+      - Enable multiple GPUs to work on different filters/images simultaneously
+      - CUDA streams allow asynchronous kernel execution and H2D/D2H transfers
+      - Overlap computation with data transfers for higher utilization
+      - Foundation for multi-GPU systems and distributed processing
+      - Requires API redesign to expose stream management
+
+GPU Features & Enhancements:
+  [ ] Add multi-GPU support for processing large images
+      - Decompose image into regions processed by different GPUs
+      - Each GPU handles one image region independently
+      - Requires managing inter-GPU communication overhead
+      - Enables processing images larger than single GPU memory
+      - Scales to massive datasets in cloud configurations
+
+  [ ] Implement GPU memory pooling to reduce allocation overhead
+      - Current implementation allocates/deallocates GPU memory frequently
+      - Memory allocation is relatively expensive operation
+      - Pool pre-allocates memory and reuses it across operations
+      - Reduces latency and fragmentation issues
+      - Standard practice in high-performance GPU code
+
+  [ ] Add GPU pinned memory support for faster H2D/D2H transfers
+      - GPU access to pinned (page-locked) CPU memory is faster
+      - Enables DMA transfers without intermediate buffering
+      - Can achieve 2-3x faster transfers than pageable memory
+      - Trade-off: Reduces available CPU memory
+      - Useful for applications doing frequent host-device transfers
+
+  [ ] Create GPU auto-tuning system for optimal kernel configurations
+      - Automatically select block size, shared memory usage based on GPU
+      - Profile different configurations and choose best
+      - Adapt at runtime based on actual GPU model and load
+      - Cache results to avoid repeated profiling
+      - Makes library portable across different GPU generations
+
+  [ ] Add asynchronous GPU operations and streams
+      - Allow applications to queue multiple GPU operations
+      - Overlap computation on GPU with data transfer
+      - Better GPU utilization through instruction-level parallelism
+      - Requires careful memory management (no premature deallocation)
+      - Significant complexity but major performance gains possible
+
+  [ ] Implement cuDNN integration for pre-optimized operations
+      - NVIDIA's cuDNN provides highly-optimized convolution implementations
+      - Outperforms hand-written kernels through deep specialization
+      - Reduces development burden and improves correctness
+      - Optional dependency only enabled if detected
+      - Fallback to custom kernels if cuDNN not available
+
+GPU Memory Management:
+  [ ] Add GPU memory profiling tools
+      - Track allocations/deallocations to detect leaks
+      - Monitor peak memory usage across operations
+      - Identify unused memory allocations to optimize
+      - Create diagnostic tools accessible to end users
+      - Help applications understand GPU memory requirements
+
+  [ ] Implement memory-mapped file I/O for out-of-core processing
+      - Process images larger than GPU memory using memory mapping
+      - OS pages image data between disk and GPU on demand
+      - Enables unlimited image sizes at cost of slower I/O
+      - Requires careful kernel design to maintain locality
+      - Trade-off between flexibility and performance
+
+  [ ] Create benchmarks comparing CPU vs GPU memory access patterns
+      - Measure memory bandwidth utilization for each operation
+      - Identify bottlenecks between compute and memory throughput
+      - Compare coalesced vs non-coalesced memory access impact
+      - Guide optimization efforts toward highest ROI improvements
+      - Document memory hierarchy and optimal access patterns
+
+  [ ] Add memory pooling strategy for frequently allocated sizes
+      - Pre-allocate pools for common allocation sizes
+      - Reduces fragmentation and allocation overhead
+      - Different pool for each allocation size class
+      - Return memory to appropriate pool on deallocation
+      - Scales better with complex applications
+
+Testing & Benchmarking:
+  [ ] Create GPU unit tests with known expected outputs
+      - Generate test images and expected filter results
+      - Verify GPU output matches CPU output byte-for-byte
+      - Test edge cases: single pixel, 1x1 kernel, boundary pixels
+      - Test different data types and channel configurations
+      - Use floating-point tolerance for rounding error comparisons
+
+  [ ] Add GPU performance benchmarks vs CPU implementations
+      - Compare execution time for same operation CPU vs GPU
+      - Vary image sizes (small, medium, large) to see scaling
+      - Include H2D/D2H transfer time in measurements
+      - Identify operation break-even points where GPU worth it
+      - Profile with nvprof/Nsight to identify bottlenecks
+
+  [ ] Implement error checking on all CUDA operations with detailed logging
+      - Wrap all CUDA calls with error checking (macro already exists)
+      - Add timestamps and operation context to error messages
+      - Create debug mode with extensive intermediate value logging
+      - Help users identify where GPU code fails
+      - Critical for debugging complex CUDA applications
+
+  [ ] Add NVIDIA Profiler integration for performance analysis
+      - Enable users to profile their GPU code with nvprof/Nsight
+      - Document profiling commands and interpretation
+      - Provide sample profiling runs with results analysis
+      - Identify bottlenecks and optimization opportunities
+      - Help users understand GPU memory hierarchy
+
+  [ ] Create stress tests for GPU memory limits and edge cases
+      - Test maximum image size GPU can handle
+      - Test rapid allocation/deallocation cycles
+      - Test with insufficient GPU memory for operations
+      - Verify graceful degradation or error handling
+      - Prevent out-of-memory crashes in production
+
+Build & Tooling:
+  [ ] Add CMake support with automatic CUDA detection
+      - CMake's FindCUDA module simplifies CUDA integration
+      - Automatically detect CUDA toolkit location and version
+      - Compile .cu files with nvcc appropriately
+      - Much cleaner than current Makefile approach
+      - Enable/disable CUDA with single CMake variable
+
+  [ ] Conditionally compile CUDA code during build
+      - Use CMake conditional compilation for CUDA sources
+      - BUILD_WITH_CUDA=ON/OFF in CMake controls GPU code inclusion
+      - Gracefully degrade if CUDA not available
+      - Prevent compilation errors on systems without CUDA
+      - Allow library to be used on CPU-only systems
+
+  [ ] Create CUDA capability detection at runtime
+      - Query GPU architecture and compute capability
+      - Adapt kernel launch parameters to GPU specifics
+      - Warn or refuse if GPU too old for operations
+      - Detect shared memory limitations
+      - Guide users to appropriate GPU for their workloads
+
+  [ ] Add validation that GPU operations produce identical results to CPU
+      - Reference CPU implementation used as ground truth
+      - Compare pixel-by-pixel with user-specified tolerance
+      - Debug mode that logs every difference found
+      - Catch algorithmic bugs in GPU implementation
+      - Assertion in tests ensures functional correctness

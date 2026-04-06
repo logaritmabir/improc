@@ -1,6 +1,6 @@
 # improc - Image Processing Library
 
-A modern C++ image processing library with support for reading, writing, and filtering images in **PNM format only** (PGM for grayscale, PPM for color), with optional GPU acceleration via CUDA.
+A modern C++ image processing library with support for reading, writing, and filtering images in **PNM format** (PGM for grayscale, PPM for color), with optional GPU acceleration via CUDA.
 
 ## Overview
 
@@ -8,11 +8,10 @@ A modern C++ image processing library with support for reading, writing, and fil
 
 - **Image Class**: A generic, template-based container for image data supporting multiple channels and flexible data types
 - **PNM I/O**: Functions to read and write images exclusively in Portable PixMap (PPM) and Portable GrayMap (PGM) formats
-- **Point Operations**: Per-pixel transformations like inversion and thresholding
+- **Point Operations**: Per-pixel transformations like inversion, thresholding, and histogram equalization
 - **Image Filtering**: Convolution-based filters including blur, median filter, edge detection, sharpening, and Laplacian
-- **Morphological Operations**: Erosion and dilation for shape analysis
+- **Morphological Operations**: Erosion, dilation, opening, closing, gradient, top-hat, and bottom-hat transforms
 - **Color Operations**: Extract RGB channels and convert to grayscale
-- **Histogram Operations**: Histogram equalization for contrast enhancement
 - **GPU Acceleration**: CUDA-based convolution for high-performance processing
 - **Type Flexibility**: Template-based design allows working with different data types (uint8_t, float, etc.)
 
@@ -27,7 +26,7 @@ improc/
 │   ├── morph.hpp        # Morphological operations
 │   ├── transform.hpp    # Geometric transformations (placeholder)
 │   ├── utils.hpp        # Utility functions
-│   ├── pnm_funcs.hpp   # PNM file I/O functions
+│   ├── pnm_funcs.hpp    # PNM file I/O functions
 │   └── cuda/            # CUDA support
 │       ├── gpu_image.cuh # GPU image container
 │       └── kernels.cuh   # CUDA convolution kernels
@@ -43,11 +42,20 @@ improc/
 │   └── cuda/            # CUDA implementations
 │       ├── gpu_image.cu
 │       └── kernels.cu
-├── tests/               # Unit tests
-│   └── image_test.cpp
+├── tests/               # Unit tests (GoogleTest)
+│   ├── image_test.cpp   # Image class tests (348 tests)
+│   ├── filters_test.cpp # Filter operation tests
+│   ├── morph_test.cpp   # Morphological operation tests
+│   ├── point_ops_test.cpp # Point operation tests
+│   ├── utils_test.cpp   # Utility function tests
+│   └── pnm_funcs_test.cpp # PNM I/O tests
 ├── images/              # Sample images and outputs
 ├── bin/                 # Compiled executables
-└── Makefile             # Build configuration
+├── .github/workflows/   # CI/CD configuration
+│   └── makefile.yml    # GitHub Actions workflow
+├── Makefile            # Build configuration
+├── README.md           # This file
+└── TODO.txt            # Project roadmap
 ```
 
 ## Key Components
@@ -85,6 +93,11 @@ Image processing operations:
 Shape-based image processing:
 - `erode()` - Perform morphological erosion
 - `dilate()` - Perform morphological dilation
+- `open()` - Perform opening (erosion followed by dilation)
+- `close()` - Perform closing (dilation followed by erosion)
+- `morphologicalGradient()` - Compute gradient (dilation minus erosion)
+- `topHat()` - Extract bright features (original minus opening)
+- `bottomHat()` - Extract dark features (closing minus original)
 
 ### Transformations (`transform.hpp`)
 Geometric image transformations (under development):
@@ -101,6 +114,12 @@ GPU-accelerated processing:
 make              # Build the main executable
 make clean        # Remove build artifacts
 make run          # Build and run the example
+make test         # Build and run unit tests
+```
+
+For CUDA-enabled builds:
+```bash
+make BUILD_WITH_CUDA=1
 ```
 
 ## Usage
@@ -110,6 +129,8 @@ make run          # Build and run the example
 ```cpp
 #include "pnm_funcs.hpp"
 #include "filters.hpp"
+#include "morph.hpp"
+#include "point_ops.hpp"
 
 Image<uint8_t> img;
 readPNM("input.pgm", img);
@@ -128,6 +149,13 @@ threshold(img, binary, 128);
 
 Image<uint8_t> equalized;
 histogramEqualization(img, equalized);
+
+// Morphological operations
+Image<uint8_t> eroded;
+erode(binary, eroded, 3);
+
+Image<uint8_t> opened;
+open(binary, opened, 3);
 
 savePNM("output.pgm", blurred);
 ```
@@ -157,8 +185,32 @@ d_output.download(result);
 
 - C++11 or later
 - GCC/Clang compiler
-- CUDA Toolkit (for GPU acceleration)
+- CUDA Toolkit (optional, for GPU acceleration)
 - GoogleTest (for running unit tests)
+
+## Testing
+
+The project includes comprehensive unit tests using GoogleTest:
+
+```bash
+make test
+./bin/test
+```
+
+Test coverage includes:
+- Image class (348 tests)
+- Filter operations
+- Morphological operations
+- Point operations
+- Utility functions
+- PNM file I/O
+
+## CI/CD
+
+The project uses GitHub Actions for continuous integration:
+- Builds on Ubuntu 20.04
+- Compiles both CPU and CUDA versions
+- Runs full test suite
 
 ## Example Images
 
