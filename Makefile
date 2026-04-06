@@ -17,7 +17,7 @@ NVCC = nvcc
 CC_FLAGS = -I$(INCLUDE_DIR) -std=c++11 -g
 NVCC_FLAGS = -I$(INCLUDE_DIR) -O2 -arch=sm_75
 NVCC_LINK_FLAGS = -lcudart
-GTEST_FLAGS = -lgtest -lgtest_main -pthread
+GTEST_FLAGS = -Llib -lgtest -lgtest_main -pthread
 
 # Build flag: set BUILD_WITH_CUDA=1 to enable CUDA support
 BUILD_WITH_CUDA ?= 0
