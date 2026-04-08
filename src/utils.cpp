@@ -9,9 +9,6 @@ T clamp(T value, T min, T max) {
 }
 
 void validateKernelSize(size_t kernel_size) {
-    if(kernel_size <= 0)
-        throw std::invalid_argument("Kernel size cannot be zero or negative");
-
     if(kernel_size % 2 == 0)
         throw std::invalid_argument("Kernel size must be odd");
 }

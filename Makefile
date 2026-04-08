@@ -90,6 +90,9 @@ $(CUDA_OBJ_DIR): | $(OBJ_DIR)
 $(OBJ_DIR)/tests: | $(OBJ_DIR)
 	mkdir -p $@
 
+static_analysis:
+	cppcheck --enable=all --error-exitcode=1 --inconclusive --std=c++11 --suppress=missingIncludeSystem -I$(INCLUDE_DIR) -Ilib/include $(SRC_DIR)
+
 .PHONY: clean
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)

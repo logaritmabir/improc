@@ -28,3 +28,6 @@ jobs:
 
       - name: Run tests
         run: ./bin/test
+      
+      - name: Static analysis
+        run: make static_analysis

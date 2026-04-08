@@ -78,7 +78,7 @@ namespace cuda {
          *
          * @param img Source CPU-side Image to copy dimensions from
          */
-        GpuImage(const Image<T>& img);
+        explicit GpuImage(const Image<T>& img);
 
         /**
          * @brief Destructor.
