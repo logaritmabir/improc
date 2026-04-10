@@ -93,8 +93,8 @@ void close(const Image<T>& input, Image<T>& output, size_t kernel_size){
 
 template<typename T>
 void morphologicalGradient(const Image<T>& input, Image<T>& output, size_t kernel_size){
-    Image<T> dilated(input);
-    Image<T> eroded(input);
+    Image<T> dilated(input.rows(), input.cols(), input.channels());
+    Image<T> eroded(input.rows(), input.cols(), input.channels());
 
     dilate(input, dilated, kernel_size);
     erode(input, eroded, kernel_size);
@@ -111,7 +111,7 @@ void morphologicalGradient(const Image<T>& input, Image<T>& output, size_t kerne
 
 template<typename T>
 void topHat(const Image<T>& input, Image<T>& output, size_t kernel_size){
-    Image<T> opened(input);
+    Image<T> opened(input.rows(), input.cols(), input.channels());
     open(input, opened, kernel_size);
 
     int cols = static_cast<int>(input.cols());
@@ -126,7 +126,7 @@ void topHat(const Image<T>& input, Image<T>& output, size_t kernel_size){
 
 template<typename T>
 void bottomHat(const Image<T>& input, Image<T>& output, size_t kernel_size){
-    Image<T> closed(input);
+    Image<T> closed(input.rows(), input.cols(), input.channels());
     close(input, closed, kernel_size);
 
     int cols = static_cast<int>(input.cols());
