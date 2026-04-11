@@ -102,6 +102,19 @@ TEST_F(FiltersTest, SobelFilter) {
     EXPECT_EQ(output.cols(), img.cols());
 }
 
+TEST_F(FiltersTest, SobelFilterDetectsVerticalEdge) {
+    Image<uint8_t> edgeImg(3, 3, 1);
+    Image<uint8_t> output(3, 3, 1);
+
+    edgeImg(0, 0, 0) = 0;   edgeImg(0, 1, 0) = 0;   edgeImg(0, 2, 0) = 255;
+    edgeImg(1, 0, 0) = 0;   edgeImg(1, 1, 0) = 0;   edgeImg(1, 2, 0) = 255;
+    edgeImg(2, 0, 0) = 0;   edgeImg(2, 1, 0) = 0;   edgeImg(2, 2, 0) = 255;
+
+    sobelFilter(edgeImg, output);
+
+    EXPECT_GT(output(1, 1, 0), 0);
+}
+
 TEST_F(FiltersTest, SobelFilterDimensionMismatch) {
     Image<uint8_t> wrongSize(2, 2, 1);
     EXPECT_THROW(sobelFilter(img, wrongSize), std::invalid_argument);

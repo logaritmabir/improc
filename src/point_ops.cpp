@@ -1,11 +1,11 @@
 #include "point_ops.hpp"
+#include "utils.hpp"
 #include <stdexcept>
 #include <array>
 
 template<typename T>
 void invert(const Image<T>& input, Image<T>& output) {
-    if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
-        throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
+    requireSameTypeImages(input, output);
     
     int cols = static_cast<int>(input.cols());
     int rows = static_cast<int>(input.rows());
@@ -43,8 +43,7 @@ void threshold(const Image<T>& input, Image<T>& output, const T thresholdValue) 
 
 template<typename T>
 void histogramEqualization(const Image<T>& input, Image<T>& output){
-    if(input.rows() != output.rows() || input.cols() != output.cols() || input.channels() != output.channels())
-        throw std::invalid_argument("Input and output images must have the same dimensions and number of channels");
+    requireSameTypeImages(input, output);
     
     int cols = static_cast<int>(input.cols());
     int rows = static_cast<int>(input.rows());
@@ -74,4 +73,3 @@ void histogramEqualization(const Image<T>& input, Image<T>& output){
 template void invert(const Image<uint8_t>& input, Image<uint8_t>& output);
 template void threshold(const Image<uint8_t>& input, Image<uint8_t>& output, const uint8_t thresholdValue);
 template void histogramEqualization(const Image<uint8_t>& input, Image<uint8_t>& output);
-

@@ -5,9 +5,11 @@
  * @brief Utility functions for image processing operations.
  */
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
-#include <vector>
 #include <stdexcept>
+#include <vector>
 #include "image.hpp"
 
 /**
@@ -23,42 +25,53 @@ template<typename T>
 T clamp(T value, T min, T max);
 
 /**
- * @brief Validates that a kernel size is valid for image processing operations.
+ * @brief Requires that the provided size value is odd.
  *
- * Checks that the kernel size is non-zero and odd (valid for symmetric kernels).
- * This validation is applicable to morphological operations, filtering, and other
- * image processing techniques that require square, symmetric kernels.
+ * This helper is intended for APIs that accept a kernel/window size and build
+ * the kernel internally.
  *
- * @param kernel_size The size of the kernel to validate
- * @throws std::invalid_argument If kernel_size is zero or even
+ * @param size The size value to validate
+ * @throws std::invalid_argument If @p size is even
  */
-void validateKernelSize(size_t kernel_size);
+void requireOddSize(size_t size);
 
 /**
- * @brief Validates that a kernel matrix is valid for image processing operations.
+ * @brief Requires that the provided dynamic kernel is square and has odd width.
  *
- * Checks that the kernel matrix is:
- * - Not empty
- * - Square (number of rows equals number of columns in each row)
- * - Has odd dimensions (valid for symmetric kernels)
+ * The kernel must be non-empty, each row must have the same size as the number
+ * of rows, and the width must be odd.
  *
  * @tparam T The data type of the kernel elements
- * @param kernel A 2D vector representing the kernel matrix
- * @throws std::invalid_argument If kernel is empty, not square, or has even dimensions
+ * @param kernel A 2D vector kernel to validate
+ * @throws std::invalid_argument If @p kernel is empty, not square, or has even width
  */
 template<typename T>
-void validateKernel(const std::vector<std::vector<T>>& kernel);
+void requireSquareAndOdd(const std::vector<std::vector<T>>& kernel);
 
 /**
- * @brief Checks if two images have identical dimensions.
+ * @brief Requires that the provided fixed-size kernel has odd width.
  *
- * Compares two images to determine if they have the same dimensions
- * (rows, columns, channels). The pixel data is not compared.
+ * A `std::array<std::array<T, N>, N>` kernel is always square by construction,
+ * so this overload validates only the odd-width requirement.
+ *
+ * @tparam T The data type of the kernel elements
+ * @tparam N The kernel width and height
+ * @param kernel A fixed-size square kernel to validate
+ * @throws std::invalid_argument If @p N is even
+ */
+template<typename T, size_t N>
+void requireSquareAndOdd(const std::array<std::array<T, N>, N>& kernel);
+
+/**
+ * @brief Requires that two images have matching metadata.
+ *
+ * This checks every image property except the pixel buffer itself, which makes
+ * it suitable for validating input/output image compatibility.
  *
  * @tparam T The data type of the image pixels
- * @param img1 First image to compare
- * @param img2 Second image to compare
- * @return true if both images have the same dimensions, false otherwise
+ * @param first First image to validate
+ * @param second Second image to validate
+ * @throws std::invalid_argument If the image metadata does not match
  */
 template<typename T>
-bool imagesEqual(const Image<T>& img1, const Image<T>& img2);
+void requireSameTypeImages(const Image<T>& first, const Image<T>& second);

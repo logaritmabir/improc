@@ -206,3 +206,4 @@ bool Image<T>::operator!=(const Image<T>& other) const {
 }
 
 template class Image<uint8_t>;
+template class Image<int>;

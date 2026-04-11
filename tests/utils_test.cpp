@@ -31,41 +31,61 @@ TEST_F(ClampTest, ClampUint8) {
     EXPECT_EQ(clamp<uint8_t>(255, 0, 255), 255);
 }
 
-class ImagesEqualTest : public ::testing::Test {
-protected:
-    void SetUp() override {
-        img1 = Image<uint8_t>(3, 3, 1);
-        img1.fill(100);
-        
-        img2 = Image<uint8_t>(3, 3, 1);
-        img2.fill(100);
-    }
-    Image<uint8_t> img1;
-    Image<uint8_t> img2;
-};
-
-TEST_F(ImagesEqualTest, IdenticalImages) {
-    EXPECT_TRUE(imagesEqual(img1, img2));
+TEST(UtilsValidationTest, RequireOddSizeAcceptsOddValues) {
+    EXPECT_NO_THROW(requireOddSize(3));
+    EXPECT_NO_THROW(requireOddSize(7));
 }
 
-TEST_F(ImagesEqualTest, SameImageWithItself) {
-    EXPECT_TRUE(imagesEqual(img1, img1));
+TEST(UtilsValidationTest, RequireOddSizeRejectsEvenValues) {
+    EXPECT_THROW(requireOddSize(2), std::invalid_argument);
+    EXPECT_THROW(requireOddSize(0), std::invalid_argument);
 }
 
-TEST_F(ImagesEqualTest, DifferentRows) {
-    Image<uint8_t> img3(4, 3, 1);
-    img3.fill(100);
-    EXPECT_FALSE(imagesEqual(img1, img3));
+TEST(UtilsValidationTest, RequireSquareAndOddAcceptsSquareOddVectorKernel) {
+    const std::vector<std::vector<float>> kernel = {
+        {1.0f, 2.0f, 1.0f},
+        {2.0f, 4.0f, 2.0f},
+        {1.0f, 2.0f, 1.0f}
+    };
+
+    EXPECT_NO_THROW(requireSquareAndOdd(kernel));
 }
 
-TEST_F(ImagesEqualTest, DifferentCols) {
-    Image<uint8_t> img3(3, 4, 1);
-    img3.fill(100);
-    EXPECT_FALSE(imagesEqual(img1, img3));
+TEST(UtilsValidationTest, RequireSquareAndOddRejectsNonSquareVectorKernel) {
+    const std::vector<std::vector<float>> kernel = {
+        {1.0f, 2.0f, 1.0f},
+        {2.0f, 4.0f}
+    };
+
+    EXPECT_THROW(requireSquareAndOdd(kernel), std::invalid_argument);
 }
 
-TEST_F(ImagesEqualTest, DifferentChannels) {
-    Image<uint8_t> img3(3, 3, 3);
-    img3.fill(100);
-    EXPECT_FALSE(imagesEqual(img1, img3));
+TEST(UtilsValidationTest, RequireSquareAndOddRejectsEvenVectorKernel) {
+    const std::vector<std::vector<float>> kernel = {
+        {1.0f, 2.0f},
+        {2.0f, 1.0f}
+    };
+
+    EXPECT_THROW(requireSquareAndOdd(kernel), std::invalid_argument);
+}
+
+TEST(UtilsValidationTest, RequireSameTypeImagesAcceptsMatchingImages) {
+    Image<uint8_t> img1(3, 3, 1);
+    Image<uint8_t> img2(3, 3, 1);
+
+    EXPECT_NO_THROW(requireSameTypeImages(img1, img2));
+}
+
+TEST(UtilsValidationTest, RequireSameTypeImagesRejectsDifferentRows) {
+    Image<uint8_t> img1(3, 3, 1);
+    Image<uint8_t> img2(4, 3, 1);
+
+    EXPECT_THROW(requireSameTypeImages(img1, img2), std::invalid_argument);
+}
+
+TEST(UtilsValidationTest, RequireSameTypeImagesRejectsDifferentChannels) {
+    Image<uint8_t> img1(3, 3, 1);
+    Image<uint8_t> img2(3, 3, 3);
+
+    EXPECT_THROW(requireSameTypeImages(img1, img2), std::invalid_argument);
 }
