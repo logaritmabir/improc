@@ -6,21 +6,6 @@
 #include <cmath>
 #include <array>
 
-// sep conva bakılacak
-// validate kernel fonksiyonuna baklıacak, nerelerde kullanılabilir vb.
-
-namespace {
-template<typename T>
-T convolveCast(float sum) {
-    return static_cast<T>(sum);
-}
-
-template<>
-uint8_t convolveCast<uint8_t>(float sum) {
-    return static_cast<uint8_t>(clamp<float>(sum, 0.0f, 255.0f));
-}
-}
-
 template<typename T>
 void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::vector<float>>& kernel) {
     requireSquareAndOdd(kernel);
@@ -46,13 +31,12 @@ void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::ve
                             sum += input(row, col, ch) * kernel[i + filterRadius][j + filterRadius];
                     }
                 }
-                output(r,c,ch) = convolveCast<T>(sum);
+                output(r,c,ch) = static_cast<T>(clamp<float>(sum, 0.0f, 255.0f));
             }
         }
     }
 }
 
-// Template specialization for std::array kernels
 template<typename T, size_t N>
 void convolve(const Image<T>& input, Image<T>& output, const std::array<std::array<float, N>, N>& kernel) {
     requireSquareAndOdd(kernel);
@@ -76,7 +60,7 @@ void convolve(const Image<T>& input, Image<T>& output, const std::array<std::arr
                             sum += input(row, col, ch) * kernel[i + filterRadius][j + filterRadius];
                     }
                 }
-                output(r,c,ch) = convolveCast<T>(sum);
+                output(r,c,ch) = static_cast<T>(clamp<float>(sum, 0.0f, 255.0f));
             }
         }
     }
@@ -137,7 +121,6 @@ void gaussianBlur(const Image<T>& input, Image<T>& output, float sigma) {
         }
     }
 
-    // Normalize the kernel
     for(int i = 0; i < kernelSize; i++){
         for(int j = 0; j < kernelSize; j++){
             kernel[i][j] /= sum;
@@ -162,7 +145,7 @@ void gaussianBlur(const Image<T>& input, Image<T>& output){
 template<typename T>
 void sobelFilter(const Image<T>& input, Image<T>& output) {
     requireSameTypeImages(input, output);
-    
+
     constexpr std::array<std::array<float, 3>, 3> Gx = {{
         {{-1.0f, 0.0f, 1.0f}},
         {{-2.0f, 0.0f, 2.0f}},
@@ -175,23 +158,30 @@ void sobelFilter(const Image<T>& input, Image<T>& output) {
         {{-1.0f, -2.0f, -1.0f}}
     }};
 
-    Image<int> signedInput(input.rows(), input.cols(), input.channels());
-    Image<int> gradX(input.rows(), input.cols(), input.channels());
-    Image<int> gradY(input.rows(), input.cols(), input.channels());
+    int cols = static_cast<int>(input.cols());
+    int rows = static_cast<int>(input.rows());
+    int channels = static_cast<int>(input.channels());
 
-    for (size_t i = 0; i < input.size(); ++i) {
-        signedInput.data()[i] = static_cast<int>(input.data()[i]);
-    }
+    for(int r = 0; r < rows; r++){
+        for(int c = 0; c < cols; c++){
+            for(int ch = 0; ch < channels; ch++){
+                float sumX = 0.0f;
+                float sumY = 0.0f;
 
-    convolve(signedInput, gradX, Gx);
-    convolve(signedInput, gradY, Gy);
+                for(int i = -1; i <= 1; i++){
+                    for(int j = -1; j <= 1; j++){
+                        int row = r + i;
+                        int col = c + j;
 
-    for (size_t r = 0; r < input.rows(); ++r) {
-        for (size_t c = 0; c < input.cols(); ++c) {
-            for (size_t ch = 0; ch < input.channels(); ++ch) {
-                float gx = static_cast<float>(gradX(r, c, ch));
-                float gy = static_cast<float>(gradY(r, c, ch));
-                float magnitude = std::sqrt(gx * gx + gy * gy);
+                        if(row >= 0 && row < rows && col >= 0 && col < cols) {
+                            const float pixel = static_cast<float>(input(row, col, ch));
+                            sumX += pixel * Gx[i + 1][j + 1];
+                            sumY += pixel * Gy[i + 1][j + 1];
+                        }
+                    }
+                }
+
+                const float magnitude = std::sqrt(sumX * sumX + sumY * sumY);
                 output(r, c, ch) = static_cast<T>(clamp<float>(magnitude, 0.0f, 255.0f));
             }
         }

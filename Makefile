@@ -15,8 +15,8 @@ CUDA_OBJ_DIR = $(OBJ_DIR)/cuda
 CC = g++
 NVCC = nvcc
 CC_FLAGS = -I$(INCLUDE_DIR) -Ilib/include -std=c++11 -g
-NVCC_FLAGS = -I$(INCLUDE_DIR) -O2 -arch=sm_75
-NVCC_LINK_FLAGS = -lcudart
+NVCC_FLAGS = -I$(INCLUDE_DIR) -O2 -arch=sm_75 -lineinfo
+NVCC_LINK_FLAGS = -lcudart -lnppif
 GTEST_FLAGS = -Llib -lgtest -lgtest_main -pthread
 
 # Build flag: set BUILD_WITH_CUDA=1 to enable CUDA support
@@ -30,6 +30,7 @@ ifeq ($(BUILD_WITH_CUDA),1)
 CUDA_FILES = $(shell find $(CUDA_SRC_DIR) -name "*.cu")
 CUDA_OBJ_FILES = $(patsubst $(CUDA_SRC_DIR)/%.cu, $(CUDA_OBJ_DIR)/%.o, $(CUDA_FILES))
 CC_FLAGS += -DBUILD_WITH_CUDA
+NVCC_FLAGS += -DBUILD_WITH_CUDA
 else
 CUDA_FILES =
 CUDA_OBJ_FILES =
@@ -63,9 +64,11 @@ $(BIN_DIR)/$(TEST_NAME): $(TEST_OBJ_FILES) $(CPP_OBJ_FILES) | $(BIN_DIR)
 endif
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+	mkdir -p $(dir $@)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 $(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp | $(OBJ_DIR)
+	mkdir -p $(dir $@)
 ifeq ($(BUILD_WITH_CUDA),1)
 	$(NVCC) $(NVCC_FLAGS) -c $< -o $@
 else
@@ -73,9 +76,11 @@ else
 endif
 
 $(CUDA_OBJ_DIR)/%.o: $(CUDA_SRC_DIR)/%.cu | $(CUDA_OBJ_DIR)
+	mkdir -p $(dir $@)
 	$(NVCC) $(NVCC_FLAGS) -c $< -o $@
 
 $(OBJ_DIR)/tests/%.o: $(TEST_DIR)/%.cpp | $(OBJ_DIR)/tests
+	mkdir -p $(dir $@)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 $(BIN_DIR):

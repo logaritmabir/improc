@@ -1,11 +1,11 @@
 #include "cuda/gpu_image.cuh"
+#include "cuda/gpu_utils.cuh"
 #include <stdexcept>
 
 namespace cuda {
     
     template<typename T>
-    GpuImage<T>::~GpuImage()
-    {
+    GpuImage<T>::~GpuImage(){
         if (data_) {
             cudaFree(data_);
         }
@@ -78,9 +78,7 @@ namespace cuda {
 
     template<typename T>
     void GpuImage<T>::upload(const Image<T>& src) {
-        if (src.rows() != rows_ || src.cols() != cols_ || src.channels() != channels_)
-            throw std::invalid_argument(
-                "Image dimensions do not match GpuImage dimensions.");
+        requireSameTypeImages(*this, src);
         if (!data_)
             throw std::runtime_error("GpuImage has no data. Call allocate() first.");
 
@@ -89,10 +87,7 @@ namespace cuda {
 
     template<typename T>
     void GpuImage<T>::download(Image<T>& dst) const {
-        if (dst.rows() != rows_ || dst.cols() != cols_ || dst.channels() != channels_){
-            throw std::invalid_argument(
-            "Image dimensions do not match GpuImage dimensions.");
-        }
+        requireSameTypeImages(*this, dst);
         if (!data_)
             throw std::runtime_error("GpuImage has no data. Call allocate() and upload() first.");
 

@@ -1,4 +1,4 @@
-#include "pnm_funcs.hpp"
+#include "pbm_funcs.hpp"
 #include <fstream>
 #include <stdexcept>
 #include <iostream>

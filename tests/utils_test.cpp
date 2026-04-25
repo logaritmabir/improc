@@ -36,6 +36,20 @@ TEST(UtilsValidationTest, RequireOddSizeAcceptsOddValues) {
     EXPECT_NO_THROW(requireOddSize(7));
 }
 
+TEST(UtilsValidationTest, RequireNonEmptyAcceptsNonEmptyKernel) {
+    const std::vector<std::vector<float>> kernel = {
+        {1.0f, 2.0f, 1.0f}
+    };
+
+    EXPECT_NO_THROW(requireNonEmpty(kernel));
+}
+
+TEST(UtilsValidationTest, RequireNonEmptyRejectsEmptyKernel) {
+    const std::vector<std::vector<float>> kernel;
+
+    EXPECT_THROW(requireNonEmpty(kernel), std::invalid_argument);
+}
+
 TEST(UtilsValidationTest, RequireOddSizeRejectsEvenValues) {
     EXPECT_THROW(requireOddSize(2), std::invalid_argument);
     EXPECT_THROW(requireOddSize(0), std::invalid_argument);

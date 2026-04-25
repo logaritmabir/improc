@@ -25,6 +25,16 @@ template<typename T>
 T clamp(T value, T min, T max);
 
 /**
+ * @brief Requires that the provided dynamic kernel is not empty.
+ *
+ * @tparam T The data type of the kernel elements
+ * @param kernel A 2D vector kernel to validate
+ * @throws std::invalid_argument If @p kernel is empty
+ */
+template<typename T>
+void requireNonEmpty(const std::vector<std::vector<T>>& kernel);
+
+/**
  * @brief Requires that the provided size value is odd.
  *
  * This helper is intended for APIs that accept a kernel/window size and build
