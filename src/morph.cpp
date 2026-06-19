@@ -1,3 +1,16 @@
+/**
+ * @file morph.cpp
+ * @brief Implementation of morphological image processing operations.
+ *
+ * This file contains template implementations for morphological operations
+ * including erosion, dilation, opening, closing, morphological gradient,
+ * and top/bottom-hat transformations. These operations are fundamental
+ * to image processing for shape analysis and feature extraction.
+ *
+ * @see morph.hpp for the function declarations and detailed documentation
+ * @note All morphological operations require single-channel (grayscale) images
+ */
+
 #include "morph.hpp"
 #include "utils.hpp"
 #include <limits>

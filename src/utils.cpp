@@ -1,3 +1,15 @@
+/**
+ * @file utils.cpp
+ * @brief Implementation of utility functions for image processing operations.
+ *
+ * This file contains implementations of helper and validation functions
+ * used throughout the image processing library. These include value clamping,
+ * kernel validation (checking for odd sizes, square dimensions), and
+ * image compatibility verification.
+ *
+ * @see utils.hpp for the function declarations and detailed documentation
+ */
+
 #include "utils.hpp"
 #include <algorithm>
 

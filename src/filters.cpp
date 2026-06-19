@@ -1,3 +1,15 @@
+/**
+ * @file filters.cpp
+ * @brief Implementation of image filtering and convolution operations.
+ *
+ * This file contains template implementations for various spatial filters,
+ * including convolution, median filtering, Gaussian blur, edge detection
+ * (Sobel), and sharpening. All CPU-side filtering operations are implemented
+ * as template instantiations to support multiple data types.
+ *
+ * @see filters.hpp for the function declarations and detailed documentation
+ */
+
 #include "filters.hpp"
 #include "utils.hpp"
 

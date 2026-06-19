@@ -34,35 +34,35 @@ namespace cuda {
     }
 
     /**
-     * @brief Requires that the provided dynamic kernel is not empty.
+     * @brief Checks that the provided dynamic kernel is not empty.
      *
      * @tparam T The data type of the kernel elements
      * @param kernel A 2D vector kernel to validate
      * @throws std::invalid_argument If @p kernel is empty
      */
     template<typename T>
-    void requireNonEmpty(const std::vector<std::vector<T>>& kernel);
+    void checkNonEmpty(const std::vector<std::vector<T>>& kernel);
 
     /**
-     * @brief Requires that the provided size value is odd.
+     * @brief Checks that the provided size value is odd.
      *
      * @param size The size value to validate
      * @throws std::invalid_argument If @p size is even
      */
-    void requireOddSize(size_t size);
+    void checkOddSize(size_t size);
 
     /**
-     * @brief Requires that the provided dynamic kernel is square and has odd width.
+     * @brief Checks that the provided dynamic kernel is square and has odd width.
      *
      * @tparam T The data type of the kernel elements
      * @param kernel A 2D vector kernel to validate
      * @throws std::invalid_argument If @p kernel is empty, not square, or has even width
      */
     template<typename T>
-    void requireSquareAndOdd(const std::vector<std::vector<T>>& kernel);
+    void checkSquareAndOdd(const std::vector<std::vector<T>>& kernel);
 
     /**
-     * @brief Requires that the provided fixed-size kernel has odd width.
+     * @brief Checks that the provided fixed-size kernel has odd width.
      *
      * @tparam T The data type of the kernel elements
      * @tparam N The kernel width and height
@@ -70,10 +70,10 @@ namespace cuda {
      * @throws std::invalid_argument If @p N is even
      */
     template<typename T, size_t N>
-    void requireSquareAndOdd(const std::array<std::array<T, N>, N>& kernel);
+    void checkSquareAndOdd(const std::array<std::array<T, N>, N>& kernel);
 
     /**
-     * @brief Requires that two GPU images have matching metadata.
+     * @brief Checks that two GPU images have matching metadata.
      *
      * @tparam T The data type of the image pixels
      * @param first First image to validate
@@ -81,10 +81,10 @@ namespace cuda {
      * @throws std::invalid_argument If the image metadata does not match
      */
     template<typename T>
-    void requireSameTypeImages(const GpuImage<T>& first, const GpuImage<T>& second);
+    void checkSameTypeImages(const GpuImage<T>& first, const GpuImage<T>& second);
 
     /**
-     * @brief Requires that a GPU image and CPU image have matching metadata.
+     * @brief Checks that a GPU image and CPU image have matching metadata.
      *
      * @tparam T The data type of the image pixels
      * @param gpuImage GPU image to validate
@@ -92,10 +92,10 @@ namespace cuda {
      * @throws std::invalid_argument If the image metadata does not match
      */
     template<typename T>
-    void requireSameTypeImages(const GpuImage<T>& gpuImage, const Image<T>& cpuImage);
+    void checkSameTypeImages(const GpuImage<T>& gpuImage, const Image<T>& cpuImage);
 
     /**
-     * @brief Requires that a CPU image and GPU image have matching metadata.
+     * @brief Checks that a CPU image and GPU image have matching metadata.
      *
      * @tparam T The data type of the image pixels
      * @param cpuImage CPU image to validate
@@ -103,17 +103,17 @@ namespace cuda {
      * @throws std::invalid_argument If the image metadata does not match
      */
     template<typename T>
-    void requireSameTypeImages(const Image<T>& cpuImage, const GpuImage<T>& gpuImage);
+    void checkSameTypeImages(const Image<T>& cpuImage, const GpuImage<T>& gpuImage);
 
     /**
-     * @brief Requires that a GPU image contains exactly one channel.
+     * @brief Checks that a GPU image contains exactly one channel.
      *
      * @tparam T The data type of the image pixels
      * @param image Image to validate
      * @throws std::invalid_argument If @p image is not single-channel
      */
     template<typename T>
-    void requireSingleChannelImage(const GpuImage<T>& image);
+    void checkSingleChannelImage(const GpuImage<T>& image);
 
     /**
      * @brief Computes a linear index for 2D data.

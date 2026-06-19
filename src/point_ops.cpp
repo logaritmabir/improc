@@ -1,3 +1,15 @@
+/**
+ * @file point_ops.cpp
+ * @brief Implementation of point-wise image transformation operations.
+ *
+ * This file contains template implementations for per-pixel operations
+ * including image inversion, binary thresholding, and histogram equalization.
+ * These operations do not require neighborhood information and can be
+ * parallelized efficiently.
+ *
+ * @see point_ops.hpp for the function declarations and detailed documentation
+ */
+
 #include "point_ops.hpp"
 #include "utils.hpp"
 #include <stdexcept>

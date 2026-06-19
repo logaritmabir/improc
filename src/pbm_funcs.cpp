@@ -1,3 +1,16 @@
+/**
+ * @file pbm_funcs.cpp
+ * @brief Implementation of PNM format image I/O and color processing.
+ *
+ * This file contains implementations for reading and writing PNM (Portable
+ * PixMap) format images, including support for PGM (grayscale, P5) and PPM
+ * (color, P6) formats. Also includes color space conversion functions
+ * (RGB to grayscale) and channel extraction utilities.
+ *
+ * @see pnm_funcs.hpp for the function declarations and detailed documentation
+ * @note Only binary PNM formats (P5 and P6) are supported; ASCII formats are not implemented
+ */
+
 #include "pbm_funcs.hpp"
 #include <fstream>
 #include <stdexcept>

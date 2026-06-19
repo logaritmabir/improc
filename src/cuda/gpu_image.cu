@@ -1,3 +1,16 @@
+/**
+ * @file gpu_image.cu
+ * @brief Implementation of GPU-side image container for CUDA operations.
+ *
+ * This file contains the template implementations for the GpuImage class,
+ * which manages image data on the GPU device. It provides GPU memory
+ * allocation, deallocation, and host-device data transfer operations.
+ * All CUDA memory operations use the CUDA_CHECK macro for error handling.
+ *
+ * @see GpuImage for the class interface
+ * @note Requires CUDA runtime library for cudaMalloc, cudaMemcpy, and cudaFree
+ */
+
 #include "cuda/gpu_image.cuh"
 #include "cuda/gpu_utils.cuh"
 #include <stdexcept>
@@ -78,7 +91,7 @@ namespace cuda {
 
     template<typename T>
     void GpuImage<T>::upload(const Image<T>& src) {
-        requireSameTypeImages(*this, src);
+        checkSameTypeImages(*this, src);
         if (!data_)
             throw std::runtime_error("GpuImage has no data. Call allocate() first.");
 
@@ -87,7 +100,7 @@ namespace cuda {
 
     template<typename T>
     void GpuImage<T>::download(Image<T>& dst) const {
-        requireSameTypeImages(*this, dst);
+        checkSameTypeImages(*this, dst);
         if (!data_)
             throw std::runtime_error("GpuImage has no data. Call allocate() and upload() first.");
 

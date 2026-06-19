@@ -1,3 +1,16 @@
+/**
+ * @file morph.cu
+ * @brief Implementation of GPU-accelerated morphological image operations.
+ *
+ * This file contains CUDA kernel implementations for morphological operations
+ * including erosion, dilation, opening, closing, morphological gradient,
+ * and top/bottom-hat transformations. All operations are optimized for
+ * GPU execution on single-channel images.
+ *
+ * @see morph.cuh for the function declarations and detailed documentation
+ * @note All morphological operations check single-channel (grayscale) GPU images
+ */
+
 #include "cuda/morph.cuh"
 #include "cuda/gpu_utils.cuh"
 
@@ -80,17 +93,17 @@ namespace cuda {
         }
 
         template<typename T>
-        void requireSingleChannelImages(const GpuImage<T>& input, const GpuImage<T>& output) {
-            requireSameTypeImages(input, output);
+        void checkSingleChannelImages(const GpuImage<T>& input, const GpuImage<T>& output) {
+            checkSameTypeImages(input, output);
             if (input.channels() != 1 || output.channels() != 1) {
-                throw std::invalid_argument("Morphological CUDA operations require single-channel images");
+                throw std::invalid_argument("Morphological CUDA operations check single-channel images");
             }
         }
 
         template<typename T, typename Kernel>
         void launchMorphKernel(const GpuImage<T>& input, GpuImage<T>& output, size_t kernelSize, Kernel kernel) {
-            requireSingleChannelImages(input, output);
-            requireOddSize(kernelSize);
+            checkSingleChannelImages(input, output);
+            checkOddSize(kernelSize);
 
             const size_t total = input.rows() * input.cols();
             const int threads = 256;
@@ -104,8 +117,8 @@ namespace cuda {
 
         template<typename T>
         void subtractImages(const GpuImage<T>& left, const GpuImage<T>& right, GpuImage<T>& output) {
-            requireSingleChannelImages(left, output);
-            requireSingleChannelImages(right, output);
+            checkSingleChannelImages(left, output);
+            checkSingleChannelImages(right, output);
 
             const size_t total = left.rows() * left.cols();
             const int threads = 256;

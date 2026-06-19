@@ -1,3 +1,15 @@
+/**
+ * @file image.cpp
+ * @brief Implementation of the Image class template for multi-channel image data.
+ *
+ * This file contains the template implementations for the Image class,
+ * which provides a flexible container for image data with support for
+ * multiple data types and channels. All member functions are defined here
+ * as template instantiations.
+ *
+ * @see Image for the class interface
+ */
+
 #include "image.hpp"
 #include <stdexcept>
 #include <algorithm>

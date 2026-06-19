@@ -1,3 +1,16 @@
+/**
+ * @file npp_filters.cu
+ * @brief Implementation of NPP (NVIDIA Performance Primitives) filtering wrappers.
+ *
+ * This file contains host-side wrapper implementations for NVIDIA Performance
+ * Primitives (NPP) filtering functions that operate on GpuImage buffers.
+ * NPP provides highly optimized implementations of common image processing
+ * operations for NVIDIA GPUs.
+ *
+ * @see npp_filters.cuh for the function declarations and detailed documentation
+ * @note Requires NVIDIA NPP library (libnppi) and corresponding header files
+ */
+
 #include "cuda/npp/npp_filters.cuh"
 
 #include <stdexcept>
@@ -10,9 +23,9 @@ namespace npp {
         cuda::GpuImage<uint8_t>& d_output, 
         const float* h_kernel, 
         size_t h_kernelSize){
-            cuda::requireSingleChannelImage(d_input);
-            cuda::requireSameTypeImages(d_input, d_output);
-            cuda::requireOddSize(h_kernelSize);
+            cuda::checkSingleChannelImage(d_input);
+            cuda::checkSameTypeImages(d_input, d_output);
+            cuda::checkOddSize(h_kernelSize);
             
             float* d_kernel = nullptr;
             CUDA_CHECK(cudaMalloc(reinterpret_cast<void**>(&d_kernel), h_kernelSize * h_kernelSize * sizeof(float)));
