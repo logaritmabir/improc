@@ -18,8 +18,8 @@
 
 namespace cuda {
     namespace {
-        template<typename T>
-        __global__ void erosionKernel(const T* input, T* output, size_t rows, size_t cols, size_t stride, size_t kernelSize) {
+        template<typename PixelType>
+        __global__ void erosionKernel(const PixelType* input, PixelType* output, size_t rows, size_t cols, size_t stride, size_t kernelSize) {
             const size_t flatIndex = blockIdx.x * blockDim.x + threadIdx.x;
             const size_t total = rows * cols;
 
@@ -30,14 +30,14 @@ namespace cuda {
             const int row = static_cast<int>(flatIndex / cols);
             const int col = static_cast<int>(flatIndex % cols);
             const int radius = static_cast<int>(kernelSize / 2);
-            T minVal = input[index(stride, row, col)];
+            PixelType minVal = input[index(stride, row, col)];
 
             for (int i = -radius; i <= radius; ++i) {
                 for (int j = -radius; j <= radius; ++j) {
                     const int neighborRow = row + i;
                     const int neighborCol = col + j;
                     if (neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < cols) {
-                        const T value = input[index(stride, neighborRow, neighborCol)];
+                        const PixelType value = input[index(stride, neighborRow, neighborCol)];
                         if (value < minVal) {
                             minVal = value;
                         }
@@ -48,8 +48,8 @@ namespace cuda {
             output[index(stride, row, col)] = minVal;
         }
 
-        template<typename T>
-        __global__ void dilationKernel(const T* input, T* output, size_t rows, size_t cols, size_t stride, size_t kernelSize) {
+        template<typename PixelType>
+        __global__ void dilationKernel(const PixelType* input, PixelType* output, size_t rows, size_t cols, size_t stride, size_t kernelSize) {
             const size_t flatIndex = blockIdx.x * blockDim.x + threadIdx.x;
             const size_t total = rows * cols;
 
@@ -60,14 +60,14 @@ namespace cuda {
             const int row = static_cast<int>(flatIndex / cols);
             const int col = static_cast<int>(flatIndex % cols);
             const int radius = static_cast<int>(kernelSize / 2);
-            T maxVal = input[index(stride, row, col)];
+            PixelType maxVal = input[index(stride, row, col)];
 
             for (int i = -radius; i <= radius; ++i) {
                 for (int j = -radius; j <= radius; ++j) {
                     const int neighborRow = row + i;
                     const int neighborCol = col + j;
                     if (neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < cols) {
-                        const T value = input[index(stride, neighborRow, neighborCol)];
+                        const PixelType value = input[index(stride, neighborRow, neighborCol)];
                         if (value > maxVal) {
                             maxVal = value;
                         }
@@ -78,8 +78,8 @@ namespace cuda {
             output[index(stride, row, col)] = maxVal;
         }
 
-        template<typename T>
-        __global__ void subtractKernel(const T* left, const T* right, T* output, size_t rows, size_t cols, size_t stride) {
+        template<typename PixelType>
+        __global__ void subtractKernel(const PixelType* left, const PixelType* right, PixelType* output, size_t rows, size_t cols, size_t stride) {
             const size_t flatIndex = blockIdx.x * blockDim.x + threadIdx.x;
             const size_t total = rows * cols;
 
@@ -89,19 +89,19 @@ namespace cuda {
 
             const int row = static_cast<int>(flatIndex / cols);
             const int col = static_cast<int>(flatIndex % cols);
-            output[index(stride, row, col)] = static_cast<T>(left[index(stride, row, col)] - right[index(stride, row, col)]);
+            output[index(stride, row, col)] = static_cast<PixelType>(left[index(stride, row, col)] - right[index(stride, row, col)]);
         }
 
-        template<typename T>
-        void checkSingleChannelImages(const GpuImage<T>& input, const GpuImage<T>& output) {
+        template<typename PixelType>
+        void checkSingleChannelImages(const GpuImage<PixelType>& input, const GpuImage<PixelType>& output) {
             checkSameTypeImages(input, output);
             if (input.channels() != 1 || output.channels() != 1) {
                 throw std::invalid_argument("Morphological CUDA operations check single-channel images");
             }
         }
 
-        template<typename T, typename Kernel>
-        void launchMorphKernel(const GpuImage<T>& input, GpuImage<T>& output, size_t kernelSize, Kernel kernel) {
+        template<typename PixelType, typename KernelFunction>
+        void launchMorphKernel(const GpuImage<PixelType>& input, GpuImage<PixelType>& output, size_t kernelSize, KernelFunction kernel) {
             checkSingleChannelImages(input, output);
             checkOddSize(kernelSize);
 
@@ -115,8 +115,8 @@ namespace cuda {
             CUDA_CHECK(cudaDeviceSynchronize());
         }
 
-        template<typename T>
-        void subtractImages(const GpuImage<T>& left, const GpuImage<T>& right, GpuImage<T>& output) {
+        template<typename PixelType>
+        void subtractImages(const GpuImage<PixelType>& left, const GpuImage<PixelType>& right, GpuImage<PixelType>& output) {
             checkSingleChannelImages(left, output);
             checkSingleChannelImages(right, output);
 
@@ -131,50 +131,50 @@ namespace cuda {
         }
     }
 
-    template<typename T>
-    void erode(const GpuImage<T>& d_input, GpuImage<T>& d_output, size_t kernelSize) {
-        launchMorphKernel(d_input, d_output, kernelSize, erosionKernel<T>);
+    template<typename PixelType>
+    void erode(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize) {
+        launchMorphKernel(d_input, d_output, kernelSize, erosionKernel<PixelType>);
     }
 
-    template<typename T>
-    void dilate(const GpuImage<T>& d_input, GpuImage<T>& d_output, size_t kernelSize) {
-        launchMorphKernel(d_input, d_output, kernelSize, dilationKernel<T>);
+    template<typename PixelType>
+    void dilate(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize) {
+        launchMorphKernel(d_input, d_output, kernelSize, dilationKernel<PixelType>);
     }
 
-    template<typename T>
-    void open(const GpuImage<T>& d_input, GpuImage<T>& d_output, size_t kernelSize) {
-        GpuImage<T> temp(d_input.rows(), d_input.cols(), d_input.channels());
+    template<typename PixelType>
+    void open(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize) {
+        GpuImage<PixelType> temp(d_input.rows(), d_input.cols(), d_input.channels());
         erode(d_input, temp, kernelSize);
         dilate(temp, d_output, kernelSize);
     }
 
-    template<typename T>
-    void close(const GpuImage<T>& d_input, GpuImage<T>& d_output, size_t kernelSize) {
-        GpuImage<T> temp(d_input.rows(), d_input.cols(), d_input.channels());
+    template<typename PixelType>
+    void close(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize) {
+        GpuImage<PixelType> temp(d_input.rows(), d_input.cols(), d_input.channels());
         dilate(d_input, temp, kernelSize);
         erode(temp, d_output, kernelSize);
     }
 
-    template<typename T>
-    void morphologicalGradient(const GpuImage<T>& d_input, GpuImage<T>& d_output, size_t kernelSize) {
-        GpuImage<T> dilated(d_input.rows(), d_input.cols(), d_input.channels());
-        GpuImage<T> eroded(d_input.rows(), d_input.cols(), d_input.channels());
+    template<typename PixelType>
+    void morphologicalGradient(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize) {
+        GpuImage<PixelType> dilated(d_input.rows(), d_input.cols(), d_input.channels());
+        GpuImage<PixelType> eroded(d_input.rows(), d_input.cols(), d_input.channels());
 
         dilate(d_input, dilated, kernelSize);
         erode(d_input, eroded, kernelSize);
         subtractImages(dilated, eroded, d_output);
     }
 
-    template<typename T>
-    void topHat(const GpuImage<T>& d_input, GpuImage<T>& d_output, size_t kernelSize) {
-        GpuImage<T> opened(d_input.rows(), d_input.cols(), d_input.channels());
+    template<typename PixelType>
+    void topHat(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize) {
+        GpuImage<PixelType> opened(d_input.rows(), d_input.cols(), d_input.channels());
         open(d_input, opened, kernelSize);
         subtractImages(d_input, opened, d_output);
     }
 
-    template<typename T>
-    void bottomHat(const GpuImage<T>& d_input, GpuImage<T>& d_output, size_t kernelSize) {
-        GpuImage<T> closed(d_input.rows(), d_input.cols(), d_input.channels());
+    template<typename PixelType>
+    void bottomHat(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize) {
+        GpuImage<PixelType> closed(d_input.rows(), d_input.cols(), d_input.channels());
         close(d_input, closed, kernelSize);
         subtractImages(closed, d_input, d_output);
     }

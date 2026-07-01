@@ -21,7 +21,7 @@
  * computing the weighted sum of pixels in the kernel's neighborhood.
  * Boundary pixels are handled by checking bounds (no padding).
  *
- * @tparam T The pixel data type (typically uint8_t)
+ * @tparam PixelType The pixel data type (typically uint8_t)
  * @param input Source image to convolve
  * @param output Destination image for result (must have same dimensions as input)
  * @param kernel 2D convolution kernel (must be square and have odd dimensions)
@@ -41,23 +41,23 @@
  * convolve(input, output, kernel);
  * @endcode
  */
-template<typename T>
-void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::vector<float>>& kernel);
+template<typename PixelType>
+void convolve(const Image<PixelType>& input, Image<PixelType>& output, const std::vector<std::vector<float>>& kernel);
 
 /**
  * @brief Applies a generic convolution kernel to an image (std::array version).
  *
  * This overload accepts fixed-size square 2D array kernels for better performance.
  *
- * @tparam T The pixel data type (typically uint8_t)
- * @tparam N The size of the square kernel (must be odd)
+ * @tparam PixelType The pixel data type (typically uint8_t)
+ * @tparam KernelSize The size of the square kernel (must be odd)
  * @param input Source image to convolve
  * @param output Destination image for result (must have same dimensions as input)
  * @param kernel 2D square convolution kernel using std::array
- * @throws std::invalid_argument if N is even or dimensions mismatch
+ * @throws std::invalid_argument if KernelSize is even or dimensions mismatch
  */
-template<typename T, size_t N>
-void convolve(const Image<T>& input, Image<T>& output, const std::array<std::array<float, N>, N>& kernel);
+template<typename PixelType, size_t KernelSize>
+void convolve(const Image<PixelType>& input, Image<PixelType>& output, const std::array<std::array<float, KernelSize>, KernelSize>& kernel);
 
 /**
  * @brief Applies a median filter to reduce noise.
@@ -66,7 +66,7 @@ void convolve(const Image<T>& input, Image<T>& output, const std::array<std::arr
  * pixels in its neighborhood. It is effective at removing salt-and-pepper
  * noise while preserving edges better than mean filtering.
  *
- * @tparam T The pixel data type (typically uint8_t)
+ * @tparam PixelType The pixel data type (typically uint8_t)
  * @param input Source image to filter
  * @param output Destination image for result (must have same dimensions as input)
  * @param kernelSize Size of the square neighborhood window (must be odd and > 1)
@@ -74,8 +74,8 @@ void convolve(const Image<T>& input, Image<T>& output, const std::array<std::arr
  *
  * @note The kernelSize determines the window size: kernelSize=3 gives 3x3 window
  */
-template<typename T>
-void medianFilter(const Image<T>& input, Image<T>& output, size_t kernelSize);
+template<typename PixelType>
+void medianFilter(const Image<PixelType>& input, Image<PixelType>& output, size_t kernelSize);
 
 /**
  * @brief Applies Gaussian blur to smooth an image.
@@ -84,7 +84,7 @@ void medianFilter(const Image<T>& input, Image<T>& output, size_t kernelSize);
  * It effectively reduces high-frequency noise and detail, producing
  * a smoothing effect. The blur amount is controlled by the sigma parameter.
  *
- * @tparam T The pixel data type (typically uint8_t)
+ * @tparam PixelType The pixel data type (typically uint8_t)
  * @param input Source image to blur
  * @param output Destination image for result (must have same dimensions as input)
  * @param sigma Standard deviation of the Gaussian distribution (controls blur amount, must be > 0)
@@ -99,8 +99,8 @@ void medianFilter(const Image<T>& input, Image<T>& output, size_t kernelSize);
  * gaussianBlur(input, output, 3.0f);  // Strong blur
  * @endcode
  */
-template<typename T>
-void gaussianBlur(const Image<T>& input, Image<T>& output, float sigma);
+template<typename PixelType>
+void gaussianBlur(const Image<PixelType>& input, Image<PixelType>& output, float sigma);
 
 /**
  * @brief Applies Gaussian blur with a default sigma value.
@@ -109,7 +109,7 @@ void gaussianBlur(const Image<T>& input, Image<T>& output, float sigma);
  * 3x3 kernel with sigma ≈ 0.85. This provides a standard amount of smoothing
  * without requiring the user to specify a sigma parameter.
  *
- * @tparam T The pixel data type (typically uint8_t)
+ * @tparam PixelType The pixel data type (typically uint8_t)
  * @param input Source image to blur
  * @param output Destination image for result (must have same dimensions as input)
  * @throws std::invalid_argument if dimensions mismatch
@@ -117,8 +117,8 @@ void gaussianBlur(const Image<T>& input, Image<T>& output, float sigma);
  * @note Uses a fixed kernel: [0.0625, 0.125, 0.0625; 0.125, 0.25, 0.125; 0.0625, 0.125, 0.0625]
  * @note For more control over blur amount, use the version with sigma parameter
  */
-template<typename T>
-void gaussianBlur(const Image<T>& input, Image<T>& output);
+template<typename PixelType>
+void gaussianBlur(const Image<PixelType>& input, Image<PixelType>& output);
 
 /**
  * @brief Applies Sobel edge detection filter.
@@ -127,7 +127,7 @@ void gaussianBlur(const Image<T>& input, Image<T>& output);
  * using two 3x3 kernels (Gx for horizontal, Gy for vertical).
  * The gradient magnitude is: sqrt(Gx^2 + Gy^2)
  *
- * @tparam T The pixel data type (typically uint8_t)
+ * @tparam PixelType The pixel data type (typically uint8_t)
  * @param input Source grayscale image for edge detection
  * @param output Destination image for edge result (must have same dimensions as input)
  * @throws std::invalid_argument if input and output dimensions don't match
@@ -140,8 +140,8 @@ void gaussianBlur(const Image<T>& input, Image<T>& output);
  *
  * @see rgbToGrayscale() in pnm_funcs.hpp to convert color images to grayscale
  */
-template<typename T>
-void sobelFilter(const Image<T>& input, Image<T>& output);
+template<typename PixelType>
+void sobelFilter(const Image<PixelType>& input, Image<PixelType>& output);
 
 /**
  * @brief Applies a sharpening filter to enhance image details.
@@ -150,7 +150,7 @@ void sobelFilter(const Image<T>& input, Image<T>& output);
  * components. This implementation uses an unsharp masking approach with
  * a 3x3 kernel that emphasizes the center pixel while subtracting neighbors.
  *
- * @tparam T The pixel data type (typically uint8_t)
+ * @tparam PixelType The pixel data type (typically uint8_t)
  * @param input Source image to sharpen
  * @param output Destination image for sharpened result (must have same dimensions as input)
  * @throws std::invalid_argument if dimensions mismatch
@@ -158,8 +158,8 @@ void sobelFilter(const Image<T>& input, Image<T>& output);
  * @note Uses kernel: [0, -1, 0; -1, 5, -1; 0, -1, 0]
  * @note May amplify noise along with edges
  */
-template<typename T>
-void sharpeningFilter(const Image<T>& input, Image<T>& output);
+template<typename PixelType>
+void sharpeningFilter(const Image<PixelType>& input, Image<PixelType>& output);
 
 /**
  * @brief Applies Laplacian edge detection filter.
@@ -169,7 +169,7 @@ void sharpeningFilter(const Image<T>& input, Image<T>& output);
  * which typically correspond to edges. The result is a grayscale image
  * where edges appear as bright lines on a dark background.
  *
- * @tparam T The pixel data type (typically uint8_t)
+ * @tparam PixelType The pixel data type (typically uint8_t)
  * @param input Source grayscale image for edge detection
  * @param output Destination image for edge result (must have same dimensions as input)
  * @throws std::invalid_argument if dimensions mismatch
@@ -180,5 +180,5 @@ void sharpeningFilter(const Image<T>& input, Image<T>& output);
  *
  * @see rgbToGrayscale() in pnm_funcs.hpp to convert color images to grayscale
  */
-template<typename T>
-void laplacianFilter(const Image<T>& input, Image<T>& output);
+template<typename PixelType>
+void laplacianFilter(const Image<PixelType>& input, Image<PixelType>& output);

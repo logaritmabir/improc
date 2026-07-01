@@ -165,12 +165,12 @@ int main() {
     0.1250f, 0.2500f, 0.1250f,
     0.0625f, 0.1250f, 0.0625f};
 
-    const float h_kernel_uint8[] = {
+    const uint8_t h_kernel_uint8[] = {
     1, 2, 1,
     2, 4, 2,
     1, 2, 1};
 
-    cuda::convolve(d_input, d_output, h_kernel_uint8, (size_t) 3);
+    cuda::convolve<uint8_t,uint8_t,uint32_t>(d_input, d_output, h_kernel_uint8, 3, 16);
 
     d_output.download(h_convolution_img);
 

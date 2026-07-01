@@ -16,8 +16,8 @@
 #include <stdexcept>
 #include <iostream>
 
-template<typename T>
-void readPNM(const std::string& filename, Image<T>& img) {
+template<typename PixelType>
+void readPNM(const std::string& filename, Image<PixelType>& img) {
     std::ifstream infile(filename, std::ios::binary);
     if (!infile) {
         throw std::runtime_error("Could not open file for reading: " + filename);
@@ -50,9 +50,9 @@ void readPNM(const std::string& filename, Image<T>& img) {
     }
 
     size_t channels = isGrayscale ? 1 : 3;
-    img = Image<T>(height, width, channels);
+    img = Image<PixelType>(height, width, channels);
 
-    infile.read(reinterpret_cast<char*>(img.data()), width * height * channels * sizeof(T));
+    infile.read(reinterpret_cast<char*>(img.data()), width * height * channels * sizeof(PixelType));
 
     if (!infile) {
         throw std::runtime_error("Error reading pixel data from file: " + filename);
@@ -61,8 +61,8 @@ void readPNM(const std::string& filename, Image<T>& img) {
     infile.close();
 }
 
-template<typename T>
-void savePNM(const std::string& filename, const Image<T>& img) {
+template<typename PixelType>
+void savePNM(const std::string& filename, const Image<PixelType>& img) {
     std::ofstream outfile(filename, std::ios::binary);
     if (!outfile) {
         throw std::runtime_error("Could not open file for writing: " + filename);
@@ -70,7 +70,7 @@ void savePNM(const std::string& filename, const Image<T>& img) {
 
     std::string magic = (img.channels() == 1) ? "P5" : "P6";
     outfile << magic << "\n" << img.cols() << " " << img.rows() << "\n255\n";
-    outfile.write(reinterpret_cast<const char*>(img.data()), img.cols() * img.rows() * img.channels() * sizeof(T));
+    outfile.write(reinterpret_cast<const char*>(img.data()), img.cols() * img.rows() * img.channels() * sizeof(PixelType));
 
     if (!outfile) {
         throw std::runtime_error("Error writing pixel data to file: " + filename);
@@ -79,8 +79,8 @@ void savePNM(const std::string& filename, const Image<T>& img) {
     outfile.close();
 }
 
-template<typename T>
-void extractChannel(const Image<T>& input, Image<T>& output, size_t channel) {
+template<typename PixelType>
+void extractChannel(const Image<PixelType>& input, Image<PixelType>& output, size_t channel) {
     if (input.channels() != 3) {
         throw std::runtime_error("Image must be RGB (3 channels) to extract a channel");
     }
@@ -95,19 +95,19 @@ void extractChannel(const Image<T>& input, Image<T>& output, size_t channel) {
     }
 }
 
-template<typename T>
-void rgbToGrayscale(const Image<T>& input, Image<T>& output) {
+template<typename PixelType>
+void rgbToGrayscale(const Image<PixelType>& input, Image<PixelType>& output) {
     if (input.channels() != 3) {
         throw std::runtime_error("Image must be RGB (3 channels)");
     }
     
     for (size_t row = 0; row < input.rows(); row++) {
         for (size_t col = 0; col < input.cols(); col++) {
-            T r = input.at(row, col, 0);
-            T g = input.at(row, col, 1);
-            T b = input.at(row, col, 2);
+            PixelType r = input.at(row, col, 0);
+            PixelType g = input.at(row, col, 1);
+            PixelType b = input.at(row, col, 2);
             
-            T gray = static_cast<T>(0.299 * r + 0.587 * g + 0.114 * b);
+            PixelType gray = static_cast<PixelType>(0.299 * r + 0.587 * g + 0.114 * b);
             output.at(row, col, 0) = gray;
         }
     }

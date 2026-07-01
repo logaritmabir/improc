@@ -18,13 +18,13 @@
  * For each pixel, the output value is calculated as: output = 255 - input
  * This operation inverts the image colors (photographic negative effect).
  *
- * @tparam T The pixel data type (typically uint8_t)
+ * @tparam PixelType The pixel data type (typically uint8_t)
  * @param input Source image to invert
  * @param output Destination image for inverted result (must have same dimensions as input)
  * @throws std::invalid_argument if input and output dimensions don't match
  */
-template<typename T>
-void invert(const Image<T>& input, Image<T>& output);
+template<typename PixelType>
+void invert(const Image<PixelType>& input, Image<PixelType>& output);
 
 /**
  * @brief Applies binary thresholding to a grayscale image.
@@ -32,14 +32,14 @@ void invert(const Image<T>& input, Image<T>& output);
  * Each pixel is set to 255 if its value is >= threshold, otherwise set to 0.
  * This creates a binary (black and white) image from a grayscale source.
  *
- * @tparam T The pixel data type (typically uint8_t)
+ * @tparam PixelType The pixel data type (typically uint8_t)
  * @param input Source grayscale image (must have exactly 1 channel)
  * @param output Destination binary image (must have same dimensions and exactly 1 channel as input)
  * @param thresholdValue The threshold value (typically 0-255 for uint8_t)
  * @throws std::invalid_argument if images are not single-channel or dimensions don't match
  */
-template<typename T>
-void threshold(const Image<T>& input, Image<T>& output, const T thresholdValue);
+template<typename PixelType>
+void threshold(const Image<PixelType>& input, Image<PixelType>& output, const PixelType thresholdValue);
 
 /**
  * @brief Applies histogram equalization to a grayscale image.
@@ -49,7 +49,7 @@ void threshold(const Image<T>& input, Image<T>& output, const T thresholdValue);
  * function (CDF) of the input histogram to a uniform distribution, effectively
  * spreading out pixel values more evenly throughout the intensity range.
  *
- * @tparam T The pixel data type (typically uint8_t)
+ * @tparam PixelType The pixel data type (typically uint8_t)
  * @param input Source grayscale image to equalize
  * @param output Destination image where the equalized result is stored (must have same dimensions as input)
  * @throws std::invalid_argument if input and output dimensions don't match
@@ -57,5 +57,5 @@ void threshold(const Image<T>& input, Image<T>& output, const T thresholdValue);
  * @note Works best on grayscale images. For color images, consider applying to each channel separately.
  * @note The output range is normalized to [0, 255] for proper display.
  */
-template<typename T>
-void histogramEqualization(const Image<T>& input, Image<T>& output);
+template<typename PixelType>
+void histogramEqualization(const Image<PixelType>& input, Image<PixelType>& output);

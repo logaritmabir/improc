@@ -15,8 +15,8 @@
 #include <stdexcept>
 #include <array>
 
-template<typename T>
-void invert(const Image<T>& input, Image<T>& output) {
+template<typename PixelType>
+void invert(const Image<PixelType>& input, Image<PixelType>& output) {
     requireSameTypeImages(input, output);
     
     int cols = static_cast<int>(input.cols());
@@ -26,14 +26,14 @@ void invert(const Image<T>& input, Image<T>& output) {
     for(int r = 0; r < rows; r++){
         for(int c = 0; c < cols; c++){
             for(int ch = 0; ch < channels; ch++){
-                output(r,c,ch) = static_cast<T>(255 - input(r,c,ch));
+                output(r,c,ch) = static_cast<PixelType>(255 - input(r,c,ch));
             }
         }
     }
 }
 
-template<typename T>
-void threshold(const Image<T>& input, Image<T>& output, const T thresholdValue) {
+template<typename PixelType>
+void threshold(const Image<PixelType>& input, Image<PixelType>& output, const PixelType thresholdValue) {
     if(input.channels() != 1)
         throw std::invalid_argument("Threshold only works on single-channel (grayscale) images");
     
@@ -48,13 +48,13 @@ void threshold(const Image<T>& input, Image<T>& output, const T thresholdValue) 
 
     for(int r = 0; r < rows; r++){
         for(int c = 0; c < cols; c++){
-            output(r,c,0) = (input(r,c) >= thresholdValue) ? static_cast<T>(255) : static_cast<T>(0);
+            output(r,c,0) = (input(r,c) >= thresholdValue) ? static_cast<PixelType>(255) : static_cast<PixelType>(0);
         }
     }
 }
 
-template<typename T>
-void histogramEqualization(const Image<T>& input, Image<T>& output){
+template<typename PixelType>
+void histogramEqualization(const Image<PixelType>& input, Image<PixelType>& output){
     requireSameTypeImages(input, output);
     
     int cols = static_cast<int>(input.cols());
@@ -77,7 +77,7 @@ void histogramEqualization(const Image<T>& input, Image<T>& output){
     int totalPixels = rows * cols;
     for(int r = 0; r < rows; r++){
         for(int c = 0; c < cols; c++){
-            output(r,c) = static_cast<T>((cdf[static_cast<int>(input(r,c))] - cdf[0]) * 255 / (totalPixels - cdf[0]));
+            output(r,c) = static_cast<PixelType>((cdf[static_cast<int>(input(r,c))] - cdf[0]) * 255 / (totalPixels - cdf[0]));
         }
     }
 }

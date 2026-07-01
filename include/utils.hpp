@@ -15,24 +15,24 @@
 /**
  * @brief Clamps a value to a specified range.
  *
- * @tparam T The data type for the value (must support comparison operators)
+ * @tparam ValueType The data type for the value (must support comparison operators)
  * @param value The value to clamp
  * @param min The minimum bound (inclusive)
  * @param max The maximum bound (inclusive)
  * @return The clamped value within [min, max]
  */
-template<typename T>
-T clamp(T value, T min, T max);
+template<typename ValueType>
+ValueType clamp(ValueType value, ValueType min, ValueType max);
 
 /**
  * @brief Requires that the provided dynamic kernel is not empty.
  *
- * @tparam T The data type of the kernel elements
+ * @tparam ElementType The data type of the kernel elements
  * @param kernel A 2D vector kernel to validate
  * @throws std::invalid_argument If @p kernel is empty
  */
-template<typename T>
-void requireNonEmpty(const std::vector<std::vector<T>>& kernel);
+template<typename ElementType>
+void requireNonEmpty(const std::vector<std::vector<ElementType>>& kernel);
 
 /**
  * @brief Requires that the provided size value is odd.
@@ -51,26 +51,26 @@ void requireOddSize(size_t size);
  * The kernel must be non-empty, each row must have the same size as the number
  * of rows, and the width must be odd.
  *
- * @tparam T The data type of the kernel elements
+ * @tparam ElementType The data type of the kernel elements
  * @param kernel A 2D vector kernel to validate
  * @throws std::invalid_argument If @p kernel is empty, not square, or has even width
  */
-template<typename T>
-void requireSquareAndOdd(const std::vector<std::vector<T>>& kernel);
+template<typename ElementType>
+void requireSquareAndOdd(const std::vector<std::vector<ElementType>>& kernel);
 
 /**
  * @brief Requires that the provided fixed-size kernel has odd width.
  *
- * A `std::array<std::array<T, N>, N>` kernel is always square by construction,
+ * A `std::array<std::array<ElementType, KernelSize>, KernelSize>` kernel is always square by construction,
  * so this overload validates only the odd-width requirement.
  *
- * @tparam T The data type of the kernel elements
- * @tparam N The kernel width and height
+ * @tparam ElementType The data type of the kernel elements
+ * @tparam KernelSize The kernel width and height
  * @param kernel A fixed-size square kernel to validate
- * @throws std::invalid_argument If @p N is even
+ * @throws std::invalid_argument If @p KernelSize is even
  */
-template<typename T, size_t N>
-void requireSquareAndOdd(const std::array<std::array<T, N>, N>& kernel);
+template<typename ElementType, size_t KernelSize>
+void requireSquareAndOdd(const std::array<std::array<ElementType, KernelSize>, KernelSize>& kernel);
 
 /**
  * @brief Requires that two images have matching metadata.
@@ -78,10 +78,10 @@ void requireSquareAndOdd(const std::array<std::array<T, N>, N>& kernel);
  * This checks every image property except the pixel buffer itself, which makes
  * it suitable for validating input/output image compatibility.
  *
- * @tparam T The data type of the image pixels
+ * @tparam PixelType The data type of the image pixels
  * @param first First image to validate
  * @param second Second image to validate
  * @throws std::invalid_argument If the image metadata does not match
  */
-template<typename T>
-void requireSameTypeImages(const Image<T>& first, const Image<T>& second);
+template<typename PixelType>
+void requireSameTypeImages(const Image<PixelType>& first, const Image<PixelType>& second);

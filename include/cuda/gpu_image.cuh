@@ -36,16 +36,16 @@ namespace cuda {
      * in GPU memory. It provides methods for allocating GPU memory and
      * transferring data between host (CPU) and device (GPU).
      *
-     * @tparam T The data type for pixel values (e.g., uint8_t, float)
+     * @tparam PixelType The data type for pixel values (e.g., uint8_t, float)
      */
-    template<typename T>
+    template<typename PixelType>
     class GpuImage{
     private:
         size_t rows_;
         size_t cols_;
         size_t channels_;
         size_t stride_;
-        T* data_;
+        PixelType* data_;
 
     public:
         /// @name Constructors and Destructor
@@ -78,7 +78,7 @@ namespace cuda {
          *
          * @param img Source CPU-side Image to copy dimensions from
          */
-        explicit GpuImage(const Image<T>& img);
+        explicit GpuImage(const Image<PixelType>& img);
 
         /**
          * @brief Destructor.
@@ -125,13 +125,13 @@ namespace cuda {
          * @brief Returns pointer to GPU data.
          * @return Pointer to the GPU data buffer
          */
-        T* data() noexcept;
+        PixelType* data() noexcept;
 
         /**
          * @brief Returns const pointer to GPU data.
          * @return Const pointer to the GPU data buffer
          */
-        const T* data() const noexcept;
+        const PixelType* data() const noexcept;
 
         /// @}
 
@@ -152,7 +152,7 @@ namespace cuda {
          * @throws std::invalid_argument if dimensions don't match
          * @throws std::runtime_error if GPU memory not allocated
          */
-        void upload(const Image<T>& src);
+        void upload(const Image<PixelType>& src);
 
         /**
          * @brief Downloads data from GPU memory to CPU Image.
@@ -161,7 +161,7 @@ namespace cuda {
          * @throws std::invalid_argument if dimensions don't match
          * @throws std::runtime_error if GPU memory not allocated
          */
-        void download(Image<T>& dst) const;
+        void download(Image<PixelType>& dst) const;
         /// @}
     };
 }

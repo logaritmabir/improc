@@ -13,13 +13,13 @@
 #include "utils.hpp"
 #include <algorithm>
 
-template<typename T>
-T clamp(T value, T min, T max) {
+template<typename ValueType>
+ValueType clamp(ValueType value, ValueType min, ValueType max) {
     return std::min(std::max(value, min), max);
 }
 
-template<typename T>
-void requireNonEmpty(const std::vector<std::vector<T>>& kernel) {
+template<typename ElementType>
+void requireNonEmpty(const std::vector<std::vector<ElementType>>& kernel) {
     if(kernel.empty())
         throw std::invalid_argument("Kernel cannot be empty");
 }
@@ -29,8 +29,8 @@ void requireOddSize(size_t size) {
         throw std::invalid_argument("Size must be odd");
 }
 
-template<typename T>
-void requireSquareAndOdd(const std::vector<std::vector<T>>& kernel) {
+template<typename ElementType>
+void requireSquareAndOdd(const std::vector<std::vector<ElementType>>& kernel) {
     requireNonEmpty(kernel);
 
     const size_t kernelSize = kernel.size();
@@ -42,14 +42,14 @@ void requireSquareAndOdd(const std::vector<std::vector<T>>& kernel) {
     requireOddSize(kernelSize);
 }
 
-template<typename T, size_t N>
-void requireSquareAndOdd(const std::array<std::array<T, N>, N>& kernel) {
+template<typename ElementType, size_t KernelSize>
+void requireSquareAndOdd(const std::array<std::array<ElementType, KernelSize>, KernelSize>& kernel) {
     (void)kernel;
-    requireOddSize(N);
+    requireOddSize(KernelSize);
 }
 
-template<typename T>
-void requireSameTypeImages(const Image<T>& first, const Image<T>& second) {
+template<typename PixelType>
+void requireSameTypeImages(const Image<PixelType>& first, const Image<PixelType>& second) {
     if(first.rows() != second.rows() ||
        first.cols() != second.cols() ||
        first.channels() != second.channels() ||

@@ -14,11 +14,11 @@
 #include <stdexcept>
 #include <algorithm>
 
-template<typename T>
-Image<T>::Image() : rows_(0), cols_(0), channels_(0), stride_(0), data_() {}
+template<typename PixelType>
+Image<PixelType>::Image() : rows_(0), cols_(0), channels_(0), stride_(0), data_() {}
 
-template<typename T>
-Image<T>::Image(size_t rows, size_t cols, size_t channels) {
+template<typename PixelType>
+Image<PixelType>::Image(size_t rows, size_t cols, size_t channels) {
         if (rows == 0 || cols == 0 || channels == 0) {
             throw std::invalid_argument("Rows, columns, and channels must be greater than zero.");
         }
@@ -29,12 +29,12 @@ Image<T>::Image(size_t rows, size_t cols, size_t channels) {
         data_.resize(rows * cols * channels);
     }
 
-template<typename T>
-Image<T>::Image(const Image<T>& other)
+template<typename PixelType>
+Image<PixelType>::Image(const Image<PixelType>& other)
     : rows_(other.rows_), cols_(other.cols_), channels_(other.channels_), stride_(other.stride_), data_(other.data_) {}
 
-template<typename T>
-Image<T>::Image(Image<T>&& other) noexcept
+template<typename PixelType>
+Image<PixelType>::Image(Image<PixelType>&& other) noexcept
     : rows_(other.rows_), cols_(other.cols_), channels_(other.channels_), stride_(other.stride_), data_(std::move(other.data_)) {
     other.cols_ = 0;
     other.rows_ = 0;
@@ -42,26 +42,26 @@ Image<T>::Image(Image<T>&& other) noexcept
     other.stride_ = 0;
 }
 
-template<typename T>
-Image<T>::~Image() noexcept {}
+template<typename PixelType>
+Image<PixelType>::~Image() noexcept {}
 
-template<typename T>
-size_t Image<T>::rows() const noexcept {
+template<typename PixelType>
+size_t Image<PixelType>::rows() const noexcept {
     return rows_;
 }
 
-template<typename T>
-size_t Image<T>::cols() const noexcept {
+template<typename PixelType>
+size_t Image<PixelType>::cols() const noexcept {
     return cols_;
 }
 
-template<typename T>
-size_t Image<T>::channels() const noexcept {
+template<typename PixelType>
+size_t Image<PixelType>::channels() const noexcept {
     return channels_;
 }
 
-template<typename T>
-T& Image<T>::at(size_t row, size_t col, size_t ch) {
+template<typename PixelType>
+PixelType& Image<PixelType>::at(size_t row, size_t col, size_t ch) {
     if (row >= rows_)
         throw std::out_of_range("Row index out of range");
 
@@ -74,8 +74,8 @@ T& Image<T>::at(size_t row, size_t col, size_t ch) {
     return data_[(row * stride_) + col * channels_ + ch];
 }
 
-template<typename T>
-const T& Image<T>::at(size_t row, size_t col, size_t ch) const{
+template<typename PixelType>
+const PixelType& Image<PixelType>::at(size_t row, size_t col, size_t ch) const{
     if (row >= rows_)
         throw std::out_of_range("Row index out of range");
 
@@ -88,68 +88,68 @@ const T& Image<T>::at(size_t row, size_t col, size_t ch) const{
     return data_[(row * stride_) + col * channels_ + ch];
 }
 
-template<typename T>
-T* Image<T>::data() noexcept {
+template<typename PixelType>
+PixelType* Image<PixelType>::data() noexcept {
     return data_.data();
 }
 
-template<typename T>
-const T* Image<T>::data() const noexcept {
+template<typename PixelType>
+const PixelType* Image<PixelType>::data() const noexcept {
     return data_.data();
 }
 
-template<typename T>
-size_t Image<T>::size() const noexcept {
+template<typename PixelType>
+size_t Image<PixelType>::size() const noexcept {
     return data_.size();
 }
 
-template<typename T>
-size_t Image<T>::stride() const noexcept {
+template<typename PixelType>
+size_t Image<PixelType>::stride() const noexcept {
     return stride_;
 }
 
-template<typename T>
-bool Image<T>::empty() const noexcept {
+template<typename PixelType>
+bool Image<PixelType>::empty() const noexcept {
     return data_.empty();
 }
 
-template<typename T>
-typename std::vector<T>::iterator Image<T>::begin(){
+template<typename PixelType>
+typename std::vector<PixelType>::iterator Image<PixelType>::begin(){
     return data_.begin();
 }
 
-template<typename T>
-typename std::vector<T>::const_iterator Image<T>::begin() const{
+template<typename PixelType>
+typename std::vector<PixelType>::const_iterator Image<PixelType>::begin() const{
     return data_.begin();
 }
 
-template<typename T>
-typename std::vector<T>::const_iterator Image<T>::cbegin() const{
+template<typename PixelType>
+typename std::vector<PixelType>::const_iterator Image<PixelType>::cbegin() const{
     return data_.cbegin();
 }
 
-template<typename T>
-typename std::vector<T>::iterator Image<T>::end(){
+template<typename PixelType>
+typename std::vector<PixelType>::iterator Image<PixelType>::end(){
     return data_.end();
 }
 
-template<typename T>
-typename std::vector<T>::const_iterator Image<T>::end() const{
+template<typename PixelType>
+typename std::vector<PixelType>::const_iterator Image<PixelType>::end() const{
     return data_.end();
 }
 
-template<typename T>
-typename std::vector<T>::const_iterator Image<T>::cend() const{
+template<typename PixelType>
+typename std::vector<PixelType>::const_iterator Image<PixelType>::cend() const{
     return data_.cend();
 }
 
-template<typename T>
-void Image<T>::fill(const T& value){
+template<typename PixelType>
+void Image<PixelType>::fill(const PixelType& value){
     std::fill(data_.begin(),data_.end(), value);
 }
 
-template<typename T>
-void Image<T>::clear(){
+template<typename PixelType>
+void Image<PixelType>::clear(){
     rows_ = 0;
     cols_ = 0;
     channels_ = 0;
@@ -157,8 +157,8 @@ void Image<T>::clear(){
     data_.clear();
 }
 
-template<typename T>
-void Image<T>::resize(size_t rows, size_t cols, size_t channels) {
+template<typename PixelType>
+void Image<PixelType>::resize(size_t rows, size_t cols, size_t channels) {
     if (rows == 0 || cols == 0 || channels == 0)
         throw std::invalid_argument("Dimensions must be > 0");
     rows_ = rows;
@@ -169,8 +169,8 @@ void Image<T>::resize(size_t rows, size_t cols, size_t channels) {
 }
 
 
-template<typename T>
-Image<T>& Image<T>::operator=(const Image<T>& other) {
+template<typename PixelType>
+Image<PixelType>& Image<PixelType>::operator=(const Image<PixelType>& other) {
     if (this != &other) {
         cols_ = other.cols_;
         rows_ = other.rows_;
@@ -181,8 +181,8 @@ Image<T>& Image<T>::operator=(const Image<T>& other) {
     return *this;
 }
 
-template<typename T>
-Image<T>& Image<T>::operator=(Image<T>&& other) noexcept {
+template<typename PixelType>
+Image<PixelType>& Image<PixelType>::operator=(Image<PixelType>&& other) noexcept {
     if (this != &other) {
         cols_ = other.cols_;
         rows_ = other.rows_;
@@ -197,23 +197,23 @@ Image<T>& Image<T>::operator=(Image<T>&& other) noexcept {
     return *this;
 }
 
-template<typename T>
-T& Image<T>::operator()(size_t row, size_t col, size_t ch) {
+template<typename PixelType>
+PixelType& Image<PixelType>::operator()(size_t row, size_t col, size_t ch) {
     return data_[(row * stride_) + col * channels_ + ch];
 }
 
-template<typename T>
-const T& Image<T>::operator()(size_t row, size_t col, size_t ch) const{
+template<typename PixelType>
+const PixelType& Image<PixelType>::operator()(size_t row, size_t col, size_t ch) const{
     return data_[(row * stride_) + col * channels_ + ch];
 }
 
-template<typename T>
-bool Image<T>::operator==(const Image<T>& other) const {
+template<typename PixelType>
+bool Image<PixelType>::operator==(const Image<PixelType>& other) const {
     return (rows_ == other.rows_ && cols_ == other.cols_ && channels_ == other.channels_ && stride_ == other.stride_ && data_ == other.data_);
 }
 
-template<typename T>
-bool Image<T>::operator!=(const Image<T>& other) const {
+template<typename PixelType>
+bool Image<PixelType>::operator!=(const Image<PixelType>& other) const {
     return !(*this == other);
 }
 

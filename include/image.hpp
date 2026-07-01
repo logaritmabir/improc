@@ -15,16 +15,16 @@
  * This class is designed to work with images loaded from PNM format files (PGM for
  * grayscale, PPM for RGB color). See pnm_funcs.hpp for PNM I/O operations.
  *
- * @tparam T The data type for pixel values (e.g., uint8_t, float)
+ * @tparam PixelType The data type for pixel values (e.g., uint8_t, float)
  */
-template<typename T>
+template<typename PixelType>
 class Image {
 private:
     size_t rows_;
     size_t cols_;
     size_t channels_;
     size_t stride_;
-    std::vector<T> data_;
+    std::vector<PixelType> data_;
 public:
     /// @name Constructors and Destructors
     /// @{
@@ -98,7 +98,7 @@ public:
      * @param ch Channel index (default: 0)
      * @return Reference to the pixel value
      */
-    T& at(size_t row, size_t col, size_t ch = 0);
+    PixelType& at(size_t row, size_t col, size_t ch = 0);
 
     /**
      * @brief Accesses a pixel value at the specified position (const version).
@@ -108,21 +108,21 @@ public:
      * @param ch Channel index (default: 0)
      * @return Const reference to the pixel value
      */
-    const T& at(size_t row, size_t col, size_t ch = 0) const;
+    const PixelType& at(size_t row, size_t col, size_t ch = 0) const;
 
     /**
      * @brief Returns a pointer to the raw image data.
      *
      * @return Pointer to the image data buffer
      */
-    T* data() noexcept;
+    PixelType* data() noexcept;
 
     /**
      * @brief Returns a const pointer to the raw image data.
      *
      * @return Const pointer to the image data buffer
      */
-    const T* data() const noexcept;
+    const PixelType* data() const noexcept;
 
     /**
      * @brief Returns the total number of elements in the image.
@@ -155,42 +155,42 @@ public:
      *
      * @return Iterator to the first element
      */
-    typename std::vector<T>::iterator begin();
+    typename std::vector<PixelType>::iterator begin();
 
     /**
      * @brief Returns a const iterator to the beginning of the image data.
      *
      * @return Const iterator to the first element
      */
-    typename std::vector<T>::const_iterator begin() const;
+    typename std::vector<PixelType>::const_iterator begin() const;
 
     /**
      * @brief Returns a const iterator to the beginning of the image data.
      *
      * @return Const iterator to the first element
      */
-    typename std::vector<T>::const_iterator cbegin() const;
+    typename std::vector<PixelType>::const_iterator cbegin() const;
 
     /**
      * @brief Returns an iterator to the end of the image data.
      *
      * @return Iterator to one past the last element
      */
-    typename std::vector<T>::iterator end();
+    typename std::vector<PixelType>::iterator end();
 
     /**
      * @brief Returns a const iterator to the end of the image data.
      *
      * @return Const iterator to one past the last element
      */
-    typename std::vector<T>::const_iterator end() const;
+    typename std::vector<PixelType>::const_iterator end() const;
 
     /**
      * @brief Returns a const iterator to the end of the image data.
      *
      * @return Const iterator to one past the last element
      */
-    typename std::vector<T>::const_iterator cend() const;
+    typename std::vector<PixelType>::const_iterator cend() const;
 
     /// @}
 
@@ -218,7 +218,7 @@ public:
      *
      * @param value The value to fill with
      */
-    void fill(const T& value);
+    void fill(const PixelType& value);
 
     /// @}
 
@@ -254,7 +254,7 @@ public:
      * @param ch Channel index (default: 0)
      * @return Reference to the pixel value
      */
-    T& operator()(size_t row, size_t col, size_t ch = 0);
+    PixelType& operator()(size_t row, size_t col, size_t ch = 0);
 
     /**
      * @brief Accesses a pixel value using function call syntax (const version).
@@ -264,7 +264,7 @@ public:
      * @param ch Channel index (default: 0)
      * @return Const reference to the pixel value
      */
-    const T& operator()(size_t row, size_t col, size_t ch = 0) const;
+    const PixelType& operator()(size_t row, size_t col, size_t ch = 0) const;
 
     /// @}
 
@@ -277,7 +277,7 @@ public:
      * @param other The image to compare with
      * @return true if images are equal, false otherwise
      */
-    bool operator==(const Image<T>& other) const;
+    bool operator==(const Image<PixelType>& other) const;
 
     /**
      * @brief Inequality comparison operator.
@@ -285,7 +285,7 @@ public:
      * @param other The image to compare with
      * @return true if images are not equal, false otherwise
      */
-    bool operator!=(const Image<T>& other) const;
+    bool operator!=(const Image<PixelType>& other) const;
 
     /// @}
 };

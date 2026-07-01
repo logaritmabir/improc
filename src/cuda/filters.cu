@@ -21,11 +21,11 @@
 
 //todo accumulators
 namespace cuda {
-    template<typename T, typename K, typename Acc>
+    template<typename PixelType, typename KernelType, typename AccumulatorType>
     __global__ void convolution(
-        const T* __restrict__ input,
-        T* __restrict__ output,
-        const K* __restrict__ kernel,
+        const PixelType* __restrict__ input,
+        PixelType* __restrict__ output,
+        const KernelType* __restrict__ kernel,
         size_t rows,
         size_t cols,
         size_t kernelWidth
@@ -35,7 +35,7 @@ namespace cuda {
         const int filterRadius = static_cast<int>(kernelWidth / 2);
 
         if (col < cols && row < rows) {
-            Acc sum = Acc{0};
+            AccumulatorType sum = AccumulatorType{0};
 
             for (int i = -filterRadius; i <= filterRadius; ++i) {
                 for (int j = -filterRadius; j <= filterRadius; ++j) {
@@ -43,33 +43,33 @@ namespace cuda {
                     const int neighborCol = col + j;
 
                     if (neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < cols) {
-                        sum += static_cast<Acc>(input[index(cols, neighborRow, neighborCol)]) *
-                            static_cast<Acc>(kernel[index(kernelWidth, i + filterRadius, j + filterRadius)]);
+                        sum += static_cast<AccumulatorType>(input[index(cols, neighborRow, neighborCol)]) *
+                            static_cast<AccumulatorType>(kernel[index(kernelWidth, i + filterRadius, j + filterRadius)]);
                     }
                 }
             }
 
-            output[index(cols, row, col)] = static_cast<T>(clamp<Acc>(sum, Acc{0}, Acc{255}));
+            output[index(cols, row, col)] = static_cast<PixelType>(clamp<AccumulatorType>(sum, AccumulatorType{0}, AccumulatorType{255}));
         }
     }
 
     // Accumulator type will be type generic in later. At least should be
-    template<typename T, typename K, typename Acc>
+    template<typename PixelType, typename KernelType, typename AccumulatorType>
     __global__ void convolution(
-        const T* __restrict__ input,
-        T* __restrict__ output,
-        const K* __restrict__ kernel,
+        const PixelType* __restrict__ input,
+        PixelType* __restrict__ output,
+        const KernelType* __restrict__ kernel,
         size_t rows,
         size_t cols,
         size_t kernelWidth,
-        K divisor
+        KernelType divisor
     ) {
         const int col = blockIdx.x * blockDim.x + threadIdx.x;
         const int row = blockIdx.y * blockDim.y + threadIdx.y;
         const int filterRadius = static_cast<int>(kernelWidth / 2);
 
         if (col < cols && row < rows) {
-            Acc sum = Acc{0};
+            AccumulatorType sum = AccumulatorType{0};
 
             for (int i = -filterRadius; i <= filterRadius; ++i) {
                 for (int j = -filterRadius; j <= filterRadius; ++j) {
@@ -77,21 +77,21 @@ namespace cuda {
                     const int neighborCol = col + j;
 
                     if (neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < cols) {
-                        sum += static_cast<Acc>(input[index(cols, neighborRow, neighborCol)]) *
-                            static_cast<Acc>(kernel[index(kernelWidth, i + filterRadius, j + filterRadius)]);
+                        sum += static_cast<AccumulatorType>(input[index(cols, neighborRow, neighborCol)]) *
+                            static_cast<AccumulatorType>(kernel[index(kernelWidth, i + filterRadius, j + filterRadius)]);
                     }
                 }
             }
-            sum /= static_cast<Acc>(divisor);
-            output[index(cols, row, col)] = static_cast<T>(clamp<Acc>(sum, Acc{0}, Acc{255}));
+            sum /= static_cast<AccumulatorType>(divisor);
+            output[index(cols, row, col)] = static_cast<PixelType>(clamp<AccumulatorType>(sum, AccumulatorType{0}, AccumulatorType{255}));
         }
     }
 
-    template<typename T, typename K, typename Acc>
+    template<typename PixelType, typename KernelType, typename AccumulatorType>
     void convolve(
-        const GpuImage<T>& d_input, 
-        GpuImage<T>& d_output, 
-        const K* h_kernel, 
+        const GpuImage<PixelType>& d_input, 
+        GpuImage<PixelType>& d_output, 
+        const KernelType* h_kernel, 
         size_t h_kernelSize
     ) {
         checkSingleChannelImage(d_input);
@@ -101,10 +101,10 @@ namespace cuda {
         dim3 threads(16, 16);
         dim3 blocks((d_input.cols() + threads.x - 1) / threads.x,(d_input.rows() + threads.y - 1) / threads.y);
 
-        K* d_kernel;
-        CUDA_CHECK(cudaMalloc(&d_kernel, h_kernelSize * h_kernelSize * sizeof(K)));
-        CUDA_CHECK(cudaMemcpy(d_kernel, h_kernel, h_kernelSize * h_kernelSize * sizeof(K), cudaMemcpyHostToDevice));
-        convolution<T,K,Acc><<<blocks, threads>>>(
+        KernelType* d_kernel;
+        CUDA_CHECK(cudaMalloc(&d_kernel, h_kernelSize * h_kernelSize * sizeof(KernelType)));
+        CUDA_CHECK(cudaMemcpy(d_kernel, h_kernel, h_kernelSize * h_kernelSize * sizeof(KernelType), cudaMemcpyHostToDevice));
+        convolution<PixelType,KernelType,AccumulatorType><<<blocks, threads>>>(
             d_input.data(),
             d_output.data(),
             d_kernel,
@@ -117,29 +117,29 @@ namespace cuda {
         CUDA_CHECK(cudaFree(d_kernel));
     }
 
-    template<typename T, typename K, typename Acc>
+    template<typename PixelType, typename KernelType, typename AccumulatorType>
     void convolve(
-        const GpuImage<T>& d_input,
-        GpuImage<T>& d_output,
-        const K* h_kernel,
+        const GpuImage<PixelType>& d_input,
+        GpuImage<PixelType>& d_output,
+        const KernelType* h_kernel,
         size_t h_kernelSize,
-        K divisor
+        KernelType divisor
     ) {
         checkSingleChannelImage(d_input);
         checkSameTypeImages(d_input, d_output);
         checkOddSize(h_kernelSize);
 
-        if (divisor == K{0}) {
+        if (divisor == KernelType{0}) {
             throw std::invalid_argument("Divisor must not be zero");
         }
 
         dim3 threads(16, 16);
         dim3 blocks((d_input.cols() + threads.x - 1) / threads.x, (d_input.rows() + threads.y - 1) / threads.y);
 
-        K* d_kernel;
-        CUDA_CHECK(cudaMalloc(&d_kernel, h_kernelSize * h_kernelSize * sizeof(K)));
-        CUDA_CHECK(cudaMemcpy(d_kernel, h_kernel, h_kernelSize * h_kernelSize * sizeof(K), cudaMemcpyHostToDevice));
-        convolution<T,K,Acc><<<blocks, threads>>>(
+        KernelType* d_kernel;
+        CUDA_CHECK(cudaMalloc(&d_kernel, h_kernelSize * h_kernelSize * sizeof(KernelType)));
+        CUDA_CHECK(cudaMemcpy(d_kernel, h_kernel, h_kernelSize * h_kernelSize * sizeof(KernelType), cudaMemcpyHostToDevice));
+        convolution<PixelType,KernelType,AccumulatorType><<<blocks, threads>>>(
             d_input.data(),
             d_output.data(),
             d_kernel,
@@ -153,41 +153,41 @@ namespace cuda {
         CUDA_CHECK(cudaFree(d_kernel));
     }
 
-    template<typename T, typename K, typename Acc>
+    template<typename PixelType, typename KernelType, typename AccumulatorType>
     void convolve(
-        const GpuImage<T>& d_input, 
-        GpuImage<T>& d_output, 
-        const std::vector<K>& h_kernel, 
+        const GpuImage<PixelType>& d_input, 
+        GpuImage<PixelType>& d_output, 
+        const std::vector<KernelType>& h_kernel, 
         size_t h_kernelSize
     ) {
         if (h_kernel.size() != h_kernelSize * h_kernelSize) {
             throw std::invalid_argument("Kernel size does not match kernel data");
         }
-        convolve<T,K,Acc>(d_input, d_output, h_kernel.data(), h_kernelSize);
+        convolve<PixelType,KernelType,AccumulatorType>(d_input, d_output, h_kernel.data(), h_kernelSize);
     }
 
-    template<typename T, typename K, typename Acc>
+    template<typename PixelType, typename KernelType, typename AccumulatorType>
     void convolve(
-        const GpuImage<T>& d_input,
-        GpuImage<T>& d_output,
-        const std::vector<K>& h_kernel,
+        const GpuImage<PixelType>& d_input,
+        GpuImage<PixelType>& d_output,
+        const std::vector<KernelType>& h_kernel,
         size_t h_kernelSize,
-        K divisor
+        KernelType divisor
     ) {
         if (h_kernel.size() != h_kernelSize * h_kernelSize) {
             throw std::invalid_argument("Kernel size does not match kernel data");
         }
-        convolve<T,K,Acc>(d_input, d_output, h_kernel.data(), h_kernelSize, divisor);
+        convolve<PixelType,KernelType,AccumulatorType>(d_input, d_output, h_kernel.data(), h_kernelSize, divisor);
     }
 
-    template<typename T>
-    __global__ void medianFilterKernel(const T* input, T* output, size_t rows, size_t cols, size_t kernelWidth) {
+    template<typename PixelType>
+    __global__ void medianFilterKernel(const PixelType* input, PixelType* output, size_t rows, size_t cols, size_t kernelWidth) {
         const int col = blockIdx.x * blockDim.x + threadIdx.x;
         const int row = blockIdx.y * blockDim.y + threadIdx.y;
         const int filterRadius = static_cast<int>(kernelWidth / 2);
 
         if (col < cols && row < rows) {
-            T neighbors[225];
+            PixelType neighbors[225];
             int count = 0;
 
             for (int i = -filterRadius; i <= filterRadius; ++i) {
@@ -196,13 +196,13 @@ namespace cuda {
                     const int neighborCol = col + j;
 
                     if (neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < cols) {
-                        neighbors[count++] = static_cast<T>(input[index(cols, neighborRow, neighborCol)]);
+                        neighbors[count++] = static_cast<PixelType>(input[index(cols, neighborRow, neighborCol)]);
                     }
                 }
             }
 
             for (int i = 1; i < count; ++i) {
-                const T value = neighbors[i];
+                const PixelType value = neighbors[i];
                 int j = i - 1;
                 while (j >= 0 && neighbors[j] > value) {
                     neighbors[j + 1] = neighbors[j];
@@ -211,12 +211,12 @@ namespace cuda {
                 neighbors[j + 1] = value;
             }
 
-            output[index(cols, row, col)] = static_cast<T>(neighbors[count / 2]);
+            output[index(cols, row, col)] = static_cast<PixelType>(neighbors[count / 2]);
         }
     }
 
-    template<typename T>
-    void medianFilter(const GpuImage<T>& d_input, GpuImage<T>& d_output, size_t kernelSize) {
+    template<typename PixelType>
+    void medianFilter(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize) {
         checkSingleChannelImage(d_input);
         checkSameTypeImages(d_input, d_output);
         checkOddSize(kernelSize);
@@ -243,65 +243,65 @@ namespace cuda {
         CUDA_CHECK(cudaDeviceSynchronize());
     }
 
-    template<typename T, typename K, typename Acc>
-    void gaussianBlur(const GpuImage<T>& d_input, GpuImage<T>& d_output, float sigma) {
+    template<typename PixelType, typename KernelType, typename AccumulatorType>
+    void gaussianBlur(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, float sigma) {
         if (sigma <= 0.0f) {
             throw std::invalid_argument("Sigma must be greater than 0");
         }
 
         const size_t kernelSize = static_cast<size_t>(static_cast<int>(std::ceil(sigma * 6.0f)) | 1);
         const int filterRadius = static_cast<int>(kernelSize / 2);
-        std::vector<K> kernel(kernelSize * kernelSize);
-        K sum = K{0};
+        std::vector<KernelType> kernel(kernelSize * kernelSize);
+        KernelType sum = KernelType{0};
 
         for (int i = -filterRadius; i <= filterRadius; ++i) {
             for (int j = -filterRadius; j <= filterRadius; ++j) {
                 const float exponent = -(i * i + j * j) / (2.0f * sigma * sigma);
                 const float value = std::exp(exponent);
-                kernel[static_cast<size_t>(i + filterRadius) * kernelSize + static_cast<size_t>(j + filterRadius)] = static_cast<K>(value);
-                sum += static_cast<K>(value);
+                kernel[static_cast<size_t>(i + filterRadius) * kernelSize + static_cast<size_t>(j + filterRadius)] = static_cast<KernelType>(value);
+                sum += static_cast<KernelType>(value);
             }
         }
 
-        for (K& value : kernel) {
+        for (KernelType& value : kernel) {
             value /= sum;
         }
 
-        convolve<T, K, Acc>(d_input, d_output, kernel, kernelSize);
+        convolve<PixelType, KernelType, AccumulatorType>(d_input, d_output, kernel, kernelSize);
     }
 
-    template<typename T, typename K, typename Acc>
-    void gaussianBlur(const GpuImage<T>& d_input, GpuImage<T>& d_output) {
-        static const std::array<K, 9> kernel = {
-            K{0.0625}, K{0.1250}, K{0.0625},
-            K{0.1250}, K{0.2500}, K{0.1250},
-            K{0.0625}, K{0.1250}, K{0.0625}
+    template<typename PixelType, typename KernelType, typename AccumulatorType>
+    void gaussianBlur(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output) {
+        static const std::array<KernelType, 9> kernel = {
+            KernelType{0.0625}, KernelType{0.1250}, KernelType{0.0625},
+            KernelType{0.1250}, KernelType{0.2500}, KernelType{0.1250},
+            KernelType{0.0625}, KernelType{0.1250}, KernelType{0.0625}
         };
-        convolve<T, K, Acc>(d_input, d_output, kernel.data(), 3);
+        convolve<PixelType, KernelType, AccumulatorType>(d_input, d_output, kernel.data(), 3);
     }
     
-    template<typename T, typename K, typename Acc>
-    void sobelFilter(const GpuImage<T>& d_input, GpuImage<T>& d_output) {
-        static_assert(std::is_same<T, uint8_t>::value, "CUDA sobelFilter is currently instantiated for uint8_t only");
+    template<typename PixelType, typename KernelType, typename AccumulatorType>
+    void sobelFilter(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output) {
+        static_assert(std::is_same<PixelType, uint8_t>::value, "CUDA sobelFilter is currently instantiated for uint8_t only");
         checkSameTypeImages(d_input, d_output);
         checkSingleChannelImage(d_input);
 
-        static const std::array<K, 9> gx = {
-            K{-1.0}, K{0.0}, K{1.0},
-            K{-2.0}, K{0.0}, K{2.0},
-            K{-1.0}, K{0.0}, K{1.0}
+        static const std::array<KernelType, 9> gx = {
+            KernelType{-1.0}, KernelType{0.0}, KernelType{1.0},
+            KernelType{-2.0}, KernelType{0.0}, KernelType{2.0},
+            KernelType{-1.0}, KernelType{0.0}, KernelType{1.0}
         };
-        static const std::array<K, 9> gy = {
-            K{1.0}, K{2.0}, K{1.0},
-            K{0.0}, K{0.0}, K{0.0},
-            K{-1.0}, K{-2.0}, K{-1.0}
+        static const std::array<KernelType, 9> gy = {
+            KernelType{1.0}, KernelType{2.0}, KernelType{1.0},
+            KernelType{0.0}, KernelType{0.0}, KernelType{0.0},
+            KernelType{-1.0}, KernelType{-2.0}, KernelType{-1.0}
         };
 
         GpuImage<uint8_t> d_gradX(d_input.rows(), d_input.cols(), d_input.channels());
         GpuImage<uint8_t> d_gradY(d_input.rows(), d_input.cols(), d_input.channels());
 
-        convolve<T, K, Acc>(d_input, d_gradX, gx.data(), 3);
-        convolve<T, K, Acc>(d_input, d_gradY, gy.data(), 3);
+        convolve<PixelType, KernelType, AccumulatorType>(d_input, d_gradX, gx.data(), 3);
+        convolve<PixelType, KernelType, AccumulatorType>(d_input, d_gradY, gy.data(), 3);
 
         Image<uint8_t> h_gradX(d_input.rows(), d_input.cols(), d_input.channels());
         Image<uint8_t> h_gradY(d_input.rows(), d_input.cols(), d_input.channels());
@@ -322,30 +322,31 @@ namespace cuda {
         d_output.upload(h_output);
     }
 
-    template<typename T, typename K, typename Acc>
-    void sharpeningFilter(const GpuImage<T>& d_input, GpuImage<T>& d_output) {
-        static const std::array<K, 9> kernel = {
-            K{0.0}, K{-1.0}, K{0.0},
-            K{-1.0}, K{5.0}, K{-1.0},
-            K{0.0}, K{-1.0}, K{0.0}
+    template<typename PixelType, typename KernelType, typename AccumulatorType>
+    void sharpeningFilter(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output) {
+        static const std::array<KernelType, 9> kernel = {
+            KernelType{0.0}, KernelType{-1.0}, KernelType{0.0},
+            KernelType{-1.0}, KernelType{5.0}, KernelType{-1.0},
+            KernelType{0.0}, KernelType{-1.0}, KernelType{0.0}
         };
-        convolve<T, K, Acc>(d_input, d_output, kernel.data(), 3);
+        convolve<PixelType, KernelType, AccumulatorType>(d_input, d_output, kernel.data(), 3);
     }
 
-    template<typename T, typename K, typename Acc>
-    void laplacianFilter(const GpuImage<T>& d_input, GpuImage<T>& d_output) {
-        static const std::array<K, 9> kernel = {
-            K{0.0}, K{1.0}, K{0.0},
-            K{1.0}, K{-4.0}, K{1.0},
-            K{0.0}, K{1.0}, K{0.0}
+    template<typename PixelType, typename KernelType, typename AccumulatorType>
+    void laplacianFilter(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output) {
+        static const std::array<KernelType, 9> kernel = {
+            KernelType{0.0}, KernelType{1.0}, KernelType{0.0},
+            KernelType{1.0}, KernelType{-4.0}, KernelType{1.0},
+            KernelType{0.0}, KernelType{1.0}, KernelType{0.0}
         };
-        convolve<T, K, Acc>(d_input, d_output, kernel.data(), 3);
+        convolve<PixelType, KernelType, AccumulatorType>(d_input, d_output, kernel.data(), 3);
     }
 
 
 
     template void convolve<uint8_t, float, float>(const GpuImage<uint8_t>& input, GpuImage<uint8_t>& output, const float* kernel, size_t kernelSize);
     template void convolve<uint8_t, uint8_t, float>(const GpuImage<uint8_t>& input, GpuImage<uint8_t>& output, const uint8_t* kernel, size_t kernelSize, uint8_t divisor);
+    template void convolve<uint8_t, uint8_t, uint32_t>(const GpuImage<uint8_t>& input, GpuImage<uint8_t>& output, const uint8_t* kernel, size_t kernelSize, uint8_t divisor);
     template void convolve<uint8_t, float, float>(const GpuImage<uint8_t>& input, GpuImage<uint8_t>& output, const std::vector<float>& kernel, size_t kernelSize);
     template void convolve<uint8_t, uint8_t, float>(const GpuImage<uint8_t>& input, GpuImage<uint8_t>& output, const std::vector<uint8_t>& kernel, size_t kernelSize, uint8_t divisor);
     template void medianFilter(const GpuImage<uint8_t>& input, GpuImage<uint8_t>& output, size_t kernelSize);

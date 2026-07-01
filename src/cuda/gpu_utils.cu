@@ -14,8 +14,8 @@
 #include <algorithm>
 
 namespace cuda {
-    template<typename T>
-    void checkNonEmpty(const std::vector<std::vector<T>>& kernel) {
+    template<typename ElementType>
+    void checkNonEmpty(const std::vector<std::vector<ElementType>>& kernel) {
         if (kernel.empty()) {
             throw std::invalid_argument("Kernel cannot be empty");
         }
@@ -27,8 +27,8 @@ namespace cuda {
         }
     }
 
-    template<typename T>
-    void checkSquareAndOdd(const std::vector<std::vector<T>>& kernel) {
+    template<typename ElementType>
+    void checkSquareAndOdd(const std::vector<std::vector<ElementType>>& kernel) {
         checkNonEmpty(kernel);
 
         const size_t kernelSize = kernel.size();
@@ -41,14 +41,14 @@ namespace cuda {
         checkOddSize(kernelSize);
     }
 
-    template<typename T, size_t N>
-    void checkSquareAndOdd(const std::array<std::array<T, N>, N>& kernel) {
+    template<typename ElementType, size_t KernelSize>
+    void checkSquareAndOdd(const std::array<std::array<ElementType, KernelSize>, KernelSize>& kernel) {
         (void)kernel;
-        checkOddSize(N);
+        checkOddSize(KernelSize);
     }
 
-    template<typename T>
-    void checkSameTypeImages(const GpuImage<T>& first, const GpuImage<T>& second) {
+    template<typename PixelType>
+    void checkSameTypeImages(const GpuImage<PixelType>& first, const GpuImage<PixelType>& second) {
         if (first.rows() != second.rows() ||
             first.cols() != second.cols() ||
             first.channels() != second.channels() ||
@@ -57,8 +57,8 @@ namespace cuda {
         }
     }
 
-    template<typename T>
-    void checkSameTypeImages(const GpuImage<T>& gpuImage, const Image<T>& cpuImage) {
+    template<typename PixelType>
+    void checkSameTypeImages(const GpuImage<PixelType>& gpuImage, const Image<PixelType>& cpuImage) {
         if (gpuImage.rows() != cpuImage.rows() ||
             gpuImage.cols() != cpuImage.cols() ||
             gpuImage.channels() != cpuImage.channels() ||
@@ -67,13 +67,13 @@ namespace cuda {
         }
     }
 
-    template<typename T>
-    void checkSameTypeImages(const Image<T>& cpuImage, const GpuImage<T>& gpuImage) {
+    template<typename PixelType>
+    void checkSameTypeImages(const Image<PixelType>& cpuImage, const GpuImage<PixelType>& gpuImage) {
         checkSameTypeImages(gpuImage, cpuImage);
     }
 
-    template<typename T>
-    void checkSingleChannelImage(const GpuImage<T>& image) {
+    template<typename PixelType>
+    void checkSingleChannelImage(const GpuImage<PixelType>& image) {
         if (image.channels() != 1) {
             throw std::invalid_argument("CUDA image operation requires a single-channel image");
         }

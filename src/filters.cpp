@@ -18,8 +18,8 @@
 #include <cmath>
 #include <array>
 
-template<typename T>
-void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::vector<float>>& kernel) {
+template<typename PixelType>
+void convolve(const Image<PixelType>& input, Image<PixelType>& output, const std::vector<std::vector<float>>& kernel) {
     requireSquareAndOdd(kernel);
     requireSameTypeImages(input, output);
 
@@ -43,18 +43,18 @@ void convolve(const Image<T>& input, Image<T>& output, const std::vector<std::ve
                             sum += input(row, col, ch) * kernel[i + filterRadius][j + filterRadius];
                     }
                 }
-                output(r,c,ch) = static_cast<T>(clamp<float>(sum, 0.0f, 255.0f));
+                output(r,c,ch) = static_cast<PixelType>(clamp<float>(sum, 0.0f, 255.0f));
             }
         }
     }
 }
 
-template<typename T, size_t N>
-void convolve(const Image<T>& input, Image<T>& output, const std::array<std::array<float, N>, N>& kernel) {
+template<typename PixelType, size_t KernelSize>
+void convolve(const Image<PixelType>& input, Image<PixelType>& output, const std::array<std::array<float, KernelSize>, KernelSize>& kernel) {
     requireSquareAndOdd(kernel);
     requireSameTypeImages(input, output);
 
-    int filterRadius = static_cast<int>(N / 2);
+    int filterRadius = static_cast<int>(KernelSize / 2);
     int cols = static_cast<int>(input.cols());
     int rows = static_cast<int>(input.rows());
     int channels = static_cast<int>(input.channels());
@@ -72,14 +72,14 @@ void convolve(const Image<T>& input, Image<T>& output, const std::array<std::arr
                             sum += input(row, col, ch) * kernel[i + filterRadius][j + filterRadius];
                     }
                 }
-                output(r,c,ch) = static_cast<T>(clamp<float>(sum, 0.0f, 255.0f));
+                output(r,c,ch) = static_cast<PixelType>(clamp<float>(sum, 0.0f, 255.0f));
             }
         }
     }
 }
 
-template<typename T>
-void medianFilter(const Image<T>& input, Image<T>& output, size_t kernelSize) {
+template<typename PixelType>
+void medianFilter(const Image<PixelType>& input, Image<PixelType>& output, size_t kernelSize) {
     if(kernelSize <= 1)
         throw std::invalid_argument("Kernel size must be greater than 1 and odd");
 
@@ -91,7 +91,7 @@ void medianFilter(const Image<T>& input, Image<T>& output, size_t kernelSize) {
     int rows = static_cast<int>(input.rows());
     int channels = static_cast<int>(input.channels());
 
-    std::vector<T> neighbors;
+    std::vector<PixelType> neighbors;
     neighbors.reserve(kernelSize * kernelSize); // Reserve space for neighbors to avoid reallocations
 
     for(int r = 0; r < rows; r++){
@@ -115,8 +115,8 @@ void medianFilter(const Image<T>& input, Image<T>& output, size_t kernelSize) {
     }
 }
 
-template<typename T>
-void gaussianBlur(const Image<T>& input, Image<T>& output, float sigma) {
+template<typename PixelType>
+void gaussianBlur(const Image<PixelType>& input, Image<PixelType>& output, float sigma) {
     if(sigma <= 0.0f)
         throw std::invalid_argument("Sigma must be greater than 0");
 
@@ -141,8 +141,8 @@ void gaussianBlur(const Image<T>& input, Image<T>& output, float sigma) {
     convolve(input, output, kernel);
 }
 
-template<typename T>
-void gaussianBlur(const Image<T>& input, Image<T>& output){
+template<typename PixelType>
+void gaussianBlur(const Image<PixelType>& input, Image<PixelType>& output){
     requireSameTypeImages(input, output);
 
     constexpr std::array<std::array<float, 3>, 3> kernel = {{
@@ -154,8 +154,8 @@ void gaussianBlur(const Image<T>& input, Image<T>& output){
     convolve(input, output, kernel);
 }
 
-template<typename T>
-void sobelFilter(const Image<T>& input, Image<T>& output) {
+template<typename PixelType>
+void sobelFilter(const Image<PixelType>& input, Image<PixelType>& output) {
     requireSameTypeImages(input, output);
 
     constexpr std::array<std::array<float, 3>, 3> Gx = {{
@@ -194,14 +194,14 @@ void sobelFilter(const Image<T>& input, Image<T>& output) {
                 }
 
                 const float magnitude = std::sqrt(sumX * sumX + sumY * sumY);
-                output(r, c, ch) = static_cast<T>(clamp<float>(magnitude, 0.0f, 255.0f));
+                output(r, c, ch) = static_cast<PixelType>(clamp<float>(magnitude, 0.0f, 255.0f));
             }
         }
     }
 }
 
-template<typename T>
-void sharpeningFilter(const Image<T>& input, Image<T>& output){
+template<typename PixelType>
+void sharpeningFilter(const Image<PixelType>& input, Image<PixelType>& output){
     requireSameTypeImages(input, output);
 
     constexpr std::array<std::array<float, 3>, 3> kernel = {{
@@ -213,8 +213,8 @@ void sharpeningFilter(const Image<T>& input, Image<T>& output){
     convolve(input, output, kernel);
 }
 
-template<typename T>
-void laplacianFilter(const Image<T>& input, Image<T>& output){
+template<typename PixelType>
+void laplacianFilter(const Image<PixelType>& input, Image<PixelType>& output){
     requireSameTypeImages(input, output);
 
     constexpr std::array<std::array<float, 3>, 3> kernel = {{

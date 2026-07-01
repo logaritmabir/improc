@@ -22,26 +22,26 @@ namespace cuda {
     /**
      * @brief Clamps a value to a specified range.
      *
-     * @tparam T The data type for the value
+     * @tparam ValueType The data type for the value
      * @param value The value to clamp
      * @param min The minimum bound (inclusive)
      * @param max The maximum bound (inclusive)
      * @return The clamped value within [min, max]
      */
-    template<typename T>
-    __device__ __forceinline__ T clamp(T value, T min, T max) {
+    template<typename ValueType>
+    __device__ __forceinline__ ValueType clamp(ValueType value, ValueType min, ValueType max) {
         return value < min ? min : (value > max ? max : value);
     }
 
     /**
      * @brief Checks that the provided dynamic kernel is not empty.
      *
-     * @tparam T The data type of the kernel elements
+     * @tparam ElementType The data type of the kernel elements
      * @param kernel A 2D vector kernel to validate
      * @throws std::invalid_argument If @p kernel is empty
      */
-    template<typename T>
-    void checkNonEmpty(const std::vector<std::vector<T>>& kernel);
+    template<typename ElementType>
+    void checkNonEmpty(const std::vector<std::vector<ElementType>>& kernel);
 
     /**
      * @brief Checks that the provided size value is odd.
@@ -54,66 +54,66 @@ namespace cuda {
     /**
      * @brief Checks that the provided dynamic kernel is square and has odd width.
      *
-     * @tparam T The data type of the kernel elements
+     * @tparam ElementType The data type of the kernel elements
      * @param kernel A 2D vector kernel to validate
      * @throws std::invalid_argument If @p kernel is empty, not square, or has even width
      */
-    template<typename T>
-    void checkSquareAndOdd(const std::vector<std::vector<T>>& kernel);
+    template<typename ElementType>
+    void checkSquareAndOdd(const std::vector<std::vector<ElementType>>& kernel);
 
     /**
      * @brief Checks that the provided fixed-size kernel has odd width.
      *
-     * @tparam T The data type of the kernel elements
-     * @tparam N The kernel width and height
+     * @tparam ElementType The data type of the kernel elements
+     * @tparam KernelSize The kernel width and height
      * @param kernel A fixed-size square kernel to validate
-     * @throws std::invalid_argument If @p N is even
+     * @throws std::invalid_argument If @p KernelSize is even
      */
-    template<typename T, size_t N>
-    void checkSquareAndOdd(const std::array<std::array<T, N>, N>& kernel);
+    template<typename ElementType, size_t KernelSize>
+    void checkSquareAndOdd(const std::array<std::array<ElementType, KernelSize>, KernelSize>& kernel);
 
     /**
      * @brief Checks that two GPU images have matching metadata.
      *
-     * @tparam T The data type of the image pixels
+     * @tparam PixelType The data type of the image pixels
      * @param first First image to validate
      * @param second Second image to validate
      * @throws std::invalid_argument If the image metadata does not match
      */
-    template<typename T>
-    void checkSameTypeImages(const GpuImage<T>& first, const GpuImage<T>& second);
+    template<typename PixelType>
+    void checkSameTypeImages(const GpuImage<PixelType>& first, const GpuImage<PixelType>& second);
 
     /**
      * @brief Checks that a GPU image and CPU image have matching metadata.
      *
-     * @tparam T The data type of the image pixels
+     * @tparam PixelType The data type of the image pixels
      * @param gpuImage GPU image to validate
      * @param cpuImage CPU image to validate
      * @throws std::invalid_argument If the image metadata does not match
      */
-    template<typename T>
-    void checkSameTypeImages(const GpuImage<T>& gpuImage, const Image<T>& cpuImage);
+    template<typename PixelType>
+    void checkSameTypeImages(const GpuImage<PixelType>& gpuImage, const Image<PixelType>& cpuImage);
 
     /**
      * @brief Checks that a CPU image and GPU image have matching metadata.
      *
-     * @tparam T The data type of the image pixels
+     * @tparam PixelType The data type of the image pixels
      * @param cpuImage CPU image to validate
      * @param gpuImage GPU image to validate
      * @throws std::invalid_argument If the image metadata does not match
      */
-    template<typename T>
-    void checkSameTypeImages(const Image<T>& cpuImage, const GpuImage<T>& gpuImage);
+    template<typename PixelType>
+    void checkSameTypeImages(const Image<PixelType>& cpuImage, const GpuImage<PixelType>& gpuImage);
 
     /**
      * @brief Checks that a GPU image contains exactly one channel.
      *
-     * @tparam T The data type of the image pixels
+     * @tparam PixelType The data type of the image pixels
      * @param image Image to validate
      * @throws std::invalid_argument If @p image is not single-channel
      */
-    template<typename T>
-    void checkSingleChannelImage(const GpuImage<T>& image);
+    template<typename PixelType>
+    void checkSingleChannelImage(const GpuImage<PixelType>& image);
 
     /**
      * @brief Computes a linear index for 2D data.

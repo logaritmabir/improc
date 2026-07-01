@@ -15,8 +15,8 @@
 #include "utils.hpp"
 #include <limits>
 
-template<typename T>
-void erode(const Image<T>& input, Image<T>& output, size_t kernel_size){
+template<typename PixelType>
+void erode(const Image<PixelType>& input, Image<PixelType>& output, size_t kernel_size){
     requireOddSize(kernel_size);
 
     if(input.channels() != 1)
@@ -34,7 +34,7 @@ void erode(const Image<T>& input, Image<T>& output, size_t kernel_size){
 
     for(int r = 0; r < rows; ++r) {
         for(int c = 0; c < cols; ++c) {
-            T minVal = std::numeric_limits<T>::max();
+            PixelType minVal = std::numeric_limits<PixelType>::max();
 
             for(int i = -filterRadius; i <= filterRadius; ++i) {
                 for(int j = -filterRadius; j <= filterRadius; ++j) {
@@ -42,7 +42,7 @@ void erode(const Image<T>& input, Image<T>& output, size_t kernel_size){
                     int neighborCol = c + j;
 
                     if(neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < cols) {
-                        T pixelVal = input(neighborRow, neighborCol, 0);
+                        PixelType pixelVal = input(neighborRow, neighborCol, 0);
                         minVal = std::min(minVal, pixelVal);
                     }
                 }
@@ -53,8 +53,8 @@ void erode(const Image<T>& input, Image<T>& output, size_t kernel_size){
     }
 }
 
-template<typename T>
-void dilate(const Image<T>& input, Image<T>& output, size_t kernel_size){
+template<typename PixelType>
+void dilate(const Image<PixelType>& input, Image<PixelType>& output, size_t kernel_size){
     requireOddSize(kernel_size);
 
     if(input.channels() != 1)
@@ -72,14 +72,14 @@ void dilate(const Image<T>& input, Image<T>& output, size_t kernel_size){
 
     for(int r = 0; r < rows; ++r) {
         for(int c = 0; c < cols; ++c) {
-            T maxVal = std::numeric_limits<T>::min();
+            PixelType maxVal = std::numeric_limits<PixelType>::min();
             for(int i = -filterRadius; i <= filterRadius; ++i) {
                 for(int j = -filterRadius; j <= filterRadius; ++j) {
                     int neighborRow = r + i;
                     int neighborCol = c + j;
 
                     if(neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < cols) {
-                        T pixelVal = input(neighborRow, neighborCol, 0);
+                        PixelType pixelVal = input(neighborRow, neighborCol, 0);
                         maxVal = std::max(maxVal, pixelVal);
                     }
                 }
@@ -90,24 +90,24 @@ void dilate(const Image<T>& input, Image<T>& output, size_t kernel_size){
     }
 }
 
-template<typename T>
-void open(const Image<T>& input, Image<T>& output, size_t kernel_size){
-    Image<T> temp(output);
+template<typename PixelType>
+void open(const Image<PixelType>& input, Image<PixelType>& output, size_t kernel_size){
+    Image<PixelType> temp(output);
     erode(input, temp, kernel_size);
     dilate(temp, output, kernel_size);
 }
 
-template<typename T>
-void close(const Image<T>& input, Image<T>& output, size_t kernel_size){
-    Image<T> temp(output);
+template<typename PixelType>
+void close(const Image<PixelType>& input, Image<PixelType>& output, size_t kernel_size){
+    Image<PixelType> temp(output);
     dilate(input, temp, kernel_size);
     erode(temp, output, kernel_size);
 }
 
-template<typename T>
-void morphologicalGradient(const Image<T>& input, Image<T>& output, size_t kernel_size){
-    Image<T> dilated(input.rows(), input.cols(), input.channels());
-    Image<T> eroded(input.rows(), input.cols(), input.channels());
+template<typename PixelType>
+void morphologicalGradient(const Image<PixelType>& input, Image<PixelType>& output, size_t kernel_size){
+    Image<PixelType> dilated(input.rows(), input.cols(), input.channels());
+    Image<PixelType> eroded(input.rows(), input.cols(), input.channels());
 
     dilate(input, dilated, kernel_size);
     erode(input, eroded, kernel_size);
@@ -122,9 +122,9 @@ void morphologicalGradient(const Image<T>& input, Image<T>& output, size_t kerne
     }
 }
 
-template<typename T>
-void topHat(const Image<T>& input, Image<T>& output, size_t kernel_size){
-    Image<T> opened(input.rows(), input.cols(), input.channels());
+template<typename PixelType>
+void topHat(const Image<PixelType>& input, Image<PixelType>& output, size_t kernel_size){
+    Image<PixelType> opened(input.rows(), input.cols(), input.channels());
     open(input, opened, kernel_size);
 
     int cols = static_cast<int>(input.cols());
@@ -137,9 +137,9 @@ void topHat(const Image<T>& input, Image<T>& output, size_t kernel_size){
     }
 }
 
-template<typename T>
-void bottomHat(const Image<T>& input, Image<T>& output, size_t kernel_size){
-    Image<T> closed(input.rows(), input.cols(), input.channels());
+template<typename PixelType>
+void bottomHat(const Image<PixelType>& input, Image<PixelType>& output, size_t kernel_size){
+    Image<PixelType> closed(input.rows(), input.cols(), input.channels());
     close(input, closed, kernel_size);
 
     int cols = static_cast<int>(input.cols());
