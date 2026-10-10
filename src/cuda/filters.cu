@@ -53,7 +53,6 @@ namespace cuda {
         }
     }
 
-    // Accumulator type will be type generic in later. At least should be
     template<typename PixelType, typename KernelType, typename AccumulatorType>
     __global__ void convolution(
         const PixelType* __restrict__ input,
