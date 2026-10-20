@@ -5,8 +5,8 @@ BUILD_TYPE ?= debug
 # Build flag: set BUILD_WITH_CUDA=1 to enable CUDA support
 BUILD_WITH_CUDA ?= 0
 
-EXECUTABLE_NAME = improc
-TEST_NAME = test
+TARGET_NAME = improc
+TEST_TARGET_NAME = test
 
 INCLUDE_DIR = include
 SRC_DIR = src
@@ -17,92 +17,105 @@ TEST_DIR = tests
 CUDA_SRC_DIR = $(SRC_DIR)/cuda
 CUDA_OBJ_DIR = $(OBJ_DIR)/cuda
 
-CC = g++
+CXX = g++
 NVCC = nvcc
 
-CC_FLAGS = -I$(INCLUDE_DIR) -std=c++11 -Ilib/include
+CXXFLAGS = -I$(INCLUDE_DIR) -std=c++11 -Ilib/include -MMD -MP
 
 ifneq ($(BUILD_TYPE),release)
-	CC_FLAGS += -O0 -g -Wall -Wextra -Wpedantic -Werror
+	CXXFLAGS += -O0 -g -Wall -Wextra -Wpedantic -Werror
 else
-	CC_FLAGS += -O2 -DNDEBUG
+	CXXFLAGS += -O2 -DNDEBUG
 endif
 
-NVCC_FLAGS = -I$(INCLUDE_DIR) --std=c++11 -O2 -arch=sm_75 -lineinfo
-NVCC_LINK_FLAGS = -lcudart -lnppif
-GTEST_FLAGS = -Llib -lgtest -lgtest_main -pthread
+NVCCFLAGS = -I$(INCLUDE_DIR) --std=c++11 -O2 -arch=sm_75 -lineinfo
+CUDA_LDLIBS = -lcudart -lnppif
+GTEST_LDLIBS = -Llib -lgtest -lgtest_main -pthread
 
-CPP_FILES = $(shell find $(SRC_DIR) -name "*.cpp")
-MAIN_FILE = $(SRC_DIR)/main.cpp
-CPP_FILES_NO_MAIN = $(filter-out $(MAIN_FILE), $(CPP_FILES))
+CXX_SRCS = $(shell find $(SRC_DIR) -name "*.cpp")
+CXX_MAIN_SRC = $(SRC_DIR)/main.cpp
+CXX_SRCS_NO_MAIN = $(filter-out $(CXX_MAIN_SRC), $(CXX_SRCS))
+CXX_TEST_SRCS = $(shell find $(TEST_DIR) -name "*_test.cpp")
+
+CXX_OBJS_NO_MAIN = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(CXX_SRCS_NO_MAIN))
+CXX_MAIN_OBJ = $(OBJ_DIR)/main.o
+CXX_TEST_OBJS = $(patsubst $(TEST_DIR)/%.cpp, $(OBJ_DIR)/tests/%.o, $(CXX_TEST_SRCS))
 
 ifeq ($(BUILD_WITH_CUDA),1)
-CUDA_FILES = $(shell find $(CUDA_SRC_DIR) -name "*.cu")
-CUDA_OBJ_FILES = $(patsubst $(CUDA_SRC_DIR)/%.cu, $(CUDA_OBJ_DIR)/%.o, $(CUDA_FILES))
-CC_FLAGS += -DBUILD_WITH_CUDA
-NVCC_FLAGS += -DBUILD_WITH_CUDA
+CUDA_SRCS = $(shell find $(CUDA_SRC_DIR) -name "*.cu")
+CUDA_OBJS = $(patsubst $(CUDA_SRC_DIR)/%.cu, $(CUDA_OBJ_DIR)/%.o, $(CUDA_SRCS))
+CXXFLAGS += -DBUILD_WITH_CUDA
+NVCCFLAGS += -DBUILD_WITH_CUDA
 else
-CUDA_FILES =
-CUDA_OBJ_FILES =
+CUDA_SRCS =
+CUDA_OBJS =
 endif
 
-TEST_FILES = $(shell find $(TEST_DIR) -name "*_test.cpp")
+ALL_DEPS = $(CXX_OBJS_NO_MAIN:.o=.d) $(CXX_MAIN_OBJ:.o=.d) $(CXX_TEST_OBJS:.o=.d)
 
-CPP_OBJ_FILES_NO_MAIN = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(CPP_FILES_NO_MAIN))
-TEST_OBJ_FILES = $(patsubst $(TEST_DIR)/%.cpp, $(OBJ_DIR)/tests/%.o, $(TEST_FILES))
-
-.PHONY: clean default all test static_analysis
+.PHONY: default all test static_lib static_analysis help clean
 
 default: all
 
-all: $(BIN_DIR)/$(EXECUTABLE_NAME)
+all: $(BIN_DIR)/$(TARGET_NAME)
 
 ifeq ($(BUILD_WITH_CUDA),1)
-$(BIN_DIR)/$(EXECUTABLE_NAME): $(CPP_OBJ_FILES_NO_MAIN) $(CUDA_OBJ_FILES) $(OBJ_DIR)/main.o | $(BIN_DIR)
-	$(NVCC) $(CC_FLAGS) $^ -o $@ $(NVCC_LINK_FLAGS)
+$(BIN_DIR)/$(TARGET_NAME): $(CXX_OBJS_NO_MAIN) $(CUDA_OBJS) $(CXX_MAIN_OBJ) | $(BIN_DIR)
+	$(NVCC) $(CXXFLAGS) $^ -o $@ $(CUDA_LDLIBS)
 else
-$(BIN_DIR)/$(EXECUTABLE_NAME): $(CPP_OBJ_FILES_NO_MAIN) $(OBJ_DIR)/main.o | $(BIN_DIR)
-	$(CC) $(CC_FLAGS) $^ -o $@
+$(BIN_DIR)/$(TARGET_NAME): $(CXX_OBJS_NO_MAIN) $(CXX_MAIN_OBJ) | $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) $^ -o $@
 endif
 
-test: $(BIN_DIR)/$(TEST_NAME)
+test: $(BIN_DIR)/$(TEST_TARGET_NAME)
 
 ifeq ($(BUILD_WITH_CUDA),1)
-$(BIN_DIR)/$(TEST_NAME): $(TEST_OBJ_FILES) $(CPP_OBJ_FILES_NO_MAIN) $(CUDA_OBJ_FILES) | $(BIN_DIR)
-	$(NVCC) $(CC_FLAGS) $^ -o $@ $(NVCC_LINK_FLAGS) $(GTEST_FLAGS)
+$(BIN_DIR)/$(TEST_TARGET_NAME): $(CXX_TEST_OBJS) $(CXX_OBJS_NO_MAIN) $(CUDA_OBJS) | $(BIN_DIR)
+	$(NVCC) $(CXXFLAGS) $^ -o $@ $(CUDA_LDLIBS) $(GTEST_LDLIBS)
 else
-$(BIN_DIR)/$(TEST_NAME): $(TEST_OBJ_FILES) $(CPP_OBJ_FILES_NO_MAIN) | $(BIN_DIR)
-	$(CC) $(CC_FLAGS) $^ -o $@ $(GTEST_FLAGS)
+$(BIN_DIR)/$(TEST_TARGET_NAME): $(CXX_TEST_OBJS) $(CXX_OBJS_NO_MAIN) | $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(GTEST_LDLIBS)
 endif
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	mkdir -p $(dir $@)
-	$(CC) $(CC_FLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp
 	mkdir -p $(dir $@)
 ifeq ($(BUILD_WITH_CUDA),1)
-	$(NVCC) $(NVCC_FLAGS) -c $< -o $@
+	$(NVCC) $(NVCCFLAGS) -c $< -o $@
 else
-	$(CC) $(CC_FLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 endif
 
 $(CUDA_OBJ_DIR)/%.o: $(CUDA_SRC_DIR)/%.cu
 	mkdir -p $(dir $@)
-	$(NVCC) $(NVCC_FLAGS) -c $< -o $@
+	$(NVCC) $(NVCCFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/tests/%.o: $(TEST_DIR)/%.cpp
 	mkdir -p $(dir $@)
-	$(CC) $(CC_FLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(BIN_DIR):
 	mkdir -p $@
 
-static_lib: $(CPP_OBJ_FILES_NO_MAIN) | $(BIN_DIR)
-	ar rcs $(BIN_DIR)/lib$(EXECUTABLE_NAME).a $^
+static_lib: $(CXX_OBJS_NO_MAIN) | $(BIN_DIR)
+	ar rcs $(BIN_DIR)/lib$(TARGET_NAME).a $^
 
 static_analysis:
 	cppcheck --enable=all --error-exitcode=1 --inconclusive --std=c++11 --suppress=missingIncludeSystem -I$(INCLUDE_DIR) -Ilib/include $(SRC_DIR)
 
+help:
+	@echo "Targets:"
+	@echo "  all              Build the improc executable (default)"
+	@echo "  test             Build the test binary"
+	@echo "  static_lib       Build static library libimproc.a"
+	@echo "  static_analysis  Run cppcheck on src/ and tests/"
+	@echo "  clean            Remove build outputs"
+	@echo "  help             Show this message"
+
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
+
+-include $(ALL_DEPS)
