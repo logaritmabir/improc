@@ -108,6 +108,9 @@ $(INSTALL_DIR): static_lib
 	cp $(BIN_DIR)/lib$(TARGET_NAME).a $@/lib
 	cp -r $(INCLUDE_DIR)/* $@/include
 
+uninstall:
+	rm -rf $(INSTALL_DIR)
+
 static_lib: $(CXX_OBJS_NO_MAIN) | $(BIN_DIR)
 	ar rcs $(BIN_DIR)/lib$(TARGET_NAME).a $^
 
