@@ -13,6 +13,7 @@ SRC_DIR = src
 OBJ_DIR = .obj
 BIN_DIR = bin
 TEST_DIR = tests
+INSTALL_DIR ?= install
 
 CUDA_SRC_DIR = $(SRC_DIR)/cuda
 CUDA_OBJ_DIR = $(OBJ_DIR)/cuda
@@ -21,6 +22,7 @@ CXX = g++
 NVCC = nvcc
 
 CXXFLAGS = -I$(INCLUDE_DIR) -std=c++11 -Ilib/include -MMD -MP
+NVCCFLAGS = -I$(INCLUDE_DIR) --std=c++11 -O2 -arch=sm_75 -lineinfo -Xcompiler -MMD -MP
 
 ifneq ($(BUILD_TYPE),release)
 	CXXFLAGS += -O0 -g -Wall -Wextra -Wpedantic -Werror
@@ -28,7 +30,6 @@ else
 	CXXFLAGS += -O2 -DNDEBUG
 endif
 
-NVCCFLAGS = -I$(INCLUDE_DIR) --std=c++11 -O2 -arch=sm_75 -lineinfo
 CUDA_LDLIBS = -lcudart -lnppif
 GTEST_LDLIBS = -Llib -lgtest -lgtest_main -pthread
 
@@ -51,9 +52,9 @@ CUDA_SRCS =
 CUDA_OBJS =
 endif
 
-ALL_DEPS = $(CXX_OBJS_NO_MAIN:.o=.d) $(CXX_MAIN_OBJ:.o=.d) $(CXX_TEST_OBJS:.o=.d)
+ALL_DEPS = $(CXX_OBJS_NO_MAIN:.o=.d) $(CXX_MAIN_OBJ:.o=.d) $(CXX_TEST_OBJS:.o=.d) $(CUDA_OBJS:.o=.d)
 
-.PHONY: default all test static_lib static_analysis help clean
+.PHONY: default all test static_lib static_analysis install help clean
 
 default: all
 
@@ -100,6 +101,13 @@ $(OBJ_DIR)/tests/%.o: $(TEST_DIR)/%.cpp
 $(BIN_DIR):
 	mkdir -p $@
 
+$(INSTALL_DIR): static_lib
+	mkdir -p $@
+	mkdir -p $@/include
+	mkdir -p $@/lib
+	cp $(BIN_DIR)/lib$(TARGET_NAME).a $@/lib
+	cp -r $(INCLUDE_DIR)/* $@/include
+
 static_lib: $(CXX_OBJS_NO_MAIN) | $(BIN_DIR)
 	ar rcs $(BIN_DIR)/lib$(TARGET_NAME).a $^
 
@@ -116,6 +124,6 @@ help:
 	@echo "  help             Show this message"
 
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR)
+	rm -rf $(OBJ_DIR) $(BIN_DIR) $(INSTALL_DIR)
 
 -include $(ALL_DEPS)
