@@ -8,29 +8,29 @@ protected:
 };
 
 TEST_F(ImageTest, DefaultConstructor) {
-    EXPECT_EQ(img.rows(), 0);
-    EXPECT_EQ(img.cols(), 0);
-    EXPECT_EQ(img.channels(), 0);
-    EXPECT_EQ(img.stride(), 0);
+    EXPECT_EQ(img.rows(), 0u);
+    EXPECT_EQ(img.cols(), 0u);
+    EXPECT_EQ(img.channels(), 0u);
+    EXPECT_EQ(img.stride(), 0u);
     EXPECT_TRUE(img.empty());
 }
 
 TEST_F(ImageTest, ParameterizedConstructor) {
     Image<uint8_t> img2(10, 20, 3);
-    EXPECT_EQ(img2.rows(), 10);
-    EXPECT_EQ(img2.cols(), 20);
-    EXPECT_EQ(img2.channels(), 3);
-    EXPECT_EQ(img2.stride(), 60);
-    EXPECT_EQ(img2.size(), 600);
+    EXPECT_EQ(img2.rows(), 10u);
+    EXPECT_EQ(img2.cols(), 20u);
+    EXPECT_EQ(img2.channels(), 3u);
+    EXPECT_EQ(img2.stride(), 60u);
+    EXPECT_EQ(img2.size(), 600u);
     EXPECT_FALSE(img2.empty());
 }
 
 TEST_F(ImageTest, ParameterizedConstructorWithSingleChannel) {
     Image<uint8_t> gray(5, 5, 1);
-    EXPECT_EQ(gray.rows(), 5);
-    EXPECT_EQ(gray.cols(), 5);
-    EXPECT_EQ(gray.channels(), 1);
-    EXPECT_EQ(gray.stride(), 5);
+    EXPECT_EQ(gray.rows(), 5u);
+    EXPECT_EQ(gray.cols(), 5u);
+    EXPECT_EQ(gray.channels(), 1u);
+    EXPECT_EQ(gray.stride(), 5u);
 }
 
 TEST_F(ImageTest, ParameterizedConstructorInvalidRows) {
@@ -50,9 +50,9 @@ TEST_F(ImageTest, CopyConstructor) {
     img1.fill(42);
     
     Image<uint8_t> img2(img1);
-    EXPECT_EQ(img2.rows(), 5);
-    EXPECT_EQ(img2.cols(), 5);
-    EXPECT_EQ(img2.channels(), 3);
+    EXPECT_EQ(img2.rows(), 5u);
+    EXPECT_EQ(img2.cols(), 5u);
+    EXPECT_EQ(img2.channels(), 3u);
     EXPECT_EQ(img2.size(), img1.size());
     EXPECT_EQ(img2(0, 0, 0), 42);
 }

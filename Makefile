@@ -22,12 +22,17 @@ CXX = g++
 NVCC = nvcc
 
 CXXFLAGS = -I$(INCLUDE_DIR) -std=c++11 -Ilib/include -MMD -MP
-NVCCFLAGS = -I$(INCLUDE_DIR) --std=c++11 -O2 -arch=sm_75 -lineinfo -Xcompiler -MMD -MP
+NVCCFLAGS = -I$(INCLUDE_DIR) --std=c++11 -arch=sm_75 -lineinfo -Xcompiler -MMD, -MP
+
+# NVCCFLAGS does not contain Wpedantic because "style of line directive is a GCC extension" error. 
+# See also -> https://stackoverflow.com/questions/31000996/warning-when-compiling-cu-with-wpedantic-style-of-line-directive-is-a-gcc-ex
 
 ifneq ($(BUILD_TYPE),release)
 	CXXFLAGS += -O0 -g -Wall -Wextra -Wpedantic -Werror
+	NVCCFLAGS += -O0 -g -Xcompiler -Wall,-Wextra,-Werror
 else
 	CXXFLAGS += -O2 -DNDEBUG
+	NVCCFLAGS += -O2 -DNDEBUG
 endif
 
 CUDA_LDLIBS = -lcudart -lnppif
@@ -67,6 +72,9 @@ else
 $(BIN_DIR)/$(TARGET_NAME): $(CXX_OBJS_NO_MAIN) $(CXX_MAIN_OBJ) | $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 endif
+
+run_test: $(BIN_DIR)/$(TEST_TARGET_NAME)
+	$(BIN_DIR)/$(TEST_TARGET_NAME)
 
 test: $(BIN_DIR)/$(TEST_TARGET_NAME)
 

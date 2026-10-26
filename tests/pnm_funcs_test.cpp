@@ -45,7 +45,7 @@ TEST_F(PNMTest, SaveAndReadMultiChannel) {
     Image<uint8_t> loaded;
     readPNM("test_output.ppm", loaded);
     
-    EXPECT_EQ(loaded.channels(), 3);
+    EXPECT_EQ(loaded.channels(), 3u);
     EXPECT_EQ(loaded(0, 0, 0), 100);
     EXPECT_EQ(loaded(0, 0, 1), 150);
     EXPECT_EQ(loaded(0, 0, 2), 200);
