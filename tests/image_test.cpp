@@ -63,22 +63,22 @@ TEST_F(ImageTest, MoveConstructor) {
     size_t original_size = img1.size();
     
     Image<uint8_t> img2(std::move(img1));
-    EXPECT_EQ(img2.rows(), 5);
-    EXPECT_EQ(img2.cols(), 5);
+    EXPECT_EQ(img2.rows(), 5u);
+    EXPECT_EQ(img2.cols(), 5u);
     EXPECT_EQ(img2.size(), original_size);
     EXPECT_EQ(img2(0, 0, 0), 123);
     
-    EXPECT_EQ(img1.rows(), 0);
-    EXPECT_EQ(img1.cols(), 0);
+    EXPECT_EQ(img1.rows(), 0u);
+    EXPECT_EQ(img1.cols(), 0u);
     EXPECT_TRUE(img1.empty());
 }
 
 TEST_F(ImageTest, Accessors) {
     Image<uint8_t> img2(4, 6, 2);
-    EXPECT_EQ(img2.rows(), 4);
-    EXPECT_EQ(img2.cols(), 6);
-    EXPECT_EQ(img2.channels(), 2);
-    EXPECT_EQ(img2.stride(), 12);
+    EXPECT_EQ(img2.rows(), 4u);
+    EXPECT_EQ(img2.cols(), 6u);
+    EXPECT_EQ(img2.channels(), 2u);
+    EXPECT_EQ(img2.stride(), 12u);
 }
 
 TEST_F(ImageTest, AtMethodRead) {
@@ -153,9 +153,9 @@ TEST_F(ImageTest, Clear) {
     img2.fill(100);
     img2.clear();
 
-    EXPECT_EQ(img2.rows(), 0);
-    EXPECT_EQ(img2.cols(), 0);
-    EXPECT_EQ(img2.channels(), 0);
+    EXPECT_EQ(img2.rows(), 0u);
+    EXPECT_EQ(img2.cols(), 0u);
+    EXPECT_EQ(img2.channels(), 0u);
     EXPECT_TRUE(img2.empty());
 }
 
@@ -164,10 +164,10 @@ TEST_F(ImageTest, Resize) {
     img2.fill(50);
 
     img2.resize(4, 4, 3);
-    EXPECT_EQ(img2.rows(), 4);
-    EXPECT_EQ(img2.cols(), 4);
-    EXPECT_EQ(img2.channels(), 3);
-    EXPECT_EQ(img2.size(), 48);
+    EXPECT_EQ(img2.rows(), 4u);
+    EXPECT_EQ(img2.cols(), 4u);
+    EXPECT_EQ(img2.channels(), 3u);
+    EXPECT_EQ(img2.size(), 48u);
 }
 
 TEST_F(ImageTest, ResizeInvalidDimensions) {
@@ -184,9 +184,9 @@ TEST_F(ImageTest, CopyAssignment) {
     Image<uint8_t> img2(2, 2, 2);
     img2 = img1;
     
-    EXPECT_EQ(img2.rows(), 3);
-    EXPECT_EQ(img2.cols(), 3);
-    EXPECT_EQ(img2.channels(), 1);
+    EXPECT_EQ(img2.rows(), 3u);
+    EXPECT_EQ(img2.cols(), 3u);
+    EXPECT_EQ(img2.channels(), 1u);
     EXPECT_EQ(img2(0, 0, 0), 77);
 }
 
@@ -195,8 +195,8 @@ TEST_F(ImageTest, CopyAssignmentSelf) {
     img1.fill(99);
     
     img1 = img1;
-    EXPECT_EQ(img1.rows(), 3);
-    EXPECT_EQ(img1.cols(), 3);
+    EXPECT_EQ(img1.rows(), 3u);
+    EXPECT_EQ(img1.cols(), 3u);
     EXPECT_EQ(img1(0, 0, 0), 99);
 }
 
@@ -207,12 +207,12 @@ TEST_F(ImageTest, MoveAssignment) {
     Image<uint8_t> img2;
     img2 = std::move(img1);
     
-    EXPECT_EQ(img2.rows(), 3);
-    EXPECT_EQ(img2.cols(), 3);
-    EXPECT_EQ(img2.channels(), 2);
+    EXPECT_EQ(img2.rows(), 3u);
+    EXPECT_EQ(img2.cols(), 3u);
+    EXPECT_EQ(img2.channels(), 2u);
     EXPECT_EQ(img2(0, 0, 0), 111);
     
-    EXPECT_EQ(img1.rows(), 0);
+    EXPECT_EQ(img1.rows(), 0u);
 }
 
 TEST_F(ImageTest, MoveAssignmentSelf) {
@@ -220,8 +220,8 @@ TEST_F(ImageTest, MoveAssignmentSelf) {
     img1.fill(55);
     
     img1 = std::move(img1);
-    EXPECT_EQ(img1.rows(), 3);
-    EXPECT_EQ(img1.cols(), 3);
+    EXPECT_EQ(img1.rows(), 3u);
+    EXPECT_EQ(img1.cols(), 3u);
 }
 
 TEST_F(ImageTest, EqualityOperator) {
@@ -333,16 +333,16 @@ TEST_F(ImageTest, MultiChannelAccess) {
 
 TEST_F(ImageTest, SizeCalculation) {
     Image<uint8_t> img2(10, 20, 3);
-    EXPECT_EQ(img2.size(), 600);
+    EXPECT_EQ(img2.size(), 600u);
     
     Image<uint8_t> img3(5, 5, 1);
-    EXPECT_EQ(img3.size(), 25);
+    EXPECT_EQ(img3.size(), 25u);
 }
 
 TEST_F(ImageTest, StrideCalculation) {
     Image<uint8_t> img2(10, 20, 3);
-    EXPECT_EQ(img2.stride(), 60);
+    EXPECT_EQ(img2.stride(), 60u);
     
     Image<uint8_t> img3(10, 20, 1);
-    EXPECT_EQ(img3.stride(), 20);
+    EXPECT_EQ(img3.stride(), 20u);
 }

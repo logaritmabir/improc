@@ -123,8 +123,8 @@ TEST_F(MorphTest, ErodeLargerKernel) {
     erode(largerImg, output, 5);
     
     // With 5x5 kernel on 5x5 image, all pixels should be 100
-    for (size_t r = 0; r < 5; r++) {
-        for (size_t c = 0; c < 5; c++) {
+    for (size_t r = 0; r < 5u; r++) {
+        for (size_t c = 0; c < 5u; c++) {
             EXPECT_EQ(output(r, c, 0), 100);
         }
     }
@@ -138,8 +138,8 @@ TEST_F(MorphTest, DilateLargerKernel) {
     dilate(largerImg, output, 5);
     
     // With 5x5 kernel on 5x5 image, all pixels should be 100
-    for (size_t r = 0; r < 5; r++) {
-        for (size_t c = 0; c < 5; c++) {
+    for (size_t r = 0; r < 5u; r++) {
+        for (size_t c = 0; c < 5u; c++) {
             EXPECT_EQ(output(r, c, 0), 100);
         }
     }

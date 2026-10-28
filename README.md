@@ -52,7 +52,6 @@ include/
   morph.hpp
   point_ops.hpp
   pnm_funcs.hpp
-  pbm_funcs.hpp
   utils.hpp
   cuda/
     gpu_image.cuh
@@ -64,7 +63,7 @@ src/
   filters.cpp
   morph.cpp
   point_ops.cpp
-  pbm_funcs.cpp
+  pnm_funcs.cpp
   utils.cpp
   main.cpp
   cuda/
@@ -117,6 +116,5 @@ d_output.download(input);
 ## Current gaps
 
 - No CUDA unit tests yet
-- Public PNM naming is slightly messy because the implementation file is still named `pbm_funcs.*`
 - CUDA support is narrower than the CPU API and currently focused on `uint8_t`
 - The demo program in [src/main.cpp](/home/ben/improc/src/main.cpp) still uses hard-coded sample-image paths

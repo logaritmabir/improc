@@ -1,9 +1,9 @@
 /**
- * @file pbm_funcs.cpp
+ * @file pnm_funcs.cpp
  * @brief Implementation of PNM format image I/O and color processing.
  *
  * This file contains implementations for reading and writing PNM (Portable
- * PixMap) format images, including support for PGM (grayscale, P5) and PPM
+ * Anymap) format images, including support for PGM (grayscale, P5) and PPM
  * (color, P6) formats. Also includes color space conversion functions
  * (RGB to grayscale) and channel extraction utilities.
  *
@@ -11,7 +11,7 @@
  * @note Only binary PNM formats (P5 and P6) are supported; ASCII formats are not implemented
  */
 
-#include "pbm_funcs.hpp"
+#include "pnm_funcs.hpp"
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
@@ -30,7 +30,7 @@ void readPNM(const std::string& filename, Image<PixelType>& img) {
     bool isColor = (magic == "P6");
     
     if (!isGrayscale && !isColor) {
-        throw std::runtime_error("Unsupported PPM format (only P5 and P6 are supported): " + magic);
+        throw std::runtime_error("Unsupported PNM format (only P5 and P6 are supported): " + magic);
     }
 
     infile.get(); // consume the newline after the magic number
