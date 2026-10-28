@@ -5,7 +5,8 @@
 ## What is implemented
 
 - CPU image container and utilities
-- PGM/PPM read and write helpers
+- P5/P6 PNM I/O for `uint8_t` images only
+- RGB channel extraction and RGB-to-grayscale conversion for `uint8_t` images
 - Point operations: `invert`, `threshold`, `histogramEqualization`
 - CPU filters: `convolve`, `medianFilter`, `gaussianBlur`, `sobelFilter`, `sharpeningFilter`, `laplacianFilter`
 - CPU morphology: `erode`, `dilate`, `open`, `close`, `morphologicalGradient`, `topHat`, `bottomHat`
@@ -35,7 +36,7 @@ make BUILD_WITH_CUDA=1
 
 The CPU test suite currently passes:
 
-- `97` tests across `7` test suites via `make test` and `./bin/test`
+- `101` tests across `7` test suites via `make test` and `./bin/test`
 
 The CUDA build path currently compiles successfully with:
 
@@ -84,7 +85,7 @@ Makefile
 #include "pnm_funcs.hpp"
 
 Image<uint8_t> input;
-readPNM("images/sampleGRAY.pgm", input);
+readPNM("images/sampleGRAY.pgm", input, PNMFormat::P5);
 
 Image<uint8_t> blurred(input.rows(), input.cols(), input.channels());
 gaussianBlur(input, blurred, 1.0f);
@@ -92,8 +93,19 @@ gaussianBlur(input, blurred, 1.0f);
 Image<uint8_t> opened(input.rows(), input.cols(), input.channels());
 open(input, opened, 3);
 
-savePNM("images/out.pgm", blurred);
+savePNM("images/out.pgm", blurred, PNMFormat::P5);
 ```
+
+PNM I/O functions currently support only `Image<uint8_t>` with 8-bit P5
+(grayscale) and P6 (RGB) files. Select the expected format explicitly with
+`PNMFormat::P5` or `PNMFormat::P6` when calling both `readPNM` and `savePNM`.
+The caller must select the format that matches the input file or output image;
+the reader uses this selection to determine the channel count and does not
+auto-detect the file format.
+
+`extractChannel` and `rgbToGrayscale` also operate on `Image<uint8_t>`. Both
+expect a three-channel RGB input and throw `std::invalid_argument` when that
+input requirement (or, for `extractChannel`, the channel index) is invalid.
 
 ## Minimal CUDA example
 
@@ -103,7 +115,7 @@ savePNM("images/out.pgm", blurred);
 #include "cuda/morph.cuh"
 
 Image<uint8_t> input;
-readPNM("images/sampleGRAY.pgm", input);
+readPNM("images/sampleGRAY.pgm", input, PNMFormat::P5);
 
 cuda::GpuImage<uint8_t> d_input(input);
 cuda::GpuImage<uint8_t> d_output(input.rows(), input.cols(), input.channels());
