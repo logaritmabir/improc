@@ -53,13 +53,13 @@ TEST_F(PNMTest, SaveAndReadMultiChannel) {
     EXPECT_EQ(loaded(0, 0, 2), 200);
 }
 
-TEST_F(PNMTest, PgmP5SpecificFunctionsRoundTrip) {
+TEST_F(PNMTest, PgmP5RoundTrip) {
     Image<uint8_t> original(2, 2, 1);
     original.fill(127);
-    savePgmP5("test_specific.pgm", original);
+    savePNM("test_specific.pgm", original, PNMFormat::P5);
 
     Image<uint8_t> loaded;
-    readPgmP5("test_specific.pgm", loaded);
+    readPNM("test_specific.pgm", loaded, PNMFormat::P5);
 
     EXPECT_EQ(loaded.rows(), 2u);
     EXPECT_EQ(loaded.cols(), 2u);
@@ -67,13 +67,13 @@ TEST_F(PNMTest, PgmP5SpecificFunctionsRoundTrip) {
     EXPECT_EQ(loaded(0, 0, 0), 127);
 }
 
-TEST_F(PNMTest, PpmP6SpecificFunctionsRoundTrip) {
+TEST_F(PNMTest, PpmP6RoundTrip) {
     Image<uint8_t> original(2, 2, 3);
     original.fill(127);
-    savePpmP6("test_specific.ppm", original);
+    savePNM("test_specific.ppm", original, PNMFormat::P6);
 
     Image<uint8_t> loaded;
-    readPpmP6("test_specific.ppm", loaded);
+    readPNM("test_specific.ppm", loaded, PNMFormat::P6);
 
     EXPECT_EQ(loaded.rows(), 2u);
     EXPECT_EQ(loaded.cols(), 2u);
@@ -87,11 +87,11 @@ TEST_F(PNMTest, SpecificReadersRejectOtherMagicNumber) {
     Image<uint8_t> grayscale(1, 1, 1);
     Image<uint8_t> color(1, 1, 3);
     Image<uint8_t> loaded;
-    savePgmP5("test_specific.pgm", grayscale);
-    savePpmP6("test_specific.ppm", color);
+    savePNM("test_specific.pgm", grayscale, PNMFormat::P5);
+    savePNM("test_specific.ppm", color, PNMFormat::P6);
 
-    EXPECT_THROW(readPgmP5("test_specific.ppm", loaded), std::runtime_error);
-    EXPECT_THROW(readPpmP6("test_specific.pgm", loaded), std::runtime_error);
+    EXPECT_THROW(readPNM("test_specific.ppm", loaded, PNMFormat::P5), std::runtime_error);
+    EXPECT_THROW(readPNM("test_specific.pgm", loaded, PNMFormat::P6), std::runtime_error);
 }
 
 TEST_F(PNMTest, SavePNMRejectsUnsupportedChannelCount) {

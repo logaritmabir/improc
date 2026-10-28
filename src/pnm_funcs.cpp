@@ -62,26 +62,6 @@ void readPNM(const std::string& filename, Image<PixelType>& img, PNMFormat forma
 }
 
 template<typename PixelType>
-void readPgmP5(const std::string& filename, Image<PixelType>& img) {
-    readPNM(filename, img, PNMFormat::P5);
-}
-
-template<typename PixelType>
-void readPpmP6(const std::string& filename, Image<PixelType>& img) {
-    readPNM(filename, img, PNMFormat::P6);
-}
-
-template<typename PixelType>
-void savePgmP5(const std::string& filename, const Image<PixelType>& img) {
-    savePNM(filename, img, PNMFormat::P5);
-}
-
-template<typename PixelType>
-void savePpmP6(const std::string& filename, const Image<PixelType>& img) {
-    savePNM(filename, img, PNMFormat::P6);
-}
-
-template<typename PixelType>
 void savePNM(const std::string& filename, const Image<PixelType>& img, PNMFormat format) {
     std::string magic;
     if (format == PNMFormat::P5) {
@@ -146,10 +126,6 @@ void rgbToGrayscale(const Image<PixelType>& input, Image<PixelType>& output) {
 }
 
 template void readPNM<uint8_t>(const std::string& filename, Image<uint8_t>& img, PNMFormat format);
-template void readPgmP5<uint8_t>(const std::string& filename, Image<uint8_t>& img);
-template void readPpmP6<uint8_t>(const std::string& filename, Image<uint8_t>& img);
 template void savePNM<uint8_t>(const std::string& filename, const Image<uint8_t>& img, PNMFormat format);
-template void savePgmP5<uint8_t>(const std::string& filename, const Image<uint8_t>& img);
-template void savePpmP6<uint8_t>(const std::string& filename, const Image<uint8_t>& img);
 template void extractChannel<uint8_t>(const Image<uint8_t>& input, Image<uint8_t>& output, size_t channel);
 template void rgbToGrayscale<uint8_t>(const Image<uint8_t>& input, Image<uint8_t>& output);
