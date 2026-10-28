@@ -14,10 +14,9 @@
 #include "pnm_funcs.hpp"
 #include <fstream>
 #include <stdexcept>
-#include <iostream>
 
 template<typename PixelType>
-void readPNM(const std::string& filename, Image<PixelType>& img) {
+void readPNM(const std::string& filename, Image<PixelType>& img, PNMFormat format) {
     std::ifstream infile(filename, std::ios::binary);
     if (!infile) {
         throw std::runtime_error("Could not open file for reading: " + filename);
@@ -25,58 +24,91 @@ void readPNM(const std::string& filename, Image<PixelType>& img) {
 
     std::string magic;
     infile >> magic;
-    
-    bool isGrayscale = (magic == "P5");
-    bool isColor = (magic == "P6");
-    
-    if (!isGrayscale && !isColor) {
-        throw std::runtime_error("Unsupported PNM format (only P5 and P6 are supported): " + magic);
+
+    const bool isGrayscale = magic == "P5";
+    const bool isColor = magic == "P6";
+    const bool matchesFormat =
+        (format == PNMFormat::P5 && isGrayscale) ||
+        (format == PNMFormat::P6 && isColor);
+
+    if ((!isGrayscale && !isColor) || !matchesFormat) {
+        throw std::runtime_error("Unsupported or unexpected PNM format: " + magic);
     }
 
-    infile.get(); // consume the newline after the magic number
+    infile.get();
     std::string comment;
     while (infile.peek() == '#') {
-        std::getline(infile, comment); // skip comment lines
+        std::getline(infile, comment);
     }
 
-    size_t width, height;
-    size_t maxColorValue;
-
+    size_t width, height, maxColorValue;
     infile >> width >> height >> maxColorValue;
-    infile.get(); // consume the newline after maxColorValue
+    if (!infile) {
+        throw std::runtime_error("Invalid PNM header in file: " + filename);
+    }
+    infile.get();
 
     if (maxColorValue != 255) {
         throw std::runtime_error("Unsupported max color value (only 255 is supported): " + std::to_string(maxColorValue));
     }
 
-    size_t channels = isGrayscale ? 1 : 3;
+    const size_t channels = isGrayscale ? 1u : 3u;
     img = Image<PixelType>(height, width, channels);
-
     infile.read(reinterpret_cast<char*>(img.data()), width * height * channels * sizeof(PixelType));
 
     if (!infile) {
         throw std::runtime_error("Error reading pixel data from file: " + filename);
     }
-
-    infile.close();
 }
 
 template<typename PixelType>
-void savePNM(const std::string& filename, const Image<PixelType>& img) {
+void readPgmP5(const std::string& filename, Image<PixelType>& img) {
+    readPNM(filename, img, PNMFormat::P5);
+}
+
+template<typename PixelType>
+void readPpmP6(const std::string& filename, Image<PixelType>& img) {
+    readPNM(filename, img, PNMFormat::P6);
+}
+
+template<typename PixelType>
+void savePgmP5(const std::string& filename, const Image<PixelType>& img) {
+    savePNM(filename, img, PNMFormat::P5);
+}
+
+template<typename PixelType>
+void savePpmP6(const std::string& filename, const Image<PixelType>& img) {
+    savePNM(filename, img, PNMFormat::P6);
+}
+
+template<typename PixelType>
+void savePNM(const std::string& filename, const Image<PixelType>& img, PNMFormat format) {
+    std::string magic;
+    if (format == PNMFormat::P5) {
+        if (img.channels() != 1) {
+            throw std::invalid_argument("P5 images must have exactly one channel.");
+        }
+        magic = "P5";
+    } else if (format == PNMFormat::P6) {
+        if (img.channels() != 3) {
+            throw std::invalid_argument("P6 images must have exactly three channels.");
+        }
+        magic = "P6";
+    } else {
+        throw std::invalid_argument("Unsupported PNM output format.");
+    }
+
     std::ofstream outfile(filename, std::ios::binary);
     if (!outfile) {
         throw std::runtime_error("Could not open file for writing: " + filename);
     }
 
-    std::string magic = (img.channels() == 1) ? "P5" : "P6";
     outfile << magic << "\n" << img.cols() << " " << img.rows() << "\n255\n";
     outfile.write(reinterpret_cast<const char*>(img.data()), img.cols() * img.rows() * img.channels() * sizeof(PixelType));
 
     if (!outfile) {
         throw std::runtime_error("Error writing pixel data to file: " + filename);
     }
-
-    outfile.close();
 }
 
 template<typename PixelType>
@@ -113,7 +145,11 @@ void rgbToGrayscale(const Image<PixelType>& input, Image<PixelType>& output) {
     }
 }
 
-template void readPNM<uint8_t>(const std::string& filename, Image<uint8_t>& img);
-template void savePNM<uint8_t>(const std::string& filename, const Image<uint8_t>& img);
+template void readPNM<uint8_t>(const std::string& filename, Image<uint8_t>& img, PNMFormat format);
+template void readPgmP5<uint8_t>(const std::string& filename, Image<uint8_t>& img);
+template void readPpmP6<uint8_t>(const std::string& filename, Image<uint8_t>& img);
+template void savePNM<uint8_t>(const std::string& filename, const Image<uint8_t>& img, PNMFormat format);
+template void savePgmP5<uint8_t>(const std::string& filename, const Image<uint8_t>& img);
+template void savePpmP6<uint8_t>(const std::string& filename, const Image<uint8_t>& img);
 template void extractChannel<uint8_t>(const Image<uint8_t>& input, Image<uint8_t>& output, size_t channel);
 template void rgbToGrayscale<uint8_t>(const Image<uint8_t>& input, Image<uint8_t>& output);

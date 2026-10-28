@@ -21,12 +21,12 @@
  * #include "filters.hpp"
  *
  * Image<uint8_t> img;
- * readPNM("input.pgm", img);
+ * readPNM("input.pgm", img, PNMFormat::P5);
  *
  * Image<uint8_t> blurred;
  * gaussianBlur(img, blurred, 2.0f);
  *
- * savePNM("output.pgm", blurred);
+ * savePNM("output.pgm", blurred, PNMFormat::P5);
  * @endcode
  *
  * @subsection cuda CUDA Example
@@ -90,7 +90,7 @@
 int main() {
     Image<uint8_t> sample_img;
     try {
-        readPNM("../images/samples/sampleGRAY.pgm", sample_img);
+        readPNM("../images/samples/sampleGRAY.pgm", sample_img, PNMFormat::P5);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
@@ -186,25 +186,25 @@ int main() {
     #endif
 
     try {
-        savePNM("../images/outputs/gaussianBlur_img.pgm", gaussianBlur_img);
-        savePNM("../images/outputs/gaussianBlur_without_sigma_img.pgm", gaussianBlur_without_sigma_img);
-        savePNM("../images/outputs/medianFilter_img.pgm", medianFilter_img);
-        savePNM("../images/outputs/sobelFilter_img.pgm", sobelFilter_img);
-        savePNM("../images/outputs/inverted_img.pgm", inverted_img);
-        savePNM("../images/outputs/threshold_img.pgm", threshold_img);
-        savePNM("../images/outputs/sharpening_img.pgm", sharpening_img);
-        savePNM("../images/outputs/laplacian_img.pgm", laplacian_img);
-        savePNM("../images/outputs/eroded_img.pgm", eroded_img);
-        savePNM("../images/outputs/dilated_img.pgm", dilated_img);
-        savePNM("../images/outputs/opened_img.pgm", opened_img);
-        savePNM("../images/outputs/closed_img.pgm", closed_img);
-        savePNM("../images/outputs/morphGradient_img.pgm", morphGradient_img);
-        savePNM("../images/outputs/topHat_img.pgm", topHat_img);
-        savePNM("../images/outputs/bottomHat_img.pgm", bottomHat_img);
-        savePNM("../images/outputs/histogramEqualized_img.pgm", histogramEqualized_img);
+        savePNM("../images/outputs/gaussianBlur_img.pgm", gaussianBlur_img, PNMFormat::P5);
+        savePNM("../images/outputs/gaussianBlur_without_sigma_img.pgm", gaussianBlur_without_sigma_img, PNMFormat::P5);
+        savePNM("../images/outputs/medianFilter_img.pgm", medianFilter_img, PNMFormat::P5);
+        savePNM("../images/outputs/sobelFilter_img.pgm", sobelFilter_img, PNMFormat::P5);
+        savePNM("../images/outputs/inverted_img.pgm", inverted_img, PNMFormat::P5);
+        savePNM("../images/outputs/threshold_img.pgm", threshold_img, PNMFormat::P5);
+        savePNM("../images/outputs/sharpening_img.pgm", sharpening_img, PNMFormat::P5);
+        savePNM("../images/outputs/laplacian_img.pgm", laplacian_img, PNMFormat::P5);
+        savePNM("../images/outputs/eroded_img.pgm", eroded_img, PNMFormat::P5);
+        savePNM("../images/outputs/dilated_img.pgm", dilated_img, PNMFormat::P5);
+        savePNM("../images/outputs/opened_img.pgm", opened_img, PNMFormat::P5);
+        savePNM("../images/outputs/closed_img.pgm", closed_img, PNMFormat::P5);
+        savePNM("../images/outputs/morphGradient_img.pgm", morphGradient_img, PNMFormat::P5);
+        savePNM("../images/outputs/topHat_img.pgm", topHat_img, PNMFormat::P5);
+        savePNM("../images/outputs/bottomHat_img.pgm", bottomHat_img, PNMFormat::P5);
+        savePNM("../images/outputs/histogramEqualized_img.pgm", histogramEqualized_img, PNMFormat::P5);
         #ifdef BUILD_WITH_CUDA
-        savePNM("../images/outputs/h_convolution_img.pgm", h_convolution_img);
-        savePNM("../images/outputs/h_npp_convolution_img.pgm", h_npp_convolution_img);
+        savePNM("../images/outputs/h_convolution_img.pgm", h_convolution_img, PNMFormat::P5);
+        savePNM("../images/outputs/h_npp_convolution_img.pgm", h_npp_convolution_img, PNMFormat::P5);
         #endif
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

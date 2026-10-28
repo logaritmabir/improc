@@ -7,33 +7,84 @@
  * @file pnm_funcs.hpp
  * @brief PNM image I/O and color processing functions.
  *
- * Supports binary PGM (P5) and PPM (P6) image files.
+ * Supports 8-bit binary PGM (P5) and PPM (P6) image files.
  */
 
+enum class PNMFormat {
+    P5,
+    P6
+};
+
 /**
- * @brief Reads a binary PGM (P5) or PPM (P6) image file.
+ * @brief Reads a P5 or P6 image selected explicitly by the caller.
  *
  * @tparam PixelType Data type for pixel values (typically uint8_t)
- * @param filename Path to the image file
+ * @param filename Path to the PNM file
  * @param img Image object to store the loaded data
- * @throws std::runtime_error If the file cannot be opened or the format is unsupported
+ * @param format Required PNM variant
+ * @throws std::runtime_error If the file cannot be opened or its format is unsupported
  */
 template<typename PixelType>
-void readPNM(const std::string& filename, Image<PixelType>& img);
+void readPNM(const std::string& filename, Image<PixelType>& img, PNMFormat format);
 
 /**
- * @brief Saves an image as binary PGM (P5) or PPM (P6).
+ * @brief Reads an 8-bit binary grayscale PGM (P5) image.
  *
- * A single-channel image is saved as P5; other channel counts are currently
- * written with a P6 header.
+ * @tparam PixelType Data type for pixel values (typically uint8_t)
+ * @param filename Path to the P5 file
+ * @param img Image object to store the loaded data
+ * @throws std::runtime_error If the file cannot be opened or is not a supported P5 file
+ */
+template<typename PixelType>
+void readPgmP5(const std::string& filename, Image<PixelType>& img);
+
+/**
+ * @brief Reads an 8-bit binary RGB PPM (P6) image.
+ *
+ * @tparam PixelType Data type for pixel values (typically uint8_t)
+ * @param filename Path to the P6 file
+ * @param img Image object to store the loaded data
+ * @throws std::runtime_error If the file cannot be opened or is not a supported P6 file
+ */
+template<typename PixelType>
+void readPpmP6(const std::string& filename, Image<PixelType>& img);
+
+/**
+ * @brief Saves an image in the explicitly selected P5 or P6 format.
  *
  * @tparam PixelType Data type for pixel values (typically uint8_t)
  * @param filename Path where the image will be saved
- * @param img Image object to save
+ * @param img Single- or three-channel image to save
+ * @param format Required PNM variant
+ * @throws std::invalid_argument If the image channels do not match the requested format
  * @throws std::runtime_error If the file cannot be opened or written
  */
 template<typename PixelType>
-void savePNM(const std::string& filename, const Image<PixelType>& img);
+void savePNM(const std::string& filename, const Image<PixelType>& img, PNMFormat format);
+
+/**
+ * @brief Saves a single-channel image as an 8-bit binary PGM (P5) file.
+ *
+ * @tparam PixelType Data type for pixel values (typically uint8_t)
+ * @param filename Path where the P5 file will be saved
+ * @param img Single-channel image to save
+ * @throws std::invalid_argument If the image does not have one channel
+ * @throws std::runtime_error If the file cannot be opened or written
+ */
+template<typename PixelType>
+void savePgmP5(const std::string& filename, const Image<PixelType>& img);
+
+/**
+ * @brief Saves a three-channel image as an 8-bit binary RGB PPM (P6) file.
+ *
+ * @tparam PixelType Data type for pixel values (typically uint8_t)
+ * @param filename Path where the P6 file will be saved
+ * @param img Three-channel image to save
+ * @throws std::invalid_argument If the image does not have three channels
+ * @throws std::runtime_error If the file cannot be opened or written
+ */
+template<typename PixelType>
+void savePpmP6(const std::string& filename, const Image<PixelType>& img);
 
 /**
  * @brief Extracts one color channel from a three-channel RGB image.

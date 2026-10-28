@@ -9,6 +9,8 @@ protected:
     void TearDown() override {
         std::remove("test_output.pgm");
         std::remove("test_output.ppm");
+        std::remove("test_specific.pgm");
+        std::remove("test_specific.ppm");
         std::remove("test_grayscale.pgm");
         std::remove("test_channel.pgm");
     }
@@ -17,10 +19,10 @@ protected:
 TEST_F(PNMTest, SaveAndReadGrayscale) {
     Image<uint8_t> original(10, 10, 1);
     original.fill(128);
-    savePNM("test_output.pgm", original);
+    savePNM("test_output.pgm", original, PNMFormat::P5);
     
     Image<uint8_t> loaded;
-    readPNM("test_output.pgm", loaded);
+    readPNM("test_output.pgm", loaded, PNMFormat::P5);
     
     EXPECT_EQ(loaded.rows(), original.rows());
     EXPECT_EQ(loaded.cols(), original.cols());
@@ -40,15 +42,61 @@ TEST_F(PNMTest, SaveAndReadMultiChannel) {
             original(r, c, 2) = 200;
         }
     }
-    savePNM("test_output.ppm", original);
+    savePNM("test_output.ppm", original, PNMFormat::P6);
     
     Image<uint8_t> loaded;
-    readPNM("test_output.ppm", loaded);
+    readPNM("test_output.ppm", loaded, PNMFormat::P6);
     
     EXPECT_EQ(loaded.channels(), 3u);
     EXPECT_EQ(loaded(0, 0, 0), 100);
     EXPECT_EQ(loaded(0, 0, 1), 150);
     EXPECT_EQ(loaded(0, 0, 2), 200);
+}
+
+TEST_F(PNMTest, PgmP5SpecificFunctionsRoundTrip) {
+    Image<uint8_t> original(2, 2, 1);
+    original.fill(127);
+    savePgmP5("test_specific.pgm", original);
+
+    Image<uint8_t> loaded;
+    readPgmP5("test_specific.pgm", loaded);
+
+    EXPECT_EQ(loaded.rows(), 2u);
+    EXPECT_EQ(loaded.cols(), 2u);
+    EXPECT_EQ(loaded.channels(), 1u);
+    EXPECT_EQ(loaded(0, 0, 0), 127);
+}
+
+TEST_F(PNMTest, PpmP6SpecificFunctionsRoundTrip) {
+    Image<uint8_t> original(2, 2, 3);
+    original.fill(127);
+    savePpmP6("test_specific.ppm", original);
+
+    Image<uint8_t> loaded;
+    readPpmP6("test_specific.ppm", loaded);
+
+    EXPECT_EQ(loaded.rows(), 2u);
+    EXPECT_EQ(loaded.cols(), 2u);
+    EXPECT_EQ(loaded.channels(), 3u);
+    EXPECT_EQ(loaded(0, 0, 0), 127);
+    EXPECT_EQ(loaded(0, 0, 1), 127);
+    EXPECT_EQ(loaded(0, 0, 2), 127);
+}
+
+TEST_F(PNMTest, SpecificReadersRejectOtherMagicNumber) {
+    Image<uint8_t> grayscale(1, 1, 1);
+    Image<uint8_t> color(1, 1, 3);
+    Image<uint8_t> loaded;
+    savePgmP5("test_specific.pgm", grayscale);
+    savePpmP6("test_specific.ppm", color);
+
+    EXPECT_THROW(readPgmP5("test_specific.ppm", loaded), std::runtime_error);
+    EXPECT_THROW(readPpmP6("test_specific.pgm", loaded), std::runtime_error);
+}
+
+TEST_F(PNMTest, SavePNMRejectsUnsupportedChannelCount) {
+    Image<uint8_t> twoChannel(2, 2, 2);
+    EXPECT_THROW(savePNM("test_specific.pgm", twoChannel, PNMFormat::P5), std::invalid_argument);
 }
 
 TEST_F(PNMTest, ExtractChannel) {
@@ -97,11 +145,11 @@ TEST_F(PNMTest, RgbToGrayscaleInvalidImage) {
 
 TEST_F(PNMTest, ReadNonexistentFile) {
     Image<uint8_t> img;
-    EXPECT_THROW(readPNM("nonexistent.pgm", img), std::runtime_error);
+    EXPECT_THROW(readPNM("nonexistent.pgm", img, PNMFormat::P5), std::runtime_error);
 }
 
 TEST_F(PNMTest, SaveToNonexistentDirectory) {
     Image<uint8_t> img(5, 5, 1);
     img.fill(50);
-    EXPECT_THROW(savePNM("/nonexistent/dir/test.pgm", img), std::runtime_error);
+    EXPECT_THROW(savePNM("/nonexistent/dir/test.pgm", img, PNMFormat::P5), std::runtime_error);
 }
