@@ -218,4 +218,3 @@ bool Image<PixelType>::operator!=(const Image<PixelType>& other) const {
 }
 
 template class Image<uint8_t>;
-template class Image<int>;

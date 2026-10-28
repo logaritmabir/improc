@@ -227,7 +227,6 @@ void laplacianFilter(const Image<PixelType>& input, Image<PixelType>& output){
 }
 
 template void medianFilter(const Image<uint8_t>& input, Image<uint8_t>& output, size_t kernelSize);
-template void convolve(const Image<int>& input, Image<int>& output, const std::array<std::array<float, 3>, 3>& kernel);
 template void convolve(const Image<uint8_t>& input, Image<uint8_t>& output, const std::vector<std::vector<float>>& kernel);
 template void convolve(const Image<uint8_t>& input, Image<uint8_t>& output, const std::array<std::array<float, 3>, 3>& kernel);
 template void gaussianBlur(const Image<uint8_t>& input, Image<uint8_t>& output, float sigma);

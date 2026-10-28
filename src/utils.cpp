@@ -70,4 +70,3 @@ template void requireSquareAndOdd(const std::vector<std::vector<uint8_t>>& kerne
 template void requireSquareAndOdd(const std::array<std::array<float, 3>, 3>& kernel);
 
 template void requireSameTypeImages(const Image<uint8_t>& first, const Image<uint8_t>& second);
-template void requireSameTypeImages(const Image<int>& first, const Image<int>& second);
