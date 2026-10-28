@@ -83,20 +83,28 @@ TEST_F(PNMTest, PpmP6RoundTrip) {
     EXPECT_EQ(loaded(0, 0, 2), 127);
 }
 
-TEST_F(PNMTest, SpecificReadersRejectOtherMagicNumber) {
-    Image<uint8_t> grayscale(1, 1, 1);
+TEST_F(PNMTest, RequestedFormatDeterminesChannelCount) {
     Image<uint8_t> color(1, 1, 3);
+    color(0, 0, 0) = 42;
+    color(0, 0, 1) = 84;
+    color(0, 0, 2) = 126;
     Image<uint8_t> loaded;
-    savePNM("test_specific.pgm", grayscale, PNMFormat::P5);
     savePNM("test_specific.ppm", color, PNMFormat::P6);
 
-    EXPECT_THROW(readPNM("test_specific.ppm", loaded, PNMFormat::P5), std::runtime_error);
-    EXPECT_THROW(readPNM("test_specific.pgm", loaded, PNMFormat::P6), std::runtime_error);
+    readPNM("test_specific.ppm", loaded, PNMFormat::P5);
+
+    EXPECT_EQ(loaded.channels(), 1u);
+    EXPECT_EQ(loaded(0, 0, 0), 42);
 }
 
-TEST_F(PNMTest, SavePNMRejectsUnsupportedChannelCount) {
+TEST_F(PNMTest, SavePNMUsesRequestedFormat) {
     Image<uint8_t> twoChannel(2, 2, 2);
-    EXPECT_THROW(savePNM("test_specific.pgm", twoChannel, PNMFormat::P5), std::invalid_argument);
+    ASSERT_NO_THROW(savePNM("test_specific.pgm", twoChannel, PNMFormat::P5));
+
+    std::ifstream file("test_specific.pgm", std::ios::binary);
+    std::string magic;
+    file >> magic;
+    EXPECT_EQ(magic, "P5");
 }
 
 TEST_F(PNMTest, ExtractChannel) {

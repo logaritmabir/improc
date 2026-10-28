@@ -24,15 +24,8 @@ void readPNM(const std::string& filename, Image<PixelType>& img, PNMFormat forma
 
     std::string magic;
     infile >> magic;
-
-    const bool isGrayscale = magic == "P5";
-    const bool isColor = magic == "P6";
-    const bool matchesFormat =
-        (format == PNMFormat::P5 && isGrayscale) ||
-        (format == PNMFormat::P6 && isColor);
-
-    if ((!isGrayscale && !isColor) || !matchesFormat) {
-        throw std::runtime_error("Unsupported or unexpected PNM format: " + magic);
+    if (!infile) {
+        throw std::runtime_error("Invalid PNM header in file: " + filename);
     }
 
     infile.get();
@@ -52,7 +45,15 @@ void readPNM(const std::string& filename, Image<PixelType>& img, PNMFormat forma
         throw std::runtime_error("Unsupported max color value (only 255 is supported): " + std::to_string(maxColorValue));
     }
 
-    const size_t channels = isGrayscale ? 1u : 3u;
+    size_t channels;
+    if (format == PNMFormat::P5) {
+        channels = 1u;
+    } else if (format == PNMFormat::P6) {
+        channels = 3u;
+    } else {
+        throw std::invalid_argument("Unsupported PNM input format.");
+    }
+
     img = Image<PixelType>(height, width, channels);
     infile.read(reinterpret_cast<char*>(img.data()), width * height * channels * sizeof(PixelType));
 
@@ -63,16 +64,10 @@ void readPNM(const std::string& filename, Image<PixelType>& img, PNMFormat forma
 
 template<typename PixelType>
 void savePNM(const std::string& filename, const Image<PixelType>& img, PNMFormat format) {
-    std::string magic;
+    const char* magic;
     if (format == PNMFormat::P5) {
-        if (img.channels() != 1) {
-            throw std::invalid_argument("P5 images must have exactly one channel.");
-        }
         magic = "P5";
     } else if (format == PNMFormat::P6) {
-        if (img.channels() != 3) {
-            throw std::invalid_argument("P6 images must have exactly three channels.");
-        }
         magic = "P6";
     } else {
         throw std::invalid_argument("Unsupported PNM output format.");
