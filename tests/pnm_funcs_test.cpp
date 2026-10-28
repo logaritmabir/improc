@@ -124,13 +124,13 @@ TEST_F(PNMTest, ExtractChannel) {
 TEST_F(PNMTest, ExtractChannelInvalidImage) {
     Image<uint8_t> grayscale(5, 5, 1);
     Image<uint8_t> output(5, 5, 1);
-    EXPECT_THROW(extractChannel(grayscale, output, 0), std::runtime_error);
+    EXPECT_THROW(extractChannel(grayscale, output, 0), std::invalid_argument);
 }
 
 TEST_F(PNMTest, ExtractChannelInvalidChannel) {
     Image<uint8_t> rgb(5, 5, 3);
     Image<uint8_t> output(5, 5, 1);
-    EXPECT_THROW(extractChannel(rgb, output, 3), std::runtime_error);
+    EXPECT_THROW(extractChannel(rgb, output, 3), std::invalid_argument);
 }
 
 TEST_F(PNMTest, RgbToGrayscale) {
@@ -148,7 +148,7 @@ TEST_F(PNMTest, RgbToGrayscale) {
 TEST_F(PNMTest, RgbToGrayscaleInvalidImage) {
     Image<uint8_t> grayscale(5, 5, 1);
     Image<uint8_t> output(5, 5, 1);
-    EXPECT_THROW(rgbToGrayscale(grayscale, output), std::runtime_error);
+    EXPECT_THROW(rgbToGrayscale(grayscale, output), std::invalid_argument);
 }
 
 TEST_F(PNMTest, ReadNonexistentFile) {

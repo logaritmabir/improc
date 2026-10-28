@@ -49,6 +49,7 @@ void savePNM(const std::string& filename, const Image<PixelType>& img, PNMFormat
  * @param input Source RGB image
  * @param output Destination single-channel image
  * @param channel Channel index: 0=Red, 1=Green, 2=Blue
+ * @throws std::invalid_argument If the input is not RGB or the channel is invalid
  */
 template<typename PixelType>
 void extractChannel(const Image<PixelType>& input, Image<PixelType>& output, size_t channel);
@@ -61,6 +62,7 @@ void extractChannel(const Image<PixelType>& input, Image<PixelType>& output, siz
  * @tparam PixelType Must be uint8_t
  * @param input Source RGB image
  * @param output Destination single-channel image
+ * @throws std::invalid_argument If the input is not RGB
  */
 template<typename PixelType>
 void rgbToGrayscale(const Image<PixelType>& input, Image<PixelType>& output);

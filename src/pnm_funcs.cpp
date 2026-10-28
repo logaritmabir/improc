@@ -89,10 +89,10 @@ void savePNM(const std::string& filename, const Image<PixelType>& img, PNMFormat
 template<typename PixelType>
 void extractChannel(const Image<PixelType>& input, Image<PixelType>& output, size_t channel) {
     if (input.channels() != 3) {
-        throw std::runtime_error("Image must be RGB (3 channels) to extract a channel");
+        throw std::invalid_argument("Image must be RGB (3 channels) to extract a channel");
     }
     if (channel > 2) {
-        throw std::runtime_error("Channel must be 0 (R), 1 (G), or 2 (B)");
+        throw std::invalid_argument("Channel must be 0 (R), 1 (G), or 2 (B)");
     }
     
     for (size_t row = 0; row < input.rows(); row++) {
@@ -105,7 +105,7 @@ void extractChannel(const Image<PixelType>& input, Image<PixelType>& output, siz
 template<typename PixelType>
 void rgbToGrayscale(const Image<PixelType>& input, Image<PixelType>& output) {
     if (input.channels() != 3) {
-        throw std::runtime_error("Image must be RGB (3 channels)");
+        throw std::invalid_argument("Image must be RGB (3 channels)");
     }
     
     for (size_t row = 0; row < input.rows(); row++) {
