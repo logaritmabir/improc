@@ -6,8 +6,10 @@
  * @file morph.hpp
  * @brief Morphological operations for image processing.
  * 
- * This file contains template functions for applying morphological operations
- * (erosion and dilation) to grayscale images.
+ * This file declares grayscale morphology operations: erosion, dilation,
+ * opening, closing, morphological gradient, and top-/bottom-hat transforms.
+ * The library currently explicitly instantiates these operations for
+ * uint8_t images.
  */
 
 /**
@@ -17,7 +19,8 @@
  * defined by the kernel size. This operation shrinks white regions and expands
  * black regions in the image.
  * 
- * @tparam PixelType The data type of the image (typically uint8_t or float)
+ * @tparam PixelType Pixel data type; the library currently provides uint8_t
+ * instantiations.
  * @param input The source grayscale image (must have exactly 1 channel)
  * @param output The destination grayscale image where the eroded result is stored (must have exactly 1 channel)
  * @param kernel_size The size of the square kernel (must be odd, e.g., 3, 5, 7)
@@ -25,7 +28,8 @@
  * @note Input and output images must have the same dimensions and exactly 1 channel.
  * @note The kernel radius determines the neighborhood: radius = (kernel_size - 1) / 2
  * 
- * @throws std::invalid_argument If kernel_size is even, input/output dimensions don't match, or images are not single-channel
+ * @throws std::invalid_argument If kernel_size is even, image dimensions
+ * differ, or either image is not single-channel
  */
 template<typename PixelType>
 void erode(const Image<PixelType>& input, Image<PixelType>& output, size_t kernel_size);
@@ -37,7 +41,8 @@ void erode(const Image<PixelType>& input, Image<PixelType>& output, size_t kerne
  * defined by the kernel size. This operation expands white regions and shrinks
  * black regions in the image.
  * 
- * @tparam PixelType The data type of the image (typically uint8_t or float)
+ * @tparam PixelType Pixel data type; the library currently provides uint8_t
+ * instantiations.
  * @param input The source grayscale image (must have exactly 1 channel)
  * @param output The destination grayscale image where the dilated result is stored (must have exactly 1 channel)
  * @param kernel_size The size of the square kernel (must be odd, e.g., 3, 5, 7)
@@ -45,7 +50,8 @@ void erode(const Image<PixelType>& input, Image<PixelType>& output, size_t kerne
  * @note Input and output images must have the same dimensions and exactly 1 channel.
  * @note The kernel radius determines the neighborhood: radius = (kernel_size - 1) / 2
  * 
- * @throws std::invalid_argument If kernel_size is even, input/output dimensions don't match, or images are not single-channel
+ * @throws std::invalid_argument If kernel_size is even, image dimensions
+ * differ, or either image is not single-channel
  */
 template<typename PixelType>
 void dilate(const Image<PixelType>& input, Image<PixelType>& output, size_t kernel_size);
@@ -57,14 +63,16 @@ void dilate(const Image<PixelType>& input, Image<PixelType>& output, size_t kern
  * and smooths the boundaries of larger bright regions while preserving the
  * overall shape of larger dark regions.
  *
- * @tparam PixelType The data type of the image (typically uint8_t or float)
+ * @tparam PixelType Pixel data type; the library currently provides uint8_t
+ * instantiations.
  * @param input The source grayscale image (must have exactly 1 channel)
  * @param output The destination grayscale image where the result is stored (must have exactly 1 channel)
  * @param kernel_size The size of the square structuring element (must be odd, e.g., 3, 5, 7)
  *
  * @note Input and output images must have the same dimensions and exactly 1 channel.
  *
- * @throws std::invalid_argument If kernel_size is even, input/output dimensions don't match, or images are not single-channel
+ * @throws std::invalid_argument If kernel_size is even, image dimensions
+ * differ, or either image is not single-channel
  *
  * @see erode() for erosion operation
  * @see dilate() for dilation operation
@@ -79,14 +87,16 @@ void open(const Image<PixelType>& input, Image<PixelType>& output, size_t kernel
  * (holes) and fills gaps in the boundaries of regions while preserving the
  * overall shape of the image.
  *
- * @tparam PixelType The data type of the image (typically uint8_t or float)
+ * @tparam PixelType Pixel data type; the library currently provides uint8_t
+ * instantiations.
  * @param input The source grayscale image (must have exactly 1 channel)
  * @param output The destination grayscale image where the result is stored (must have exactly 1 channel)
  * @param kernel_size The size of the square structuring element (must be odd, e.g., 3, 5, 7)
  *
  * @note Input and output images must have the same dimensions and exactly 1 channel.
  *
- * @throws std::invalid_argument If kernel_size is even, input/output dimensions don't match, or images are not single-channel
+ * @throws std::invalid_argument If kernel_size is even, image dimensions
+ * differ, or either image is not single-channel
  *
  * @see dilate() for dilation operation
  * @see erode() for erosion operation
@@ -101,14 +111,17 @@ void close(const Image<PixelType>& input, Image<PixelType>& output, size_t kerne
  * It highlights the boundaries (edges) of objects in the image, producing
  * a result similar to a edge detection filter.
  *
- * @tparam PixelType The data type of the image (typically uint8_t or float)
+ * @tparam PixelType Pixel data type; the library currently provides uint8_t
+ * instantiations.
  * @param input The source grayscale image (must have exactly 1 channel)
  * @param output The destination grayscale image where the gradient is stored (must have exactly 1 channel)
  * @param kernel_size The size of the square structuring element (must be odd, e.g., 3, 5, 7)
  *
- * @note Input and output images must have the same dimensions and exactly 1 channel.
+ * @pre Input and output images must have the same dimensions and exactly one
+ * channel. The output dimensions are not checked by this operation.
  *
- * @throws std::invalid_argument If kernel_size is even, input/output dimensions don't match, or images are not single-channel
+ * @throws std::invalid_argument If kernel_size is even or the input is not
+ * single-channel
  *
  * @see dilate() for dilation operation
  * @see erode() for erosion operation
@@ -123,14 +136,17 @@ void morphologicalGradient(const Image<PixelType>& input, Image<PixelType>& outp
  * the image by subtracting the opened image from the original. It is useful
  * for enhancing small features that would otherwise be lost during smoothing.
  *
- * @tparam PixelType The data type of the image (typically uint8_t or float)
+ * @tparam PixelType Pixel data type; the library currently provides uint8_t
+ * instantiations.
  * @param input The source grayscale image (must have exactly 1 channel)
  * @param output The destination grayscale image where the result is stored (must have exactly 1 channel)
  * @param kernel_size The size of the square structuring element (must be odd, e.g., 3, 5, 7)
  *
- * @note Input and output images must have the same dimensions and exactly 1 channel.
+ * @pre Input and output images must have the same dimensions and exactly one
+ * channel. The output dimensions are not checked by this operation.
  *
- * @throws std::invalid_argument If kernel_size is even, input/output dimensions don't match, or images are not single-channel
+ * @throws std::invalid_argument If kernel_size is even or the input is not
+ * single-channel
  *
  * @see open() for the opening operation
  * @see bottomHat() for extracting dark features
@@ -145,14 +161,17 @@ void topHat(const Image<PixelType>& input, Image<PixelType>& output, size_t kern
  * the image by subtracting the original image from the closed image. It is
  * useful for enhancing small dark features that would otherwise be lost.
  *
- * @tparam PixelType The data type of the image (typically uint8_t or float)
+ * @tparam PixelType Pixel data type; the library currently provides uint8_t
+ * instantiations.
  * @param input The source grayscale image (must have exactly 1 channel)
  * @param output The destination grayscale image where the result is stored (must have exactly 1 channel)
  * @param kernel_size The size of the square structuring element (must be odd, e.g., 3, 5, 7)
  *
- * @note Input and output images must have the same dimensions and exactly 1 channel.
+ * @pre Input and output images must have the same dimensions and exactly one
+ * channel. The output dimensions are not checked by this operation.
  *
- * @throws std::invalid_argument If kernel_size is even, input/output dimensions don't match, or images are not single-channel
+ * @throws std::invalid_argument If kernel_size is even or the input is not
+ * single-channel
  *
  * @see close() for the closing operation
  * @see topHat() for extracting bright features

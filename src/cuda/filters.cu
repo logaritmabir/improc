@@ -4,11 +4,12 @@
  *
  * This file contains CUDA kernel implementations and host-side wrappers for
  * various spatial filters including convolution, Gaussian blur, Sobel edge
- * detection, sharpening, Laplacian, and median filtering. Operations are
- * optimized for GPU execution with support for both global and constant memory.
+ * detection, sharpening, Laplacian, and median filtering. Operations use
+ * device global memory.
  *
  * @see filters.cuh for the function declarations and detailed documentation
- * @note Uses NVIDIA Performance Primitives (NPP) for optimized implementations where available
+ * @note The library currently explicitly instantiates the public wrappers for
+ * uint8_t images.
  */
 
 #include "cuda/filters.cuh"

@@ -5,7 +5,8 @@
  * This file contains template implementations for per-pixel operations
  * including image inversion, binary thresholding, and histogram equalization.
  * These operations do not require neighborhood information and can be
- * parallelized efficiently.
+ * parallelized efficiently. The library currently explicitly instantiates
+ * these operations for uint8_t images.
  *
  * @see point_ops.hpp for the function declarations and detailed documentation
  */

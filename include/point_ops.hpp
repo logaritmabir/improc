@@ -6,6 +6,8 @@
  *
  * This module provides functions for applying point-wise (per-pixel)
  * operations to images without requiring neighborhood information.
+ * The library currently explicitly instantiates these operations for
+ * uint8_t images.
  *
  * @see Image for the image container class
  */
@@ -20,8 +22,9 @@
  *
  * @tparam PixelType The pixel data type (typically uint8_t)
  * @param input Source image to invert
- * @param output Destination image for inverted result (must have same dimensions as input)
- * @throws std::invalid_argument if input and output dimensions don't match
+ * @param output Destination image for inverted result (must have matching
+ * dimensions, channels, and stride)
+ * @throws std::invalid_argument if input and output metadata don't match
  */
 template<typename PixelType>
 void invert(const Image<PixelType>& input, Image<PixelType>& output);
@@ -51,10 +54,12 @@ void threshold(const Image<PixelType>& input, Image<PixelType>& output, const Pi
  *
  * @tparam PixelType The pixel data type (typically uint8_t)
  * @param input Source grayscale image to equalize
- * @param output Destination image where the equalized result is stored (must have same dimensions as input)
- * @throws std::invalid_argument if input and output dimensions don't match
+ * @param output Destination image where the equalized result is stored (must
+ * have matching dimensions, channels, and stride)
+ * @throws std::invalid_argument if input and output metadata don't match
  *
- * @note Works best on grayscale images. For color images, consider applying to each channel separately.
+ * @note This implementation processes channel 0; pass a single-channel image
+ * for grayscale equalization.
  * @note The output range is normalized to [0, 255] for proper display.
  */
 template<typename PixelType>

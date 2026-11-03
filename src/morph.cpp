@@ -6,6 +6,8 @@
  * including erosion, dilation, opening, closing, morphological gradient,
  * and top/bottom-hat transformations. These operations are fundamental
  * to image processing for shape analysis and feature extraction.
+ * The library currently explicitly instantiates these operations for
+ * uint8_t images.
  *
  * @see morph.hpp for the function declarations and detailed documentation
  * @note All morphological operations require single-channel (grayscale) images

@@ -4,8 +4,8 @@
  *
  * This file contains the template implementations for the Image class,
  * which provides a flexible container for image data with support for
- * multiple data types and channels. All member functions are defined here
- * as template instantiations.
+ * multiple data types and channels. The implementation is explicitly
+ * instantiated for uint8_t.
  *
  * @see Image for the class interface
  */
@@ -44,6 +44,34 @@ Image<PixelType>::Image(Image<PixelType>&& other) noexcept
 
 template<typename PixelType>
 Image<PixelType>::~Image() noexcept {}
+
+template<typename PixelType>
+Image<PixelType>& Image<PixelType>::operator=(const Image<PixelType>& other) {
+    if (this != &other) {
+        cols_ = other.cols_;
+        rows_ = other.rows_;
+        channels_ = other.channels_;
+        stride_ = other.stride_;
+        data_ = other.data_;
+    }
+    return *this;
+}
+
+template<typename PixelType>
+Image<PixelType>& Image<PixelType>::operator=(Image<PixelType>&& other) noexcept {
+    if (this != &other) {
+        cols_ = other.cols_;
+        rows_ = other.rows_;
+        channels_ = other.channels_;
+        stride_ = other.stride_;
+        data_ = std::move(other.data_);
+        other.cols_ = 0;
+        other.rows_ = 0;
+        other.channels_ = 0;
+        other.stride_ = 0;
+    }
+    return *this;
+}
 
 template<typename PixelType>
 size_t Image<PixelType>::rows() const noexcept {
@@ -144,11 +172,6 @@ typename std::vector<PixelType>::const_iterator Image<PixelType>::cend() const{
 }
 
 template<typename PixelType>
-void Image<PixelType>::fill(const PixelType& value){
-    std::fill(data_.begin(),data_.end(), value);
-}
-
-template<typename PixelType>
 void Image<PixelType>::clear(){
     rows_ = 0;
     cols_ = 0;
@@ -168,33 +191,9 @@ void Image<PixelType>::resize(size_t rows, size_t cols, size_t channels) {
     data_.resize(rows * cols * channels);
 }
 
-
 template<typename PixelType>
-Image<PixelType>& Image<PixelType>::operator=(const Image<PixelType>& other) {
-    if (this != &other) {
-        cols_ = other.cols_;
-        rows_ = other.rows_;
-        channels_ = other.channels_;
-        stride_ = other.stride_;
-        data_ = other.data_;
-    }
-    return *this;
-}
-
-template<typename PixelType>
-Image<PixelType>& Image<PixelType>::operator=(Image<PixelType>&& other) noexcept {
-    if (this != &other) {
-        cols_ = other.cols_;
-        rows_ = other.rows_;
-        channels_ = other.channels_;
-        stride_ = other.stride_;
-        data_ = std::move(other.data_);
-        other.cols_ = 0;
-        other.rows_ = 0;
-        other.channels_ = 0;
-        other.stride_ = 0;
-    }
-    return *this;
+void Image<PixelType>::fill(const PixelType& value){
+    std::fill(data_.begin(),data_.end(), value);
 }
 
 template<typename PixelType>

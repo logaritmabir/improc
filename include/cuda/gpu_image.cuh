@@ -13,6 +13,7 @@
 
 #include <cuda_runtime.h>
 #include <stdexcept>
+#include <string>
 #include "image.hpp"
 
 #define CUDA_CHECK(call) \
@@ -36,19 +37,13 @@ namespace cuda {
      * in GPU memory. It provides methods for allocating GPU memory and
      * transferring data between host (CPU) and device (GPU).
      *
-     * @tparam PixelType The data type for pixel values (e.g., uint8_t, float)
+     * @tparam PixelType The pixel data type; the library currently explicitly
+     * instantiates this class for uint8_t.
      */
     template<typename PixelType>
     class GpuImage{
-    private:
-        size_t rows_;
-        size_t cols_;
-        size_t channels_;
-        size_t stride_;
-        PixelType* data_;
-
     public:
-        /// @name Constructors and Destructor
+        /// @name Constructors
         /// @{
 
         /**
@@ -67,6 +62,7 @@ namespace cuda {
          * @param cols Number of columns in the image
          * @param channels Number of channels per pixel
          * @throws std::invalid_argument if any dimension is zero
+         * @throws std::runtime_error If CUDA memory allocation fails
          */
         GpuImage(size_t rows, size_t cols, size_t channels);
 
@@ -77,8 +73,25 @@ namespace cuda {
          * Does NOT copy pixel data - use upload() to transfer data.
          *
          * @param img Source CPU-side Image to copy dimensions from
+         * @throws std::runtime_error If CUDA memory allocation fails
          */
         explicit GpuImage(const Image<PixelType>& img);
+
+        /**
+         * @brief Copy construction is disabled because this class owns GPU memory.
+         */
+        GpuImage(const GpuImage& other) = delete;
+
+        /**
+         * @brief Transfers GPU memory ownership from another image.
+         * @param other Image to move from; it becomes empty.
+         */
+        GpuImage(GpuImage&& other) noexcept;
+
+        /// @}
+
+        /// @name Destructor
+        /// @{
 
         /**
          * @brief Destructor.
@@ -86,6 +99,23 @@ namespace cuda {
          * Frees GPU memory if data was allocated.
          */
         ~GpuImage();
+
+        /// @}
+
+        /// @name Assignment Operators
+        /// @{
+
+        /**
+         * @brief Copy assignment is disabled because this class owns GPU memory.
+         */
+        GpuImage& operator=(const GpuImage& other) = delete;
+
+        /**
+         * @brief Transfers GPU memory ownership from another image.
+         * @param other Image to move from; it becomes empty.
+         * @return Reference to this image.
+         */
+        GpuImage& operator=(GpuImage&& other) noexcept;
 
         /// @}
 
@@ -141,7 +171,10 @@ namespace cuda {
         /**
          * @brief Allocates GPU memory for the image.
          *
-         * If memory was previously allocated, it is freed first.
+         * If memory was previously allocated, it is freed first. The image
+         * must have nonzero dimensions.
+         *
+         * @throws std::runtime_error If CUDA memory allocation fails
          */
         void allocate();
 
@@ -149,8 +182,9 @@ namespace cuda {
          * @brief Uploads data from CPU Image to GPU memory.
          *
          * @param src Source CPU Image to upload
-         * @throws std::invalid_argument if dimensions don't match
-         * @throws std::runtime_error if GPU memory not allocated
+         * @throws std::invalid_argument If image metadata does not match
+         * @throws std::runtime_error If GPU memory is not allocated or a CUDA
+         * transfer fails
          */
         void upload(const Image<PixelType>& src);
 
@@ -158,10 +192,18 @@ namespace cuda {
          * @brief Downloads data from GPU memory to CPU Image.
          *
          * @param dst Destination CPU Image to download to
-         * @throws std::invalid_argument if dimensions don't match
-         * @throws std::runtime_error if GPU memory not allocated
+         * @throws std::invalid_argument If image metadata does not match
+         * @throws std::runtime_error If GPU memory is not allocated or a CUDA
+         * transfer fails
          */
         void download(Image<PixelType>& dst) const;
         /// @}
+
+    private:
+        size_t rows_;
+        size_t cols_;
+        size_t channels_;
+        size_t stride_;
+        PixelType* data_;
     };
 }

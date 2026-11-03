@@ -5,13 +5,13 @@
  *
  * @section overview Overview
  *
- * Improc provides a comprehensive set of image processing operations including:
+ * Improc provides image processing operations including:
  * - Image container class with multi-channel support
- * - Point operations (inversion, thresholding)
+ * - Point operations (inversion, thresholding, histogram equalization)
  * - Filtering operations (convolution, median filter, Gaussian blur, Sobel edge detection, sharpening, Laplacian)
- * - Morphological operations (erosion, dilation)
+ * - Morphological operations (erosion, dilation, opening, closing, gradient, top-/bottom-hat)
  * - PNM file format I/O (PGM for grayscale, PPM for RGB)
- * - GPU-accelerated convolution via CUDA
+ * - CUDA image operations and NPP-backed convolution
  *
  * @section usage Usage
  *
@@ -23,7 +23,7 @@
  * Image<uint8_t> img;
  * readPNM("input.pgm", img, PNMFormat::P5);
  *
- * Image<uint8_t> blurred;
+ * Image<uint8_t> blurred(img.rows(), img.cols(), img.channels());
  * gaussianBlur(img, blurred, 2.0f);
  *
  * savePNM("output.pgm", blurred, PNMFormat::P5);
@@ -32,8 +32,12 @@
  * @subsection cuda CUDA Example
  * @code
  * #include "cuda/gpu_image.cuh"
- * #include "cuda/kernels.cuh"
+ * #include "cuda/filters.cuh"
+ * #include "pnm_funcs.hpp"
  *
+ * Image<uint8_t> img;
+ * readPNM("input.pgm", img, PNMFormat::P5);
+ * Image<uint8_t> result(img.rows(), img.cols(), img.channels());
  * cuda::GpuImage<uint8_t> d_input(img);
  * cuda::GpuImage<uint8_t> d_output(img);
  *
@@ -43,17 +47,18 @@
  *                    0.1250f, 0.2500f, 0.1250f,
  *                    0.0625f, 0.1250f, 0.0625f };
  *
- * cuda::convolve(d_input, d_output, kernel, 3);
+ * cuda::convolve<uint8_t, float, float>(d_input, d_output, kernel, 3);
  * d_output.download(result);
  * @endcode
  *
  * @section modules Modules
  *
  * - @ref Image "Image Class" - Template-based image container
- * - @ref point_ops "Point Operations" - Per-pixel transformations
- * - @ref filters "Filtering" - Convolution and smoothing filters
- * - @ref morph "Morphological Operations" - Erosion and dilation
- * - @ref pnm_funcs "PNM I/O" - File format support
+ * - Point Operations - Per-pixel transformations
+ * - Filtering - Convolution and smoothing filters
+ * - Morphological Operations - Erosion, dilation, opening, closing, gradient,
+ *   and top-/bottom-hat transforms
+ * - PNM I/O - File format support
  * - @ref cuda "CUDA Support" - GPU-accelerated processing
  *
  * @section build Building
@@ -61,7 +66,7 @@
  * The project uses a Makefile for building:
  * @code
  * make        # Build the project
- * make -DBUILD_WITH_CUDA=1 # Build the project with CUDA support
+ * make BUILD_WITH_CUDA=1 # Build the project with CUDA support
  * make clean  # Clean build artifacts
  * @endcode
  *

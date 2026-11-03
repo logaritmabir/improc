@@ -3,6 +3,10 @@
 /**
  * @file utils.hpp
  * @brief Utility functions for image processing operations.
+ *
+ * The compiled library currently provides clamp instantiations for float, int,
+ * and uint8_t; kernel validators for float and uint8_t; and image metadata
+ * validation for uint8_t images.
  */
 
 #include <array>
@@ -15,7 +19,8 @@
 /**
  * @brief Clamps a value to a specified range.
  *
- * @tparam ValueType The data type for the value (must support comparison operators)
+ * @tparam ValueType The data type for the value (must support comparison
+ * operators); compiled instantiations are float, int, and uint8_t
  * @param value The value to clamp
  * @param min The minimum bound (inclusive)
  * @param max The maximum bound (inclusive)

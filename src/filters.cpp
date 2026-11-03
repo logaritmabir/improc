@@ -4,8 +4,8 @@
  *
  * This file contains template implementations for various spatial filters,
  * including convolution, median filtering, Gaussian blur, edge detection
- * (Sobel), and sharpening. All CPU-side filtering operations are implemented
- * as template instantiations to support multiple data types.
+ * (Sobel), and sharpening. The library currently explicitly instantiates these
+ * operations for uint8_t images.
  *
  * @see filters.hpp for the function declarations and detailed documentation
  */

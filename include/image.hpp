@@ -10,23 +10,19 @@
  *
  * The Image class provides a flexible container for storing image data with support
  * for multiple channels (grayscale, RGB, etc.) and type flexibility. Data is stored
- * in row-major order with optional stride support.
+ * in tightly packed row-major order; stride() reports the number of elements
+ * between the starts of adjacent rows.
  *
  * This class is designed to work with images loaded from PNM format files (PGM for
  * grayscale, PPM for RGB color). See pnm_funcs.hpp for PNM I/O operations.
  *
- * @tparam PixelType The data type for pixel values (e.g., uint8_t, float)
+ * @tparam PixelType The data type for pixel values. The library currently
+ * explicitly instantiates this class for uint8_t.
  */
 template<typename PixelType>
 class Image {
-private:
-    size_t rows_;
-    size_t cols_;
-    size_t channels_;
-    size_t stride_;
-    std::vector<PixelType> data_;
 public:
-    /// @name Constructors and Destructors
+    /// @name Constructors
     /// @{
 
     /**
@@ -39,9 +35,10 @@ public:
     /**
      * @brief Constructs an image with specified dimensions.
      *
-     * @param rows Number of rows in the image
-     * @param cols Number of columns in the image
-     * @param channels Number of channels per pixel
+     * @param rows Number of rows in the image; must be greater than zero
+     * @param cols Number of columns in the image; must be greater than zero
+     * @param channels Number of channels per pixel; must be greater than zero
+     * @throws std::invalid_argument If any dimension is zero
      */
     Image(size_t rows, size_t cols, size_t channels);
 
@@ -59,10 +56,36 @@ public:
      */
     Image(Image&& other) noexcept;
 
+    /// @}
+
+    /// @name Destructor
+    /// @{
+
     /**
      * @brief Destructor.
      */
     ~Image() noexcept;
+
+    /// @}
+
+    /// @name Assignment Operators
+    /// @{
+
+    /**
+     * @brief Copy assignment operator.
+     *
+     * @param other The image to assign from
+     * @return Reference to this image
+     */
+    Image& operator=(const Image& other);
+
+    /**
+     * @brief Move assignment operator.
+     *
+     * @param other The image to assign from
+     * @return Reference to this image
+     */
+    Image& operator=(Image&& other) noexcept;
 
     /// @}
 
@@ -97,6 +120,7 @@ public:
      * @param col Column index (0-based)
      * @param ch Channel index (default: 0)
      * @return Reference to the pixel value
+     * @throws std::out_of_range If any index is outside the image dimensions
      */
     PixelType& at(size_t row, size_t col, size_t ch = 0);
 
@@ -107,6 +131,7 @@ public:
      * @param col Column index (0-based)
      * @param ch Channel index (default: 0)
      * @return Const reference to the pixel value
+     * @throws std::out_of_range If any index is outside the image dimensions
      */
     const PixelType& at(size_t row, size_t col, size_t ch = 0) const;
 
@@ -194,22 +219,24 @@ public:
 
     /// @}
 
-    /// @}
-
     /// @name Modifiers
     /// @{
 
     /**
-     * @brief Clears the image, freeing all data.
+     * @brief Resets the image to the empty state.
+     *
+     * Sets all dimensions and the element count to zero. The vector may retain
+     * its allocated capacity.
      */
     void clear();
 
     /**
      * @brief Resizes the image to new dimensions.
      *
-     * @param rows New number of rows
-     * @param cols New number of columns
-     * @param channels New number of channels
+     * @param rows New number of rows; must be greater than zero
+     * @param cols New number of columns; must be greater than zero
+     * @param channels New number of channels; must be greater than zero
+     * @throws std::invalid_argument If any dimension is zero
      */
     void resize(size_t rows, size_t cols, size_t channels);
 
@@ -219,27 +246,6 @@ public:
      * @param value The value to fill with
      */
     void fill(const PixelType& value);
-
-    /// @}
-
-    /// @name Assignment Operators
-    /// @{
-
-    /**
-     * @brief Copy assignment operator.
-     *
-     * @param other The image to assign from
-     * @return Reference to this image
-     */
-    Image& operator=(const Image& other);
-
-    /**
-     * @brief Move assignment operator.
-     *
-     * @param other The image to assign from
-     * @return Reference to this image
-     */
-    Image& operator=(Image&& other) noexcept;
 
     /// @}
 
@@ -253,6 +259,8 @@ public:
      * @param col Column index (0-based)
      * @param ch Channel index (default: 0)
      * @return Reference to the pixel value
+     * @pre All indices must be within the image dimensions; this operator does
+     * not perform bounds checking.
      */
     PixelType& operator()(size_t row, size_t col, size_t ch = 0);
 
@@ -263,6 +271,8 @@ public:
      * @param col Column index (0-based)
      * @param ch Channel index (default: 0)
      * @return Const reference to the pixel value
+     * @pre All indices must be within the image dimensions; this operator does
+     * not perform bounds checking.
      */
     const PixelType& operator()(size_t row, size_t col, size_t ch = 0) const;
 
@@ -288,4 +298,11 @@ public:
     bool operator!=(const Image<PixelType>& other) const;
 
     /// @}
+
+private:
+    size_t rows_;
+    size_t cols_;
+    size_t channels_;
+    size_t stride_;
+    std::vector<PixelType> data_;
 };

@@ -44,6 +44,11 @@ The CUDA build path currently compiles successfully with:
 
 There is not yet a dedicated CUDA test suite in `tests/`.
 
+## C++ style
+
+Header and source ordering conventions are documented in
+[CODE_STYLE.md](./CODE_STYLE.md).
+
 ## Project layout
 
 ```text

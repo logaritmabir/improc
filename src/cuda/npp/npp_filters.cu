@@ -2,8 +2,8 @@
  * @file npp_filters.cu
  * @brief Implementation of NPP (NVIDIA Performance Primitives) filtering wrappers.
  *
- * This file contains host-side wrapper implementations for NVIDIA Performance
- * Primitives (NPP) filtering functions that operate on GpuImage buffers.
+ * This file contains a host-side convolution wrapper for NVIDIA Performance
+ * Primitives (NPP) that operates on GpuImage buffers.
  * NPP provides highly optimized implementations of common image processing
  * operations for NVIDIA GPUs.
  *

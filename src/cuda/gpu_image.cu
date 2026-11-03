@@ -5,7 +5,7 @@
  * This file contains the template implementations for the GpuImage class,
  * which manages image data on the GPU device. It provides GPU memory
  * allocation, deallocation, and host-device data transfer operations.
- * All CUDA memory operations use the CUDA_CHECK macro for error handling.
+ * Allocation and transfer errors are reported through CUDA_CHECK.
  *
  * @see GpuImage for the class interface
  * @note Requires CUDA runtime library for cudaMalloc, cudaMemcpy, and cudaFree
@@ -18,13 +18,8 @@
 namespace cuda {
     
     template<typename PixelType>
-    GpuImage<PixelType>::~GpuImage(){
-        if (data_) {
-            cudaFree(data_);
-        }
-    }
-    template<typename PixelType>
-    GpuImage<PixelType>::GpuImage(){}
+    GpuImage<PixelType>::GpuImage()
+        : rows_(0), cols_(0), channels_(0), stride_(0), data_(nullptr) {}
 
     template<typename PixelType>
     GpuImage<PixelType>::GpuImage(size_t rows, size_t cols, size_t channels){
@@ -40,13 +35,47 @@ namespace cuda {
     }
 
     template<typename PixelType>
-    GpuImage<PixelType>::GpuImage(const Image<PixelType>& img){
-        rows_ = img.rows();
-        cols_ = img.cols();
-        channels_ = img.channels();
-        stride_ = img.stride();
-        data_ = nullptr;
+    GpuImage<PixelType>::GpuImage(const Image<PixelType>& img)
+        : rows_(img.rows()), cols_(img.cols()), channels_(img.channels()),
+          stride_(img.stride()), data_(nullptr) {
         allocate();
+    }
+
+    template<typename PixelType>
+    GpuImage<PixelType>::GpuImage(GpuImage&& other) noexcept
+        : rows_(other.rows_), cols_(other.cols_), channels_(other.channels_), stride_(other.stride_), data_(other.data_) {
+        other.data_ = nullptr;
+        other.rows_ = 0;
+        other.cols_ = 0;
+        other.channels_ = 0;
+        other.stride_ = 0;
+    }
+
+    template<typename PixelType>
+    GpuImage<PixelType>::~GpuImage(){
+        if (data_) {
+            cudaFree(data_);
+        }
+    }
+
+    template<typename PixelType>
+    GpuImage<PixelType>& GpuImage<PixelType>::operator=(GpuImage&& other) noexcept {
+        if (this != &other) {
+            if (data_) {
+                cudaFree(data_);
+            }
+            rows_ = other.rows_;
+            cols_ = other.cols_;
+            channels_ = other.channels_;
+            stride_ = other.stride_;
+            data_ = other.data_;
+            other.data_ = nullptr;
+            other.rows_ = 0;
+            other.cols_ = 0;
+            other.channels_ = 0;
+            other.stride_ = 0;
+        }
+        return *this;
     }
 
     template<typename PixelType>

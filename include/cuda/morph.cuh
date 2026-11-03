@@ -6,6 +6,8 @@
  *
  * Declares erosion, dilation, and higher-level morphology routines for
  * single-channel @ref cuda::GpuImage data.
+ * The compiled operations are currently explicitly instantiated for uint8_t
+ * images.
  */
 
 #include "cuda/gpu_image.cuh"
@@ -19,6 +21,9 @@ namespace cuda {
      * @param d_input Source image on the GPU
      * @param d_output Destination image on the GPU
      * @param kernelSize Width of the square structuring element
+     * @throws std::invalid_argument If the kernel width is even, the image
+     * metadata differs, or either image is not single-channel
+     * @throws std::runtime_error If a CUDA operation fails
      */
     template<typename PixelType>
     void erode(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize);
@@ -30,6 +35,9 @@ namespace cuda {
      * @param d_input Source image on the GPU
      * @param d_output Destination image on the GPU
      * @param kernelSize Width of the square structuring element
+     * @throws std::invalid_argument If the kernel width is even, the image
+     * metadata differs, or either image is not single-channel
+     * @throws std::runtime_error If a CUDA operation fails
      */
     template<typename PixelType>
     void dilate(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize);
@@ -41,6 +49,9 @@ namespace cuda {
      * @param d_input Source image on the GPU
      * @param d_output Destination image on the GPU
      * @param kernelSize Width of the square structuring element
+     * @throws std::invalid_argument If the kernel width is even, the image
+     * metadata differs, or either image is not single-channel
+     * @throws std::runtime_error If a CUDA operation fails
      */
     template<typename PixelType>
     void open(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize);
@@ -52,6 +63,9 @@ namespace cuda {
      * @param d_input Source image on the GPU
      * @param d_output Destination image on the GPU
      * @param kernelSize Width of the square structuring element
+     * @throws std::invalid_argument If the kernel width is even, the image
+     * metadata differs, or either image is not single-channel
+     * @throws std::runtime_error If a CUDA operation fails
      */
     template<typename PixelType>
     void close(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize);
@@ -63,6 +77,9 @@ namespace cuda {
      * @param d_input Source image on the GPU
      * @param d_output Destination image on the GPU
      * @param kernelSize Width of the square structuring element
+     * @throws std::invalid_argument If the kernel width is even, the image
+     * metadata differs, or either image is not single-channel
+     * @throws std::runtime_error If a CUDA operation fails
      */
     template<typename PixelType>
     void morphologicalGradient(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize);
@@ -74,6 +91,9 @@ namespace cuda {
      * @param d_input Source image on the GPU
      * @param d_output Destination image on the GPU
      * @param kernelSize Width of the square structuring element
+     * @throws std::invalid_argument If the kernel width is even, the image
+     * metadata differs, or either image is not single-channel
+     * @throws std::runtime_error If a CUDA operation fails
      */
     template<typename PixelType>
     void topHat(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize);
@@ -85,6 +105,9 @@ namespace cuda {
      * @param d_input Source image on the GPU
      * @param d_output Destination image on the GPU
      * @param kernelSize Width of the square structuring element
+     * @throws std::invalid_argument If the kernel width is even, the image
+     * metadata differs, or either image is not single-channel
+     * @throws std::runtime_error If a CUDA operation fails
      */
     template<typename PixelType>
     void bottomHat(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize);
