@@ -21,6 +21,13 @@
  */
 template<typename PixelType>
 class Image {
+private:
+    size_t rows_;
+    size_t cols_;
+    size_t channels_;
+    size_t stride_;
+    std::vector<PixelType> data_;
+
 public:
     /// @name Constructors
     /// @{
@@ -299,10 +306,4 @@ public:
 
     /// @}
 
-private:
-    size_t rows_;
-    size_t cols_;
-    size_t channels_;
-    size_t stride_;
-    std::vector<PixelType> data_;
 };

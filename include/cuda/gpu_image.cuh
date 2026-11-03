@@ -42,6 +42,13 @@ namespace cuda {
      */
     template<typename PixelType>
     class GpuImage{
+    private:
+        size_t rows_;
+        size_t cols_;
+        size_t channels_;
+        size_t stride_;
+        PixelType* data_;
+
     public:
         /// @name Constructors
         /// @{
@@ -199,11 +206,5 @@ namespace cuda {
         void download(Image<PixelType>& dst) const;
         /// @}
 
-    private:
-        size_t rows_;
-        size_t cols_;
-        size_t channels_;
-        size_t stride_;
-        PixelType* data_;
     };
 }
