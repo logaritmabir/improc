@@ -181,6 +181,7 @@ namespace cuda {
          * If memory was previously allocated, it is freed first. The image
          * must have nonzero dimensions.
          *
+         * @throws std::invalid_argument If the allocation size is zero
          * @throws std::runtime_error If CUDA memory allocation fails
          */
         void allocate();

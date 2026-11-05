@@ -106,11 +106,15 @@ namespace cuda {
 
     template<typename PixelType>
     void GpuImage<PixelType>::allocate() {
+        const size_t totalSize = rows_ * stride_ * sizeof(PixelType);
+        if (totalSize == 0) {
+            throw std::invalid_argument("Cannot allocate GPU memory for an empty image.");
+        }
+
         if (data_) {
             cudaFree(data_);
             data_ = nullptr;
         }
-        size_t totalSize = rows_ * stride_ * sizeof(PixelType);
         CUDA_CHECK(cudaMalloc(&data_, totalSize));
     }
 
