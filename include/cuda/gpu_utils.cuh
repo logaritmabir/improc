@@ -81,7 +81,7 @@ namespace cuda {
      * @throws std::invalid_argument If the image metadata does not match
      */
     template<typename PixelType>
-    void checkSameTypeImages(const GpuImage<PixelType>& first, const GpuImage<PixelType>& second);
+    void checkMatchingImageMetadata(const GpuImage<PixelType>& first, const GpuImage<PixelType>& second);
 
     /**
      * @brief Checks that a GPU image and CPU image have matching metadata.
@@ -92,7 +92,7 @@ namespace cuda {
      * @throws std::invalid_argument If the image metadata does not match
      */
     template<typename PixelType>
-    void checkSameTypeImages(const GpuImage<PixelType>& gpuImage, const Image<PixelType>& cpuImage);
+    void checkMatchingImageMetadata(const GpuImage<PixelType>& gpuImage, const Image<PixelType>& cpuImage);
 
     /**
      * @brief Checks that a CPU image and GPU image have matching metadata.
@@ -103,7 +103,7 @@ namespace cuda {
      * @throws std::invalid_argument If the image metadata does not match
      */
     template<typename PixelType>
-    void checkSameTypeImages(const Image<PixelType>& cpuImage, const GpuImage<PixelType>& gpuImage);
+    void checkMatchingImageMetadata(const Image<PixelType>& cpuImage, const GpuImage<PixelType>& gpuImage);
 
     /**
      * @brief Checks that a GPU image contains exactly one channel.

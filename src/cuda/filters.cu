@@ -95,7 +95,7 @@ namespace cuda {
         size_t h_kernelSize
     ) {
         checkSingleChannelImage(d_input);
-        checkSameTypeImages(d_input, d_output);
+        checkMatchingImageMetadata(d_input, d_output);
         checkOddSize(h_kernelSize);
 
         dim3 threads(16, 16);
@@ -126,7 +126,7 @@ namespace cuda {
         KernelType divisor
     ) {
         checkSingleChannelImage(d_input);
-        checkSameTypeImages(d_input, d_output);
+        checkMatchingImageMetadata(d_input, d_output);
         checkOddSize(h_kernelSize);
 
         if (divisor == KernelType{0}) {
@@ -218,7 +218,7 @@ namespace cuda {
     template<typename PixelType>
     void medianFilter(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize) {
         checkSingleChannelImage(d_input);
-        checkSameTypeImages(d_input, d_output);
+        checkMatchingImageMetadata(d_input, d_output);
         checkOddSize(kernelSize);
 
         if (kernelSize <= 1) {
@@ -283,7 +283,7 @@ namespace cuda {
     template<typename PixelType, typename KernelType, typename AccumulatorType>
     void sobelFilter(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output) {
         static_assert(std::is_same<PixelType, uint8_t>::value, "CUDA sobelFilter is currently instantiated for uint8_t only");
-        checkSameTypeImages(d_input, d_output);
+        checkMatchingImageMetadata(d_input, d_output);
         checkSingleChannelImage(d_input);
 
         static const std::array<KernelType, 9> gx = {

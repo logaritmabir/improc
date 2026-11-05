@@ -24,7 +24,7 @@ namespace npp {
         const float* h_kernel, 
         size_t h_kernelSize){
             cuda::checkSingleChannelImage(d_input);
-            cuda::checkSameTypeImages(d_input, d_output);
+            cuda::checkMatchingImageMetadata(d_input, d_output);
             cuda::checkOddSize(h_kernelSize);
             
             float* d_kernel = nullptr;

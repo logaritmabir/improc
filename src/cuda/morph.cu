@@ -94,7 +94,7 @@ namespace cuda {
 
         template<typename PixelType>
         void checkSingleChannelImages(const GpuImage<PixelType>& input, const GpuImage<PixelType>& output) {
-            checkSameTypeImages(input, output);
+            checkMatchingImageMetadata(input, output);
             if (input.channels() != 1 || output.channels() != 1) {
                 throw std::invalid_argument("Morphological CUDA operations check single-channel images");
             }

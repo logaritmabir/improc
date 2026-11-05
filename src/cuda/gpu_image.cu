@@ -40,11 +40,11 @@ namespace cuda {
     template<typename PixelType>
     GpuImage<PixelType>::GpuImage(GpuImage&& other) noexcept
         : rows_(other.rows_), cols_(other.cols_), channels_(other.channels_), stride_(other.stride_), data_(other.data_) {
-        other.data_ = nullptr;
         other.rows_ = 0;
         other.cols_ = 0;
         other.channels_ = 0;
         other.stride_ = 0;
+        other.data_ = nullptr;
     }
 
     template<typename PixelType>
@@ -65,11 +65,11 @@ namespace cuda {
             channels_ = other.channels_;
             stride_ = other.stride_;
             data_ = other.data_;
-            other.data_ = nullptr;
             other.rows_ = 0;
             other.cols_ = 0;
             other.channels_ = 0;
             other.stride_ = 0;
+            other.data_ = nullptr;
         }
         return *this;
     }
@@ -120,7 +120,7 @@ namespace cuda {
 
     template<typename PixelType>
     void GpuImage<PixelType>::upload(const Image<PixelType>& src) {
-        checkSameTypeImages(*this, src);
+        checkMatchingImageMetadata(*this, src);
         if (!data_)
             throw std::runtime_error("GpuImage has no data. Call allocate() first.");
 
@@ -129,7 +129,7 @@ namespace cuda {
 
     template<typename PixelType>
     void GpuImage<PixelType>::download(Image<PixelType>& dst) const {
-        checkSameTypeImages(*this, dst);
+        checkMatchingImageMetadata(*this, dst);
         if (!data_)
             throw std::runtime_error("GpuImage has no data. Call allocate() and upload() first.");
 
