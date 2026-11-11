@@ -30,14 +30,14 @@ namespace cuda {
             const int row = static_cast<int>(flatIndex / cols);
             const int col = static_cast<int>(flatIndex % cols);
             const int radius = static_cast<int>(kernelSize / 2);
-            PixelType minVal = input[index(stride, row, col)];
+            PixelType minVal = input[linearIndex2D(stride, row, col)];
 
             for (int i = -radius; i <= radius; ++i) {
                 for (int j = -radius; j <= radius; ++j) {
                     const int neighborRow = row + i;
                     const int neighborCol = col + j;
                     if (neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < cols) {
-                        const PixelType value = input[index(stride, neighborRow, neighborCol)];
+                        const PixelType value = input[linearIndex2D(stride, neighborRow, neighborCol)];
                         if (value < minVal) {
                             minVal = value;
                         }
@@ -45,7 +45,7 @@ namespace cuda {
                 }
             }
 
-            output[index(stride, row, col)] = minVal;
+            output[linearIndex2D(stride, row, col)] = minVal;
         }
 
         template<typename PixelType>
@@ -60,14 +60,14 @@ namespace cuda {
             const int row = static_cast<int>(flatIndex / cols);
             const int col = static_cast<int>(flatIndex % cols);
             const int radius = static_cast<int>(kernelSize / 2);
-            PixelType maxVal = input[index(stride, row, col)];
+            PixelType maxVal = input[linearIndex2D(stride, row, col)];
 
             for (int i = -radius; i <= radius; ++i) {
                 for (int j = -radius; j <= radius; ++j) {
                     const int neighborRow = row + i;
                     const int neighborCol = col + j;
                     if (neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < cols) {
-                        const PixelType value = input[index(stride, neighborRow, neighborCol)];
+                        const PixelType value = input[linearIndex2D(stride, neighborRow, neighborCol)];
                         if (value > maxVal) {
                             maxVal = value;
                         }
@@ -75,7 +75,7 @@ namespace cuda {
                 }
             }
 
-            output[index(stride, row, col)] = maxVal;
+            output[linearIndex2D(stride, row, col)] = maxVal;
         }
 
         template<typename PixelType>
@@ -89,7 +89,7 @@ namespace cuda {
 
             const int row = static_cast<int>(flatIndex / cols);
             const int col = static_cast<int>(flatIndex % cols);
-            output[index(stride, row, col)] = static_cast<PixelType>(left[index(stride, row, col)] - right[index(stride, row, col)]);
+            output[linearIndex2D(stride, row, col)] = static_cast<PixelType>(left[linearIndex2D(stride, row, col)] - right[linearIndex2D(stride, row, col)]);
         }
 
         template<typename PixelType>
@@ -103,7 +103,7 @@ namespace cuda {
         template<typename PixelType, typename KernelFunction>
         void launchMorphKernel(const GpuImage<PixelType>& input, GpuImage<PixelType>& output, size_t kernelSize, KernelFunction kernel) {
             checkSingleChannelImages(input, output);
-            checkOddSize(kernelSize);
+            requireOddKernelSize(kernelSize);
 
             const size_t total = input.rows() * input.cols();
             const int threads = 256;

@@ -40,15 +40,15 @@ template<typename ElementType>
 void requireNonEmpty(const std::vector<std::vector<ElementType>>& kernel);
 
 /**
- * @brief Requires that the provided size value is odd.
+ * @brief Requires that the provided kernel size is odd.
  *
  * This helper is intended for APIs that accept a kernel/window size and build
  * the kernel internally.
  *
- * @param size The size value to validate
- * @throws std::invalid_argument If @p size is even
+ * @param kernelSize The kernel size to validate
+ * @throws std::invalid_argument If @p kernelSize is even
  */
-void requireOddSize(size_t size);
+void requireOddKernelSize(size_t kernelSize);
 
 /**
  * @brief Requires that the provided dynamic kernel is square and has odd width.

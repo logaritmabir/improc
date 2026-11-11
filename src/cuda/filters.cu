@@ -44,13 +44,13 @@ namespace cuda {
                     const int neighborCol = col + j;
 
                     if (neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < cols) {
-                        sum += static_cast<AccumulatorType>(input[index(cols, neighborRow, neighborCol)]) *
-                            static_cast<AccumulatorType>(kernel[index(kernelWidth, i + filterRadius, j + filterRadius)]);
+                        sum += static_cast<AccumulatorType>(input[linearIndex2D(cols, neighborRow, neighborCol)]) *
+                            static_cast<AccumulatorType>(kernel[linearIndex2D(kernelWidth, i + filterRadius, j + filterRadius)]);
                     }
                 }
             }
 
-            output[index(cols, row, col)] = static_cast<PixelType>(clamp<AccumulatorType>(sum, AccumulatorType{0}, AccumulatorType{255}));
+            output[linearIndex2D(cols, row, col)] = static_cast<PixelType>(clamp<AccumulatorType>(sum, AccumulatorType{0}, AccumulatorType{255}));
         }
     }
 
@@ -77,13 +77,13 @@ namespace cuda {
                     const int neighborCol = col + j;
 
                     if (neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < cols) {
-                        sum += static_cast<AccumulatorType>(input[index(cols, neighborRow, neighborCol)]) *
-                            static_cast<AccumulatorType>(kernel[index(kernelWidth, i + filterRadius, j + filterRadius)]);
+                        sum += static_cast<AccumulatorType>(input[linearIndex2D(cols, neighborRow, neighborCol)]) *
+                            static_cast<AccumulatorType>(kernel[linearIndex2D(kernelWidth, i + filterRadius, j + filterRadius)]);
                     }
                 }
             }
             sum /= static_cast<AccumulatorType>(divisor);
-            output[index(cols, row, col)] = static_cast<PixelType>(clamp<AccumulatorType>(sum, AccumulatorType{0}, AccumulatorType{255}));
+            output[linearIndex2D(cols, row, col)] = static_cast<PixelType>(clamp<AccumulatorType>(sum, AccumulatorType{0}, AccumulatorType{255}));
         }
     }
 
@@ -96,7 +96,7 @@ namespace cuda {
     ) {
         checkSingleChannelImage(d_input);
         checkMatchingImageMetadata(d_input, d_output);
-        checkOddSize(h_kernelSize);
+        requireOddKernelSize(h_kernelSize);
 
         dim3 threads(16, 16);
         dim3 blocks((d_input.cols() + threads.x - 1) / threads.x,(d_input.rows() + threads.y - 1) / threads.y);
@@ -127,7 +127,7 @@ namespace cuda {
     ) {
         checkSingleChannelImage(d_input);
         checkMatchingImageMetadata(d_input, d_output);
-        checkOddSize(h_kernelSize);
+        requireOddKernelSize(h_kernelSize);
 
         if (divisor == KernelType{0}) {
             throw std::invalid_argument("Divisor must not be zero");
@@ -196,7 +196,7 @@ namespace cuda {
                     const int neighborCol = col + j;
 
                     if (neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < cols) {
-                        neighbors[count++] = static_cast<PixelType>(input[index(cols, neighborRow, neighborCol)]);
+                        neighbors[count++] = static_cast<PixelType>(input[linearIndex2D(cols, neighborRow, neighborCol)]);
                     }
                 }
             }
@@ -211,7 +211,7 @@ namespace cuda {
                 neighbors[j + 1] = value;
             }
 
-            output[index(cols, row, col)] = static_cast<PixelType>(neighbors[count / 2]);
+            output[linearIndex2D(cols, row, col)] = static_cast<PixelType>(neighbors[count / 2]);
         }
     }
 
@@ -219,7 +219,7 @@ namespace cuda {
     void medianFilter(const GpuImage<PixelType>& d_input, GpuImage<PixelType>& d_output, size_t kernelSize) {
         checkSingleChannelImage(d_input);
         checkMatchingImageMetadata(d_input, d_output);
-        checkOddSize(kernelSize);
+        requireOddKernelSize(kernelSize);
 
         if (kernelSize <= 1) {
             throw std::invalid_argument("Kernel size must be greater than 1 and odd");

@@ -19,7 +19,7 @@
 
 template<typename PixelType>
 void erode(const Image<PixelType>& input, Image<PixelType>& output, size_t kernel_size){
-    requireOddSize(kernel_size);
+    requireOddKernelSize(kernel_size);
 
     if(input.channels() != 1)
         throw std::invalid_argument("Erosion only works on single-channel (grayscale) images");
@@ -57,7 +57,7 @@ void erode(const Image<PixelType>& input, Image<PixelType>& output, size_t kerne
 
 template<typename PixelType>
 void dilate(const Image<PixelType>& input, Image<PixelType>& output, size_t kernel_size){
-    requireOddSize(kernel_size);
+    requireOddKernelSize(kernel_size);
 
     if(input.channels() != 1)
         throw std::invalid_argument("Dilation only works on single-channel (grayscale) images");

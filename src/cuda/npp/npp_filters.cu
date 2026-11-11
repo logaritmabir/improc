@@ -25,7 +25,7 @@ namespace npp {
         size_t h_kernelSize){
             cuda::checkSingleChannelImage(d_input);
             cuda::checkMatchingImageMetadata(d_input, d_output);
-            cuda::checkOddSize(h_kernelSize);
+            cuda::requireOddKernelSize(h_kernelSize);
             
             float* d_kernel = nullptr;
             CUDA_CHECK(cudaMalloc(reinterpret_cast<void**>(&d_kernel), h_kernelSize * h_kernelSize * sizeof(float)));

@@ -24,9 +24,9 @@ void requireNonEmpty(const std::vector<std::vector<ElementType>>& kernel) {
         throw std::invalid_argument("Kernel cannot be empty");
 }
 
-void requireOddSize(size_t size) {
-    if(size % 2 == 0)
-        throw std::invalid_argument("Size must be odd");
+void requireOddKernelSize(size_t kernelSize) {
+    if(kernelSize % 2 == 0)
+        throw std::invalid_argument("Kernel size must be odd");
 }
 
 template<typename ElementType>
@@ -39,13 +39,13 @@ void requireSquareAndOdd(const std::vector<std::vector<ElementType>>& kernel) {
             throw std::invalid_argument("Kernel must be square");
     }
 
-    requireOddSize(kernelSize);
+    requireOddKernelSize(kernelSize);
 }
 
 template<typename ElementType, size_t KernelSize>
 void requireSquareAndOdd(const std::array<std::array<ElementType, KernelSize>, KernelSize>& kernel) {
     (void)kernel;
-    requireOddSize(KernelSize);
+    requireOddKernelSize(KernelSize);
 }
 
 template<typename PixelType>

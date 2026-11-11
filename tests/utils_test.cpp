@@ -32,8 +32,8 @@ TEST_F(ClampTest, ClampUint8) {
 }
 
 TEST(UtilsValidationTest, RequireOddSizeAcceptsOddValues) {
-    EXPECT_NO_THROW(requireOddSize(3));
-    EXPECT_NO_THROW(requireOddSize(7));
+    EXPECT_NO_THROW(requireOddKernelSize(3));
+    EXPECT_NO_THROW(requireOddKernelSize(7));
 }
 
 TEST(UtilsValidationTest, RequireNonEmptyAcceptsNonEmptyKernel) {
@@ -51,8 +51,8 @@ TEST(UtilsValidationTest, RequireNonEmptyRejectsEmptyKernel) {
 }
 
 TEST(UtilsValidationTest, RequireOddSizeRejectsEvenValues) {
-    EXPECT_THROW(requireOddSize(2), std::invalid_argument);
-    EXPECT_THROW(requireOddSize(0), std::invalid_argument);
+    EXPECT_THROW(requireOddKernelSize(2), std::invalid_argument);
+    EXPECT_THROW(requireOddKernelSize(0), std::invalid_argument);
 }
 
 TEST(UtilsValidationTest, RequireSquareAndOddAcceptsSquareOddVectorKernel) {

@@ -83,7 +83,7 @@ void medianFilter(const Image<PixelType>& input, Image<PixelType>& output, size_
     if(kernelSize <= 1)
         throw std::invalid_argument("Kernel size must be greater than 1 and odd");
 
-    requireOddSize(kernelSize);
+    requireOddKernelSize(kernelSize);
     requireSameTypeImages(input, output);
 
     int filterRadius = static_cast<int>(kernelSize / 2);
