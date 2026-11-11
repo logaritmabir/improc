@@ -13,20 +13,36 @@
 #include <stdexcept>
 
 namespace cuda {
+    namespace {
+        template<typename FirstImageType, typename SecondImageType>
+        void checkMetadata(const FirstImageType& first, const SecondImageType& second) {
+            if (first.rows() != second.rows() ||
+                first.cols() != second.cols() ||
+                first.channels() != second.channels() ||
+                first.stride() != second.stride()) {
+                throw std::invalid_argument("Images must have matching dimensions, channels, and stride");
+            }
+        }
+    }
+
     void requireOddKernelSize(size_t kernelSize) {
         if (kernelSize % 2 == 0) {
             throw std::invalid_argument("Kernel size must be odd");
         }
     }
 
-    template<typename FirstImageType, typename SecondImageType>
-    void checkMatchingImageMetadata(const FirstImageType& first, const SecondImageType& second) {
-        if (first.rows() != second.rows() ||
-            first.cols() != second.cols() ||
-            first.channels() != second.channels() ||
-            first.stride() != second.stride()) {
-            throw std::invalid_argument("Images must have matching dimensions, channels, and stride");
-        }
+    template<typename PixelType>
+    void checkMatchingImageMetadata(
+        const GpuImage<PixelType>& first,
+        const GpuImage<PixelType>& second) {
+        checkMetadata(first, second);
+    }
+
+    template<typename PixelType>
+    void checkMatchingImageMetadata(
+        const GpuImage<PixelType>& first,
+        const Image<PixelType>& second) {
+        checkMetadata(first, second);
     }
 
     template<typename PixelType>
@@ -36,8 +52,12 @@ namespace cuda {
         }
     }
 
-    template void checkMatchingImageMetadata(const GpuImage<uint8_t>& first, const GpuImage<uint8_t>& second);
-    template void checkMatchingImageMetadata(const GpuImage<uint8_t>& gpuImage, const Image<uint8_t>& cpuImage);
+    template void checkMatchingImageMetadata(
+        const GpuImage<uint8_t>& first,
+        const GpuImage<uint8_t>& second);
+    template void checkMatchingImageMetadata(
+        const GpuImage<uint8_t>& first,
+        const Image<uint8_t>& second);
 
     template void checkSingleChannelImage(const GpuImage<uint8_t>& image);
 } // namespace cuda

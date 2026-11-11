@@ -39,14 +39,20 @@ namespace cuda {
     /**
      * @brief Checks that two images have matching metadata.
      *
-     * @tparam FirstImageType Type of the first image
-     * @tparam SecondImageType Type of the second image
+     * @tparam PixelType The shared pixel type of both images
      * @param first First image to validate
      * @param second Second image to validate
      * @throws std::invalid_argument If dimensions, channels, or stride differ
      */
-    template<typename FirstImageType, typename SecondImageType>
-    void checkMatchingImageMetadata(const FirstImageType& first, const SecondImageType& second);
+    template<typename PixelType>
+    void checkMatchingImageMetadata(
+        const GpuImage<PixelType>& first,
+        const GpuImage<PixelType>& second);
+
+    template<typename PixelType>
+    void checkMatchingImageMetadata(
+        const GpuImage<PixelType>& first,
+        const Image<PixelType>& second);
 
     /**
      * @brief Checks that a GPU image contains exactly one channel.
