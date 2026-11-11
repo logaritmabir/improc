@@ -24,9 +24,6 @@ namespace cuda {
     template<typename PixelType>
     GpuImage<PixelType>::GpuImage(size_t rows, size_t cols, size_t channels)
         : rows_(rows), cols_(cols), channels_(channels), stride_(cols * channels), data_(nullptr) {
-        if (rows == 0 || cols == 0 || channels == 0) {
-            throw std::invalid_argument("Rows, columns, and channels must be greater than zero.");
-        }
         allocate();
     }
 
