@@ -1,22 +1,22 @@
-/**
- * @file gpu_image.cu
- * @brief Implementation of GPU-side image container for CUDA operations.
- *
- * This file contains the template implementations for the GpuImage class,
- * which manages image data on the GPU device. It provides GPU memory
- * allocation, deallocation, and host-device data transfer operations.
- * Allocation and transfer errors are reported through CUDA_CHECK.
- *
- * @see GpuImage for the class interface
- * @note Requires CUDA runtime library for cudaMalloc, cudaMemcpy, and cudaFree
- */
+#pragma once
 
-#include "cuda/gpu_image.cuh"
-#include "cuda/gpu_utils.cuh"
 #include <stdexcept>
 
 namespace cuda {
-    
+    namespace detail {
+        template<typename FirstImageType, typename SecondImageType>
+        void requireMatchingImageMetadata(
+            const FirstImageType& first,
+            const SecondImageType& second) {
+            if (first.rows() != second.rows() ||
+                first.cols() != second.cols() ||
+                first.channels() != second.channels() ||
+                first.stride() != second.stride()) {
+                throw std::invalid_argument("Images must have matching dimensions, channels, and stride");
+            }
+        }
+    }
+
     template<typename PixelType>
     GpuImage<PixelType>::GpuImage()
         : rows_(0), cols_(0), channels_(0), stride_(0), data_(nullptr) {}
@@ -36,7 +36,8 @@ namespace cuda {
 
     template<typename PixelType>
     GpuImage<PixelType>::GpuImage(GpuImage&& other) noexcept
-        : rows_(other.rows_), cols_(other.cols_), channels_(other.channels_), stride_(other.stride_), data_(other.data_) {
+        : rows_(other.rows_), cols_(other.cols_), channels_(other.channels_),
+          stride_(other.stride_), data_(other.data_) {
         other.rows_ = 0;
         other.cols_ = 0;
         other.channels_ = 0;
@@ -45,7 +46,7 @@ namespace cuda {
     }
 
     template<typename PixelType>
-    GpuImage<PixelType>::~GpuImage(){
+    GpuImage<PixelType>::~GpuImage() {
         if (data_) {
             cudaFree(data_);
         }
@@ -112,27 +113,31 @@ namespace cuda {
             cudaFree(data_);
             data_ = nullptr;
         }
-        CUDA_CHECK(cudaMalloc(&data_, totalSize));
+        CUDA_CHECK(cudaMalloc(reinterpret_cast<void**>(&data_), totalSize));
     }
 
     template<typename PixelType>
     void GpuImage<PixelType>::upload(const Image<PixelType>& src) {
-        checkMatchingImageMetadata(*this, src);
-        if (!data_)
+        detail::requireMatchingImageMetadata(*this, src);
+        if (!data_) {
             throw std::runtime_error("GpuImage has no data. Call allocate() first.");
+        }
 
-        CUDA_CHECK(cudaMemcpy(data_, src.data(), rows_ * stride_ * sizeof(PixelType), cudaMemcpyHostToDevice));
+        CUDA_CHECK(cudaMemcpy(
+            data_,
+            src.data(),
+            rows_ * stride_ * sizeof(PixelType),
+            cudaMemcpyHostToDevice));
     }
 
     template<typename PixelType>
     void GpuImage<PixelType>::download(Image<PixelType>& dst) const {
-        checkMatchingImageMetadata(*this, dst);
-        if (!data_)
+        detail::requireMatchingImageMetadata(*this, dst);
+        if (!data_) {
             throw std::runtime_error("GpuImage has no data. Call allocate() and upload() first.");
+        }
 
-        size_t totalSize = rows_ * stride_ * sizeof(PixelType);
+        const size_t totalSize = rows_ * stride_ * sizeof(PixelType);
         CUDA_CHECK(cudaMemcpy(dst.data(), data_, totalSize, cudaMemcpyDeviceToHost));
     }
-
-    template class GpuImage<uint8_t>;
 }

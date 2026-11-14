@@ -37,8 +37,7 @@ namespace cuda {
      * in GPU memory. It provides methods for allocating GPU memory and
      * transferring data between host (CPU) and device (GPU).
      *
-     * @tparam PixelType The pixel data type; the library currently explicitly
-     * instantiates this class for uint8_t.
+     * @tparam PixelType The pixel data type stored in GPU memory.
      */
     template<typename PixelType>
     class GpuImage{
@@ -208,4 +207,7 @@ namespace cuda {
         /// @}
 
     };
+
 }
+
+#include "cuda/gpu_image.tpp"

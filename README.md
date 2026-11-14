@@ -1,6 +1,6 @@
 # improc
 
-`improc` is a small C++ image-processing library built around a templated `Image<T>` container, PNM file I/O, CPU image operations, and an optional CUDA path for GPU-resident `uint8_t` images.
+`improc` is a small C++ image-processing library built around templated `Image<T>` and `cuda::GpuImage<T>` containers, PNM file I/O, CPU image operations, and an optional CUDA path.
 
 ## What is implemented
 
@@ -10,7 +10,7 @@
 - Point operations: `invert`, `threshold`, `histogramEqualization`
 - CPU filters: `convolve`, `medianFilter`, `gaussianBlur`, `sobelFilter`, `sharpeningFilter`, `laplacianFilter`
 - CPU morphology: `erode`, `dilate`, `open`, `close`, `morphologicalGradient`, `topHat`, `bottomHat`
-- CUDA image container: `cuda::GpuImage<uint8_t>`
+- CUDA image container: `cuda::GpuImage<T>`
 - CUDA filters: `cuda::convolve`, `cuda::medianFilter`, `cuda::gaussianBlur`, `cuda::sobelFilter`, `cuda::sharpeningFilter`, `cuda::laplacianFilter`
 - CUDA morphology: `cuda::erode`, `cuda::dilate`, `cuda::open`, `cuda::close`, `cuda::morphologicalGradient`, `cuda::topHat`, `cuda::bottomHat`
 
@@ -62,6 +62,7 @@ include/
   utils.hpp
   cuda/
     gpu_image.cuh
+    gpu_image.tpp
     gpu_utils.cuh
     filters.cuh
     morph.cuh
@@ -73,7 +74,6 @@ src/
   utils.cpp
   main.cpp
   cuda/
-    gpu_image.cu
     gpu_utils.cu
     filters.cu
     morph.cu
