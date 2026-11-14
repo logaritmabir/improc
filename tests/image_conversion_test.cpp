@@ -45,3 +45,33 @@ TEST(ImageConversionTest, RgbToGrayscaleRejectsNonRgbImage) {
     Image<uint8_t> output(5, 5, 1);
     EXPECT_THROW(rgbToGrayscale(grayscale, output), std::invalid_argument);
 }
+
+TEST(ImageConversionTest, ConvertImageTypeCastsPixelValuesWithoutScaling) {
+    Image<uint8_t> input(1, 2, 1);
+    input(0, 0) = 255;
+    input(0, 1) = 17;
+    Image<float> output(1, 2, 1);
+
+    convertImageType(input, output);
+
+    EXPECT_FLOAT_EQ(output(0, 0), 255.0f);
+    EXPECT_FLOAT_EQ(output(0, 1), 17.0f);
+}
+
+TEST(ImageConversionTest, ConvertImageTypeRejectsMismatchedDimensionsBeforeWriting) {
+    Image<uint8_t> input(2, 2, 1);
+    input.fill(10);
+    Image<float> output(1, 2, 1);
+    output.fill(99.0f);
+
+    EXPECT_THROW(convertImageType(input, output), std::invalid_argument);
+    EXPECT_FLOAT_EQ(output(0, 0), 99.0f);
+    EXPECT_FLOAT_EQ(output(0, 1), 99.0f);
+}
+
+TEST(ImageConversionTest, ConvertImageTypeRejectsMismatchedChannels) {
+    Image<uint8_t> input(1, 1, 3);
+    Image<float> output(1, 1, 1);
+
+    EXPECT_THROW(convertImageType(input, output), std::invalid_argument);
+}

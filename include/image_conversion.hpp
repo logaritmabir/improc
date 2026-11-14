@@ -45,4 +45,20 @@ void extractChannel(const Image<PixelType>& input, Image<PixelType>& output, siz
 template<typename PixelType>
 void rgbToGrayscale(const Image<PixelType>& input, Image<PixelType>& output);
 
+/**
+ * @brief Converts each pixel to a different pixel type.
+ *
+ * Applies `static_cast<DestinationPixelType>` to each pixel value. Values are
+ * not normalized or clamped; callers must ensure that values are representable
+ * by the destination type.
+ *
+ * @tparam SourcePixelType Source image pixel type
+ * @tparam DestinationPixelType Destination image pixel type
+ * @param input Source image
+ * @param output Destination image; must match the source dimensions and channel count
+ * @throws std::invalid_argument If the image dimensions or channel counts differ
+ */
+template<typename SourcePixelType, typename DestinationPixelType>
+void convertImageType(const Image<SourcePixelType>& input, Image<DestinationPixelType>& output);
+
 #include "image_conversion.tpp"

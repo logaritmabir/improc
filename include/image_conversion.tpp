@@ -33,3 +33,20 @@ void rgbToGrayscale(const Image<PixelType>& input, Image<PixelType>& output) {
         }
     }
 }
+
+template<typename SourcePixelType, typename DestinationPixelType>
+void convertImageType(const Image<SourcePixelType>& input, Image<DestinationPixelType>& output) {
+    if (input.rows() != output.rows() ||
+        input.cols() != output.cols() ||
+        input.channels() != output.channels()) {
+        throw std::invalid_argument("Input and output images must have matching dimensions and channels");
+    }
+
+    for (size_t row = 0; row < input.rows(); row++) {
+        for (size_t col = 0; col < input.cols(); col++) {
+            for (size_t ch = 0; ch < input.channels(); ch++) {
+                output.at(row, col, ch) = static_cast<DestinationPixelType>(input.at(row, col, ch));
+            }
+        }
+    }
+}
