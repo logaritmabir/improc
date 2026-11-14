@@ -24,9 +24,7 @@ namespace cuda {
      * @return The clamped value within [min, max]
      */
     template<typename ValueType>
-    __device__ __forceinline__ ValueType clamp(ValueType value, ValueType min, ValueType max) {
-        return value < min ? min : (value > max ? max : value);
-    }
+    __device__ __forceinline__ ValueType clamp(ValueType value, ValueType min, ValueType max);
 
     /**
      * @brief Requires that the provided kernel size is odd.
@@ -39,20 +37,16 @@ namespace cuda {
     /**
      * @brief Checks that two images have matching metadata.
      *
-     * @tparam PixelType The shared pixel type of both images
+     * @tparam FirstImageType Type of the first image
+     * @tparam SecondImageType Type of the second image
      * @param first First image to validate
      * @param second Second image to validate
      * @throws std::invalid_argument If dimensions, channels, or stride differ
      */
-    template<typename PixelType>
+    template<typename FirstImageType, typename SecondImageType>
     void checkMatchingImageMetadata(
-        const GpuImage<PixelType>& first,
-        const GpuImage<PixelType>& second);
-
-    template<typename PixelType>
-    void checkMatchingImageMetadata(
-        const GpuImage<PixelType>& first,
-        const Image<PixelType>& second);
+        const FirstImageType& first,
+        const SecondImageType& second);
 
     /**
      * @brief Checks that a GPU image contains exactly one channel.
@@ -72,8 +66,8 @@ namespace cuda {
      * @param col Column index
      * @return Linear index (row * cols + col)
      */
-    __device__ __forceinline__ size_t linearIndex2D(size_t cols, size_t row, size_t col) {
-        return row * cols + col;
-    }
+    __device__ __forceinline__ size_t linearIndex2D(size_t cols, size_t row, size_t col);
 
 } // namespace cuda
+
+#include "cuda/gpu_utils.tpp"

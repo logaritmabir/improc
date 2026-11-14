@@ -13,51 +13,9 @@
 #include <stdexcept>
 
 namespace cuda {
-    namespace {
-        template<typename FirstImageType, typename SecondImageType>
-        void checkMetadata(const FirstImageType& first, const SecondImageType& second) {
-            if (first.rows() != second.rows() ||
-                first.cols() != second.cols() ||
-                first.channels() != second.channels() ||
-                first.stride() != second.stride()) {
-                throw std::invalid_argument("Images must have matching dimensions, channels, and stride");
-            }
-        }
-    }
-
     void requireOddKernelSize(size_t kernelSize) {
         if (kernelSize % 2 == 0) {
             throw std::invalid_argument("Kernel size must be odd");
         }
     }
-
-    template<typename PixelType>
-    void checkMatchingImageMetadata(
-        const GpuImage<PixelType>& first,
-        const GpuImage<PixelType>& second) {
-        checkMetadata(first, second);
-    }
-
-    template<typename PixelType>
-    void checkMatchingImageMetadata(
-        const GpuImage<PixelType>& first,
-        const Image<PixelType>& second) {
-        checkMetadata(first, second);
-    }
-
-    template<typename PixelType>
-    void checkSingleChannelImage(const GpuImage<PixelType>& image) {
-        if (image.channels() != 1) {
-            throw std::invalid_argument("CUDA image operation requires a single-channel image");
-        }
-    }
-
-    template void checkMatchingImageMetadata(
-        const GpuImage<uint8_t>& first,
-        const GpuImage<uint8_t>& second);
-    template void checkMatchingImageMetadata(
-        const GpuImage<uint8_t>& first,
-        const Image<uint8_t>& second);
-
-    template void checkSingleChannelImage(const GpuImage<uint8_t>& image);
 } // namespace cuda

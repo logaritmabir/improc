@@ -1,21 +1,9 @@
 #pragma once
 
+#include "cuda/gpu_utils.cuh"
 #include <stdexcept>
 
 namespace cuda {
-    namespace detail {
-        template<typename FirstImageType, typename SecondImageType>
-        void requireMatchingImageMetadata(
-            const FirstImageType& first,
-            const SecondImageType& second) {
-            if (first.rows() != second.rows() ||
-                first.cols() != second.cols() ||
-                first.channels() != second.channels() ||
-                first.stride() != second.stride()) {
-                throw std::invalid_argument("Images must have matching dimensions, channels, and stride");
-            }
-        }
-    }
 
     template<typename PixelType>
     GpuImage<PixelType>::GpuImage()
@@ -118,7 +106,7 @@ namespace cuda {
 
     template<typename PixelType>
     void GpuImage<PixelType>::upload(const Image<PixelType>& src) {
-        detail::requireMatchingImageMetadata(*this, src);
+        checkMatchingImageMetadata(*this, src);
         if (!data_) {
             throw std::runtime_error("GpuImage has no data. Call allocate() first.");
         }
@@ -132,7 +120,7 @@ namespace cuda {
 
     template<typename PixelType>
     void GpuImage<PixelType>::download(Image<PixelType>& dst) const {
-        detail::requireMatchingImageMetadata(*this, dst);
+        checkMatchingImageMetadata(*this, dst);
         if (!data_) {
             throw std::runtime_error("GpuImage has no data. Call allocate() and upload() first.");
         }
@@ -140,4 +128,5 @@ namespace cuda {
         const size_t totalSize = rows_ * stride_ * sizeof(PixelType);
         CUDA_CHECK(cudaMemcpy(dst.data(), data_, totalSize, cudaMemcpyDeviceToHost));
     }
-}
+
+} // namespace cuda
