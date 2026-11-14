@@ -94,8 +94,12 @@
 
 int main() {
     Image<uint8_t> sample_img;
+    Image<uint8_t> sample_img_black;
+    Image<uint8_t> sample_img_white;
     try {
         readPNM("../images/samples/sampleGRAY.pgm", sample_img, PNMFormat::P5);
+        readPNM("../images/samples/sampleBLACK.pgm", sample_img_black, PNMFormat::P5);
+        readPNM("../images/samples/sampleWHITE.pgm", sample_img_white, PNMFormat::P5);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
@@ -154,8 +158,8 @@ int main() {
     bottomHat(sample_img, bottomHat_img, 3);
 
     // Histogram equalization test
-    Image<uint8_t> histogramEqualized_img = sample_img;
-    histogramEqualization(sample_img, histogramEqualized_img);
+    Image<uint8_t> histogramEqualized_img = sample_img_white;
+    histogramEqualization(sample_img_white, histogramEqualized_img);
 
     #ifdef BUILD_WITH_CUDA
     // CUDA convolution test

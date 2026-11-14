@@ -89,3 +89,14 @@ TEST_F(PointOpsTest, ThresholdMultiChannelOutput) {
     Image<uint8_t> output(3, 3, 3);
     EXPECT_THROW(threshold(img1, output, (uint8_t)128), std::invalid_argument);
 }
+
+TEST_F(PointOpsTest, HistogramEqualizationBlackImage) {
+    Image<uint8_t> black(3, 3, 1);
+    black.fill(0);
+    Image<uint8_t> output(3, 3, 1);
+
+    EXPECT_NO_THROW(histogramEqualization(black, output));
+    for (size_t i = 0; i < output.size(); ++i) {
+        EXPECT_EQ(output.data()[i], 0);
+    }
+}

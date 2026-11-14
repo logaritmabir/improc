@@ -61,6 +61,7 @@ void threshold(const Image<PixelType>& input, Image<PixelType>& output, const Pi
  * @note This implementation processes channel 0; pass a single-channel image
  * for grayscale equalization.
  * @note The output range is normalized to [0, 255] for proper display.
+ * @note An all-black input is copied to the output unchanged.
  */
 template<typename PixelType>
 void histogramEqualization(const Image<PixelType>& input, Image<PixelType>& output);

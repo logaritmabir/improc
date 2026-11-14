@@ -28,6 +28,17 @@ void readPNM(const std::string& filename, Image<PixelType>& img, PNMFormat forma
         throw std::runtime_error("Invalid PNM header in file: " + filename);
     }
 
+    size_t channels;
+    if (format == PNMFormat::P5 && magic == "P5") {
+        channels = 1u;
+    } else if (format == PNMFormat::P6 && magic == "P6") {
+        channels = 3u;
+    } else if (format != PNMFormat::P5 && format != PNMFormat::P6) {
+        throw std::invalid_argument("Unsupported PNM input format.");
+    } else {
+        throw std::runtime_error("PNM magic number does not match the requested format in file: " + filename);
+    }
+
     infile.get();
     std::string comment;
     while (infile.peek() == '#') {
@@ -45,15 +56,6 @@ void readPNM(const std::string& filename, Image<PixelType>& img, PNMFormat forma
         throw std::runtime_error("Unsupported max color value (only 255 is supported): " + std::to_string(maxColorValue));
     }
 
-    size_t channels;
-    if (format == PNMFormat::P5) {
-        channels = 1u;
-    } else if (format == PNMFormat::P6) {
-        channels = 3u;
-    } else {
-        throw std::invalid_argument("Unsupported PNM input format.");
-    }
-
     img = Image<PixelType>(height, width, channels);
     infile.read(reinterpret_cast<char*>(img.data()), width * height * channels * sizeof(PixelType));
 
@@ -65,12 +67,19 @@ void readPNM(const std::string& filename, Image<PixelType>& img, PNMFormat forma
 template<typename PixelType>
 void savePNM(const std::string& filename, const Image<PixelType>& img, PNMFormat format) {
     const char* magic;
+    size_t channels;
     if (format == PNMFormat::P5) {
         magic = "P5";
+        channels = 1u;
     } else if (format == PNMFormat::P6) {
         magic = "P6";
+        channels = 3u;
     } else {
         throw std::invalid_argument("Unsupported PNM output format.");
+    }
+
+    if (img.channels() != channels) {
+        throw std::invalid_argument("Image channel count does not match the requested PNM format.");
     }
 
     std::ofstream outfile(filename, std::ios::binary);

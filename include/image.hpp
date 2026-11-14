@@ -16,8 +16,7 @@
  * This class is designed to work with images loaded from PNM format files (PGM for
  * grayscale, PPM for RGB color). See pnm_funcs.hpp for PNM I/O operations.
  *
- * @tparam PixelType The data type for pixel values. The library currently
- * explicitly instantiates this class for uint8_t.
+ * @tparam PixelType The data type for pixel values.
  */
 template<typename PixelType>
 class Image {
@@ -307,3 +306,5 @@ public:
     /// @}
 
 };
+
+#include "image.tpp"

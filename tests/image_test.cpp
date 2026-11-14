@@ -346,3 +346,18 @@ TEST_F(ImageTest, StrideCalculation) {
     Image<uint8_t> img3(10, 20, 1);
     EXPECT_EQ(img3.stride(), 20u);
 }
+
+TEST(ImageGenericPixelTypeTest, SupportsOtherPixelTypes) {
+    Image<float> floatImage(1, 2, 1);
+    floatImage(0, 0) = 1.5f;
+    floatImage(0, 1) = 2.5f;
+    EXPECT_FLOAT_EQ(floatImage(0, 1), 2.5f);
+
+    Image<double> doubleImage(1, 1, 1);
+    doubleImage.fill(3.25);
+    EXPECT_DOUBLE_EQ(doubleImage(0, 0), 3.25);
+
+    Image<int> intImage(1, 1, 1);
+    intImage.fill(42);
+    EXPECT_EQ(intImage(0, 0), 42);
+}

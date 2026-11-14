@@ -54,6 +54,7 @@ Header and source ordering conventions are documented in
 ```text
 include/
   image.hpp
+  image.tpp
   filters.hpp
   morph.hpp
   point_ops.hpp
@@ -65,7 +66,6 @@ include/
     filters.cuh
     morph.cuh
 src/
-  image.cpp
   filters.cpp
   morph.cpp
   point_ops.cpp

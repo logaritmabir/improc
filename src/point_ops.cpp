@@ -76,6 +76,11 @@ void histogramEqualization(const Image<PixelType>& input, Image<PixelType>& outp
     }
 
     int totalPixels = rows * cols;
+    if (totalPixels == cdf[0]) {
+        output = input;
+        return;
+    }
+
     for(int r = 0; r < rows; r++){
         for(int c = 0; c < cols; c++){
             output(r,c) = static_cast<PixelType>((cdf[static_cast<int>(input(r,c))] - cdf[0]) * 255 / (totalPixels - cdf[0]));
