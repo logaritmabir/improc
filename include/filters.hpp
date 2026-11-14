@@ -157,7 +157,7 @@ void gaussianBlur(const Image<PixelType>& input, Image<PixelType>& output);
  *           [-2  0  2]          [ 0  0  0]
  *           [-1  0  1]          [-1 -2 -1]
  *
- * @see rgbToGrayscale() in pnm_funcs.hpp to convert color images to grayscale
+ * @see rgbToGrayscale() in image_conversion.hpp to convert color images to grayscale
  */
 template<typename PixelType>
 void sobelFilter(const Image<PixelType>& input, Image<PixelType>& output);
@@ -199,7 +199,7 @@ void sharpeningFilter(const Image<PixelType>& input, Image<PixelType>& output);
  * @note For conventional edge detection, apply to grayscale images.
  * @note Output values are clamped to [0, 255] range
  *
- * @see rgbToGrayscale() in pnm_funcs.hpp to convert color images to grayscale
+ * @see rgbToGrayscale() in image_conversion.hpp to convert color images to grayscale
  */
 template<typename PixelType>
 void laplacianFilter(const Image<PixelType>& input, Image<PixelType>& output);

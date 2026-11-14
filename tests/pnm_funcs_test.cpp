@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
 #include "pnm_funcs.hpp"
-#include "image.hpp"
 #include <cstdint>
-#include <fstream>
+#include <cstdio>
 
 class PNMTest : public ::testing::Test {
 protected:
@@ -108,50 +107,6 @@ TEST_F(PNMTest, SavePNMAcceptsMatchingChannelCount) {
 
     Image<uint8_t> color(2, 2, 3);
     ASSERT_NO_THROW(savePNM("test_specific.ppm", color, PNMFormat::P6));
-}
-
-TEST_F(PNMTest, ExtractChannel) {
-    Image<uint8_t> rgb(5, 5, 3);
-    rgb.fill(100);
-    rgb(0, 0, 0) = 255;
-    rgb(0, 0, 1) = 128;
-    rgb(0, 0, 2) = 64;
-    
-    Image<uint8_t> redChannel(5, 5, 1);
-    extractChannel(rgb, redChannel, 0);
-    
-    EXPECT_EQ(redChannel(0, 0, 0), 255);
-    EXPECT_EQ(redChannel(1, 1, 0), 100);
-}
-
-TEST_F(PNMTest, ExtractChannelInvalidImage) {
-    Image<uint8_t> grayscale(5, 5, 1);
-    Image<uint8_t> output(5, 5, 1);
-    EXPECT_THROW(extractChannel(grayscale, output, 0), std::invalid_argument);
-}
-
-TEST_F(PNMTest, ExtractChannelInvalidChannel) {
-    Image<uint8_t> rgb(5, 5, 3);
-    Image<uint8_t> output(5, 5, 1);
-    EXPECT_THROW(extractChannel(rgb, output, 3), std::invalid_argument);
-}
-
-TEST_F(PNMTest, RgbToGrayscale) {
-    Image<uint8_t> rgb(2, 2, 3);
-    rgb(0, 0, 0) = 255; // R
-    rgb(0, 0, 1) = 0;   // G
-    rgb(0, 0, 2) = 0;   // B
-    
-    Image<uint8_t> gray(2, 2, 1);
-    rgbToGrayscale(rgb, gray);
-    
-    EXPECT_EQ(gray(0, 0, 0), 76); // 0.299 * 255 ≈ 76
-}
-
-TEST_F(PNMTest, RgbToGrayscaleInvalidImage) {
-    Image<uint8_t> grayscale(5, 5, 1);
-    Image<uint8_t> output(5, 5, 1);
-    EXPECT_THROW(rgbToGrayscale(grayscale, output), std::invalid_argument);
 }
 
 TEST_F(PNMTest, ReadNonexistentFile) {

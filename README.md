@@ -55,6 +55,8 @@ Header and source ordering conventions are documented in
 include/
   image.hpp
   image.tpp
+  image_conversion.hpp
+  image_conversion.tpp
   filters.hpp
   morph.hpp
   point_ops.hpp
@@ -108,9 +110,10 @@ The caller must select the format that matches the input file or output image;
 the reader uses this selection to determine the channel count and does not
 auto-detect the file format.
 
-`extractChannel` and `rgbToGrayscale` also operate on `Image<uint8_t>`. Both
-expect a three-channel RGB input and throw `std::invalid_argument` when that
-input requirement (or, for `extractChannel`, the channel index) is invalid.
+`extractChannel` and `rgbToGrayscale` are image transformations declared in
+`image_conversion.hpp`, independent of PNM file I/O. Both expect a three-channel
+RGB input and throw `std::invalid_argument` when that input requirement (or,
+for `extractChannel`, the channel index) is invalid.
 
 ## Minimal CUDA example
 
