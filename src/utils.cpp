@@ -2,71 +2,14 @@
  * @file utils.cpp
  * @brief Implementation of utility functions for image processing operations.
  *
- * This file contains implementations of helper and validation functions
- * used throughout the image processing library. These include value clamping,
- * kernel validation (checking for odd sizes, square dimensions), and
- * image compatibility verification.
+ * This file contains the non-template kernel-size validation function.
  *
  * @see utils.hpp for the function declarations and detailed documentation
  */
 
 #include "utils.hpp"
-#include <algorithm>
-
-template<typename ValueType>
-ValueType clamp(ValueType value, ValueType min, ValueType max) {
-    return std::min(std::max(value, min), max);
-}
-
-template<typename ElementType>
-void requireNonEmpty(const std::vector<std::vector<ElementType>>& kernel) {
-    if(kernel.empty())
-        throw std::invalid_argument("Kernel cannot be empty");
-}
 
 void requireOddKernelSize(size_t kernelSize) {
     if(kernelSize % 2 == 0)
         throw std::invalid_argument("Kernel size must be odd");
 }
-
-template<typename ElementType>
-void requireSquareAndOdd(const std::vector<std::vector<ElementType>>& kernel) {
-    requireNonEmpty(kernel);
-
-    const size_t kernelSize = kernel.size();
-    for(const auto& row : kernel) {
-        if(row.size() != kernelSize)
-            throw std::invalid_argument("Kernel must be square");
-    }
-
-    requireOddKernelSize(kernelSize);
-}
-
-template<typename ElementType, size_t KernelSize>
-void requireSquareAndOdd(const std::array<std::array<ElementType, KernelSize>, KernelSize>& kernel) {
-    (void)kernel;
-    requireOddKernelSize(KernelSize);
-}
-
-template<typename PixelType>
-void requireSameTypeImages(const Image<PixelType>& first, const Image<PixelType>& second) {
-    if(first.rows() != second.rows() ||
-       first.cols() != second.cols() ||
-       first.channels() != second.channels() ||
-       first.stride() != second.stride()) {
-        throw std::invalid_argument("Images must have matching dimensions, channels, and stride");
-    }
-}
-
-template float clamp(float value, float min, float max);
-template int clamp(int value, int min, int max);
-template uint8_t clamp(uint8_t value, uint8_t min, uint8_t max);
-
-template void requireNonEmpty(const std::vector<std::vector<float>>& kernel);
-template void requireNonEmpty(const std::vector<std::vector<uint8_t>>& kernel);
-
-template void requireSquareAndOdd(const std::vector<std::vector<float>>& kernel);
-template void requireSquareAndOdd(const std::vector<std::vector<uint8_t>>& kernel);
-template void requireSquareAndOdd(const std::array<std::array<float, 3>, 3>& kernel);
-
-template void requireSameTypeImages(const Image<uint8_t>& first, const Image<uint8_t>& second);

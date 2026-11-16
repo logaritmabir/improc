@@ -90,6 +90,13 @@ TEST(UtilsValidationTest, RequireSameTypeImagesAcceptsMatchingImages) {
     EXPECT_NO_THROW(requireSameTypeImages(img1, img2));
 }
 
+TEST(UtilsValidationTest, RequireSameTypeImagesAcceptsOtherPixelTypes) {
+    Image<float> img1(3, 3, 1);
+    Image<float> img2(3, 3, 1);
+
+    EXPECT_NO_THROW(requireSameTypeImages(img1, img2));
+}
+
 TEST(UtilsValidationTest, RequireSameTypeImagesRejectsDifferentRows) {
     Image<uint8_t> img1(3, 3, 1);
     Image<uint8_t> img2(4, 3, 1);
