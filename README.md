@@ -6,7 +6,8 @@
 
 - CPU image container and utilities
 - P5/P6 PNM I/O for `uint8_t` images only
-- RGB channel extraction and RGB-to-grayscale conversion for `uint8_t` images
+- Image conversions: RGB channel extraction, RGB-to-grayscale, pixel-type
+  conversion, and explicit value-range conversion
 - Point operations: `invert`, `threshold`, `histogramEqualization`
 - CPU filters: `convolve`, `medianFilter`, `gaussianBlur`, `sobelFilter`, `sharpeningFilter`, `laplacianFilter`
 - CPU morphology: `erode`, `dilate`, `open`, `close`, `morphologicalGradient`, `topHat`, `bottomHat`
@@ -114,6 +115,11 @@ auto-detect the file format.
 `image_conversion.hpp`, independent of PNM file I/O. Both expect a three-channel
 RGB input and throw `std::invalid_argument` when that input requirement (or,
 for `extractChannel`, the channel index) is invalid.
+
+`convertImageType` changes the pixel type without scaling values.
+`convertImageRange` explicitly maps values between caller-provided ranges,
+clamps to the destination range, and rounds when the destination pixel type is
+integral.
 
 ## Minimal CUDA example
 

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cmath>
+#include <limits>
+#include <type_traits>
+
 template<typename PixelType>
 void extractChannel(const Image<PixelType>& input, Image<PixelType>& output, size_t channel) {
     if (input.channels() != 3) {
@@ -46,6 +50,85 @@ void convertImageType(const Image<SourcePixelType>& input, Image<DestinationPixe
         for (size_t col = 0; col < input.cols(); col++) {
             for (size_t ch = 0; ch < input.channels(); ch++) {
                 output.at(row, col, ch) = static_cast<DestinationPixelType>(input.at(row, col, ch));
+            }
+        }
+    }
+}
+
+
+template<typename SourcePixelType, typename DestinationPixelType>
+void convertImageRange(
+    const Image<SourcePixelType>& input,
+    Image<DestinationPixelType>& output,
+    long double sourceMin,
+    long double sourceMax,
+    long double destinationMin,
+    long double destinationMax) {
+    static_assert(std::is_arithmetic<SourcePixelType>::value,
+        "Source pixel type must be arithmetic");
+    static_assert(std::is_arithmetic<DestinationPixelType>::value,
+        "Destination pixel type must be arithmetic");
+
+    if (!std::isfinite(sourceMin) || !std::isfinite(sourceMax) ||
+        !std::isfinite(destinationMin) || !std::isfinite(destinationMax) ||
+        sourceMin >= sourceMax || destinationMin >= destinationMax) {
+        throw std::invalid_argument("Image conversion ranges must be finite and ascending");
+    }
+
+    const long double sourceRange = sourceMax - sourceMin;
+    const long double destinationRange = destinationMax - destinationMin;
+    if (!std::isfinite(sourceRange) || !std::isfinite(destinationRange)) {
+        throw std::invalid_argument("Image conversion range widths must be finite");
+    }
+
+    if (input.rows() != output.rows() ||
+        input.cols() != output.cols() ||
+        input.channels() != output.channels()) {
+        throw std::invalid_argument("Input and output images must have matching dimensions and channels");
+    }
+
+    const long double destinationTypeMin =
+        static_cast<long double>(std::numeric_limits<DestinationPixelType>::lowest());
+    const long double destinationTypeMax =
+        static_cast<long double>(std::numeric_limits<DestinationPixelType>::max());
+    if (destinationMin < destinationTypeMin || destinationMax > destinationTypeMax) {
+        throw std::invalid_argument("Destination range is not representable by the destination pixel type");
+    }
+
+    if (std::is_integral<DestinationPixelType>::value) {
+        for (size_t row = 0; row < input.rows(); row++) {
+            for (size_t col = 0; col < input.cols(); col++) {
+                for (size_t ch = 0; ch < input.channels(); ch++) {
+                    if (std::isnan(static_cast<long double>(input.at(row, col, ch)))) {
+                        throw std::invalid_argument("Cannot convert NaN pixels to an integer type");
+                    }
+                }
+            }
+        }
+    }
+
+    for (size_t row = 0; row < input.rows(); row++) {
+        for (size_t col = 0; col < input.cols(); col++) {
+            for (size_t ch = 0; ch < input.channels(); ch++) {
+                long double value = static_cast<long double>(input.at(row, col, ch));
+                if (value < sourceMin) {
+                    value = sourceMin;
+                } else if (value > sourceMax) {
+                    value = sourceMax;
+                }
+
+                long double convertedValue =
+                    destinationMin + ((value - sourceMin) / sourceRange) * destinationRange;
+                if (convertedValue < destinationMin) {
+                    convertedValue = destinationMin;
+                } else if (convertedValue > destinationMax) {
+                    convertedValue = destinationMax;
+                }
+
+                if (std::is_integral<DestinationPixelType>::value) {
+                    convertedValue = std::round(convertedValue);
+                }
+                output.at(row, col, ch) = static_cast<DestinationPixelType>(convertedValue);
             }
         }
     }

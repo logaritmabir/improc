@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "image_conversion.hpp"
 #include <cstdint>
+#include <limits>
 
 TEST(ImageConversionTest, ExtractChannel) {
     Image<uint8_t> rgb(5, 5, 3);
@@ -74,4 +75,67 @@ TEST(ImageConversionTest, ConvertImageTypeRejectsMismatchedChannels) {
     Image<float> output(1, 1, 1);
 
     EXPECT_THROW(convertImageType(input, output), std::invalid_argument);
+}
+
+TEST(ImageConversionTest, ConvertImageRangeNormalizesUint8ToUnitFloatRange) {
+    Image<uint8_t> input(1, 3, 1);
+    input(0, 0) = 0;
+    input(0, 1) = 128;
+    input(0, 2) = 255;
+    Image<float> output(1, 3, 1);
+
+    convertImageRange(input, output, 0, 255, 0, 1);
+
+    EXPECT_FLOAT_EQ(output(0, 0), 0.0f);
+    EXPECT_NEAR(output(0, 1), 128.0f / 255.0f, 1e-6f);
+    EXPECT_FLOAT_EQ(output(0, 2), 1.0f);
+}
+
+TEST(ImageConversionTest, ConvertImageRangeDenormalizesAndClampsToUint8) {
+    Image<float> input(1, 4, 1);
+    input(0, 0) = 0.0f;
+    input(0, 1) = 0.5f;
+    input(0, 2) = 1.5f;
+    input(0, 3) = -0.5f;
+    Image<uint8_t> output(1, 4, 1);
+
+    convertImageRange(input, output, 0, 1, 0, 255);
+
+    EXPECT_EQ(output(0, 0), 0);
+    EXPECT_EQ(output(0, 1), 128);
+    EXPECT_EQ(output(0, 2), 255);
+    EXPECT_EQ(output(0, 3), 0);
+}
+
+TEST(ImageConversionTest, ConvertImageRangeRejectsInvalidRangesBeforeWriting) {
+    Image<uint8_t> input(1, 1, 1);
+    input(0, 0) = 128;
+    Image<float> output(1, 1, 1);
+    output(0, 0) = 42.0f;
+
+    EXPECT_THROW(convertImageRange(input, output, 1, 1, 0, 1), std::invalid_argument);
+    EXPECT_FLOAT_EQ(output(0, 0), 42.0f);
+}
+
+TEST(ImageConversionTest, ConvertImageRangeRejectsMismatchedDimensionsBeforeWriting) {
+    Image<uint8_t> input(2, 2, 1);
+    input.fill(128);
+    Image<float> output(1, 2, 1);
+    output.fill(42.0f);
+
+    EXPECT_THROW(convertImageRange(input, output, 0, 255, 0, 1), std::invalid_argument);
+    EXPECT_FLOAT_EQ(output(0, 0), 42.0f);
+    EXPECT_FLOAT_EQ(output(0, 1), 42.0f);
+}
+
+TEST(ImageConversionTest, ConvertImageRangeRejectsNaNForIntegerOutputBeforeWriting) {
+    Image<float> input(1, 2, 1);
+    input(0, 0) = 0.5f;
+    input(0, 1) = std::numeric_limits<float>::quiet_NaN();
+    Image<uint8_t> output(1, 2, 1);
+    output.fill(42);
+
+    EXPECT_THROW(convertImageRange(input, output, 0, 1, 0, 255), std::invalid_argument);
+    EXPECT_EQ(output(0, 0), 42);
+    EXPECT_EQ(output(0, 1), 42);
 }

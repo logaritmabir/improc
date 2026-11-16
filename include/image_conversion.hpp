@@ -5,7 +5,8 @@
  * @brief Pixel-type and color-layout conversions for images.
  *
  * This module contains image transformations independent of file formats,
- * including channel extraction and RGB-to-grayscale conversion.
+ * including channel extraction, RGB-to-grayscale conversion, and pixel-value
+ * range conversion.
  */
 
 #include <cstddef>
@@ -60,5 +61,37 @@ void rgbToGrayscale(const Image<PixelType>& input, Image<PixelType>& output);
  */
 template<typename SourcePixelType, typename DestinationPixelType>
 void convertImageType(const Image<SourcePixelType>& input, Image<DestinationPixelType>& output);
+
+/**
+ * @brief Converts pixel values from one explicit numeric range to another.
+ *
+ * Values outside the source range are clamped to that range before mapping.
+ * Floating-point destinations preserve fractional results. Integer
+ * destinations are rounded to the nearest value.
+ *
+ * @warning This function was written by an AI system and has not been
+ * independently reviewed or verified by a human. Review its implementation
+ * before relying on it.
+ *
+ * @tparam SourcePixelType Source image pixel type
+ * @tparam DestinationPixelType Destination image pixel type
+ * @param input Source image
+ * @param output Destination image; must match the source dimensions and channels
+ * @param sourceMin Minimum value of the source range
+ * @param sourceMax Maximum value of the source range
+ * @param destinationMin Minimum value of the destination range
+ * @param destinationMax Maximum value of the destination range
+ * @throws std::invalid_argument If either range is non-finite or not ascending,
+ * image metadata differs, a destination bound is not representable, or a NaN
+ * source value is converted to an integer type
+ */
+template<typename SourcePixelType, typename DestinationPixelType>
+void convertImageRange(
+    const Image<SourcePixelType>& input,
+    Image<DestinationPixelType>& output,
+    long double sourceMin,
+    long double sourceMax,
+    long double destinationMin,
+    long double destinationMax);
 
 #include "image_conversion.tpp"
