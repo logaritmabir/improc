@@ -30,6 +30,7 @@ them with the public interface in this order:
 - Define class members in the same order as their declarations.
 - Keep free-function definitions in the order their declarations appear in the
   corresponding public header.
+- In a header, declare template functions before non-template functions.
 - In CUDA implementation files, keep internal kernels/helpers before the
   public host-side wrappers; keep wrappers in public-header order.
 - Put explicit template instantiations at the end of the source file.

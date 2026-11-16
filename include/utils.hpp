@@ -36,17 +36,6 @@ template<typename ElementType>
 void requireNonEmpty(const std::vector<std::vector<ElementType>>& kernel);
 
 /**
- * @brief Requires that the provided kernel size is odd.
- *
- * This helper is intended for APIs that accept a kernel/window size and build
- * the kernel internally.
- *
- * @param kernelSize The kernel size to validate
- * @throws std::invalid_argument If @p kernelSize is even
- */
-void requireOddKernelSize(size_t kernelSize);
-
-/**
  * @brief Requires that the provided dynamic kernel is square and has odd width.
  *
  * The kernel must be non-empty, each row must have the same size as the number
@@ -86,5 +75,16 @@ void requireSquareAndOdd(const std::array<std::array<ElementType, KernelSize>, K
  */
 template<typename PixelType>
 void requireSameTypeImages(const Image<PixelType>& first, const Image<PixelType>& second);
+
+/**
+ * @brief Requires that the provided kernel size is odd.
+ *
+ * This helper is intended for APIs that accept a kernel/window size and build
+ * the kernel internally.
+ *
+ * @param kernelSize The kernel size to validate
+ * @throws std::invalid_argument If @p kernelSize is even
+ */
+void requireOddKernelSize(size_t kernelSize);
 
 #include "utils.tpp"
