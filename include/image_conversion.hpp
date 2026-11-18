@@ -67,7 +67,8 @@ void convertImageType(const Image<SourcePixelType>& input, Image<DestinationPixe
  *
  * Values outside the source range are clamped to that range before mapping.
  * Floating-point destinations preserve fractional results. Integer
- * destinations are rounded to the nearest value.
+ * destinations are rounded to the nearest value. Range calculations use
+ * `double` precision.
  *
  * @warning This function was written by an AI system and has not been
  * independently reviewed or verified by a human. Review its implementation
@@ -81,17 +82,22 @@ void convertImageType(const Image<SourcePixelType>& input, Image<DestinationPixe
  * @param sourceMax Maximum value of the source range
  * @param destinationMin Minimum value of the destination range
  * @param destinationMax Maximum value of the destination range
+ * @pre The input and output images have matching dimensions and channel counts.
+ * The ranges are finite and ascending, and the destination range is
+ * representable by @p DestinationPixelType.
+ * @note Range calculations use `double` precision. Large integer values may
+ * not be represented exactly.
  * @throws std::invalid_argument If either range is non-finite or not ascending,
- * image metadata differs, a destination bound is not representable, or a NaN
- * source value is converted to an integer type
+ * image metadata differs, a range width overflows, or a NaN source value is
+ * converted to an integer type
  */
 template<typename SourcePixelType, typename DestinationPixelType>
 void convertImageRange(
     const Image<SourcePixelType>& input,
     Image<DestinationPixelType>& output,
-    long double sourceMin,
-    long double sourceMax,
-    long double destinationMin,
-    long double destinationMax);
+    double sourceMin,
+    double sourceMax,
+    double destinationMin,
+    double destinationMax);
 
 #include "image_conversion.tpp"

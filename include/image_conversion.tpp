@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cmath>
-#include <limits>
 #include <type_traits>
 
 template<typename PixelType>
@@ -55,15 +54,14 @@ void convertImageType(const Image<SourcePixelType>& input, Image<DestinationPixe
     }
 }
 
-
 template<typename SourcePixelType, typename DestinationPixelType>
 void convertImageRange(
     const Image<SourcePixelType>& input,
     Image<DestinationPixelType>& output,
-    long double sourceMin,
-    long double sourceMax,
-    long double destinationMin,
-    long double destinationMax) {
+    double sourceMin,
+    double sourceMax,
+    double destinationMin,
+    double destinationMax) {
     static_assert(std::is_arithmetic<SourcePixelType>::value,
         "Source pixel type must be arithmetic");
     static_assert(std::is_arithmetic<DestinationPixelType>::value,
@@ -75,8 +73,8 @@ void convertImageRange(
         throw std::invalid_argument("Image conversion ranges must be finite and ascending");
     }
 
-    const long double sourceRange = sourceMax - sourceMin;
-    const long double destinationRange = destinationMax - destinationMin;
+    const double sourceRange = sourceMax - sourceMin;
+    const double destinationRange = destinationMax - destinationMin;
     if (!std::isfinite(sourceRange) || !std::isfinite(destinationRange)) {
         throw std::invalid_argument("Image conversion range widths must be finite");
     }
@@ -87,19 +85,13 @@ void convertImageRange(
         throw std::invalid_argument("Input and output images must have matching dimensions and channels");
     }
 
-    const long double destinationTypeMin =
-        static_cast<long double>(std::numeric_limits<DestinationPixelType>::lowest());
-    const long double destinationTypeMax =
-        static_cast<long double>(std::numeric_limits<DestinationPixelType>::max());
-    if (destinationMin < destinationTypeMin || destinationMax > destinationTypeMax) {
-        throw std::invalid_argument("Destination range is not representable by the destination pixel type");
-    }
-
+    // TODO: Reconsider whether integral-specific NaN validation and rounding
+    // are needed; this check may be removable if the conversion policy changes.
     if (std::is_integral<DestinationPixelType>::value) {
         for (size_t row = 0; row < input.rows(); row++) {
             for (size_t col = 0; col < input.cols(); col++) {
                 for (size_t ch = 0; ch < input.channels(); ch++) {
-                    if (std::isnan(static_cast<long double>(input.at(row, col, ch)))) {
+                    if (std::isnan(static_cast<double>(input.at(row, col, ch)))) {
                         throw std::invalid_argument("Cannot convert NaN pixels to an integer type");
                     }
                 }
@@ -110,14 +102,14 @@ void convertImageRange(
     for (size_t row = 0; row < input.rows(); row++) {
         for (size_t col = 0; col < input.cols(); col++) {
             for (size_t ch = 0; ch < input.channels(); ch++) {
-                long double value = static_cast<long double>(input.at(row, col, ch));
+                double value = static_cast<double>(input.at(row, col, ch));
                 if (value < sourceMin) {
                     value = sourceMin;
                 } else if (value > sourceMax) {
                     value = sourceMax;
                 }
 
-                long double convertedValue =
+                double convertedValue =
                     destinationMin + ((value - sourceMin) / sourceRange) * destinationRange;
                 if (convertedValue < destinationMin) {
                     convertedValue = destinationMin;
