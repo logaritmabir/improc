@@ -37,22 +37,6 @@
  * @note The kernel values are NOT normalized by this function.
  * @note The accumulated result is cast to PixelType without range clamping by
  * this function.
- *
- * @par Example
- * @code
- * #include "filters.hpp"
- * #include <vector>
- *
- * Image<uint8_t> input(5, 5, 1);
- * Image<uint8_t> output(5, 5, 1);
- * // 3x3 box blur kernel
- * std::vector<std::vector<float>> kernel = {
- *     {1.0f/9, 1.0f/9, 1.0f/9},
- *     {1.0f/9, 1.0f/9, 1.0f/9},
- *     {1.0f/9, 1.0f/9, 1.0f/9}
- * };
- * convolve(input, output, kernel);
- * @endcode
  */
 template<typename PixelType, typename KernelType, typename AccumulatorType = double>
 void convolve(const Image<PixelType>& input, Image<PixelType>& output, const std::vector<std::vector<KernelType>>& kernel);
