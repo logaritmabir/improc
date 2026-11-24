@@ -6,8 +6,8 @@
  *
  * This module provides various image filters including convolution,
  * median filtering, Gaussian blur, and edge detection (Sobel).
- * The library currently explicitly instantiates these operations for
- * uint8_t images.
+ *
+ * Template implementations are provided by filters.tpp.
  *
  * @see Image for the image container class
  * @see point_ops.hpp for point-wise operations
@@ -15,6 +15,7 @@
 
 #include "image.hpp"
 #include <array>
+#include <cstddef>
 
 /**
  * @brief Applies a generic convolution kernel to an image.
@@ -23,7 +24,9 @@
  * computing the weighted sum of pixels in the kernel's neighborhood.
  * Boundary pixels are handled by checking bounds (no padding).
  *
- * @tparam PixelType The pixel data type (typically uint8_t)
+ * @tparam PixelType The pixel data type
+ * @tparam KernelType The kernel element data type
+ * @tparam AccumulatorType The type used for accumulating convolution results
  * @param input Source image to convolve
  * @param output Destination image for result (must have matching dimensions,
  * channels, and stride)
@@ -32,7 +35,8 @@
  * or the image metadata does not match
  *
  * @note The kernel values are NOT normalized by this function.
- * @note Output values are clamped to [0, 255] range.
+ * @note The accumulated result is cast to PixelType without range clamping by
+ * this function.
  *
  * @par Example
  * @code
@@ -50,16 +54,18 @@
  * convolve(input, output, kernel);
  * @endcode
  */
-template<typename PixelType>
-void convolve(const Image<PixelType>& input, Image<PixelType>& output, const std::vector<std::vector<float>>& kernel);
+template<typename PixelType, typename KernelType, typename AccumulatorType = double>
+void convolve(const Image<PixelType>& input, Image<PixelType>& output, const std::vector<std::vector<KernelType>>& kernel);
 
 /**
  * @brief Applies a generic convolution kernel to an image (std::array version).
  *
- * This overload accepts fixed-size square 2D array kernels for better performance.
+ * This overload accepts fixed-size square 2D array kernels.
  *
- * @tparam PixelType The pixel data type (typically uint8_t)
+ * @tparam PixelType The pixel data type
+ * @tparam KernelType The kernel element data type
  * @tparam KernelSize The size of the square kernel (must be odd)
+ * @tparam AccumulatorType The type used for accumulating convolution results
  * @param input Source image to convolve
  * @param output Destination image for result (must have matching dimensions,
  * channels, and stride)
@@ -67,11 +73,11 @@ void convolve(const Image<PixelType>& input, Image<PixelType>& output, const std
  * @throws std::invalid_argument if KernelSize is even or the image metadata
  * does not match
  *
- * @note The library currently explicitly instantiates this overload for
- * uint8_t images and 3x3 kernels.
+ * @note The accumulated result is cast to PixelType without range clamping by
+ * this function.
  */
-template<typename PixelType, size_t KernelSize>
-void convolve(const Image<PixelType>& input, Image<PixelType>& output, const std::array<std::array<float, KernelSize>, KernelSize>& kernel);
+template<typename PixelType, typename KernelType, size_t KernelSize, typename AccumulatorType = double>
+void convolve(const Image<PixelType>& input, Image<PixelType>& output, const std::array<std::array<KernelType, KernelSize>, KernelSize>& kernel);
 
 /**
  * @brief Applies a median filter to reduce noise.
@@ -197,9 +203,11 @@ void sharpeningFilter(const Image<PixelType>& input, Image<PixelType>& output);
  *
  * @note Uses kernel: [0, 1, 0; 1, -4, 1; 0, 1, 0]
  * @note For conventional edge detection, apply to grayscale images.
- * @note Output values are clamped to [0, 255] range
+ * @note Output values follow the same behavior as convolve().
  *
  * @see rgbToGrayscale() in image_conversion.hpp to convert color images to grayscale
  */
 template<typename PixelType>
 void laplacianFilter(const Image<PixelType>& input, Image<PixelType>& output);
+
+#include "filters.tpp"
